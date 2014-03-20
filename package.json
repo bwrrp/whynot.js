@@ -1,0 +1,12 @@
+{
+  "name": "whynot.js",
+  "version": "0.0.0",
+  "description": "Generic VM-based structure matching framework",
+  "keywords": [
+    "Matching",
+    "Regex",
+    "Structure"
+  ],
+  "author": "Stef Busking",
+  "license": "MIT"
+}
