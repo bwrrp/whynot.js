@@ -57,14 +57,15 @@ define(
 		 * @return {Object} The new instruction
 		 */
 		Assembler.prototype.jump = function(targets) {
-			return this.addInstruction(
+			return addInstruction(
+				this.program,
 				'jump',
 				null,
 				targets
 			);
 		};
 
-		function defaultRecordGenerator(data, inputIndex) {
+		function defaultRecorder(data, inputIndex) {
 			return data;
 		}
 
@@ -81,7 +82,8 @@ define(
 		 * @return {Object} The new instruction
 		 */
 		Assembler.prototype.record = function(data, recorder) {
-			return this.addInstruction(
+			return addInstruction(
+				this.program,
 				'record',
 				recorder || defaultRecorder,
 				data
@@ -99,7 +101,8 @@ define(
 		 * @return {Object} The new instruction
 		 */
 		Assembler.prototype.bad = function(cost) {
-			return this.addInstruction(
+			return addInstruction(
+				this.program,
 				'bad',
 				null,
 				cost || 1
@@ -115,7 +118,8 @@ define(
 		 * @return {Object} The new instruction
 		 */
 		Assembler.prototype.accept = function() {
-			return this.addInstruction(
+			return addInstruction(
+				this.program,
 				'accept',
 				null,
 				null
@@ -130,7 +134,8 @@ define(
 		 * @return {Object} The new instruction
 		 */
 		Assembler.prototype.fail = function() {
-			return this.addInstruction(
+			return addInstruction(
+				this.program,
 				'fail',
 				null,
 				null

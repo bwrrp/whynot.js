@@ -133,5 +133,7 @@ define(
 			}
 			return this._threadList[this._nextThread++];
 		};
+
+		return Generation;
 	}
 );

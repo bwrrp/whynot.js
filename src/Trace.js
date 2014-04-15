@@ -42,6 +42,10 @@ define(
 				// Continue
 				trace = prefix;
 			}
+			// Recurse
+			for (var i = 0, l = trace.prefixes.length; i < l; ++i) {
+				trace.prefixes[i].compact();
+			}
 		};
 
 		return Trace;

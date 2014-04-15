@@ -140,6 +140,7 @@ define(
 				}
 
 				// Continue with next generation
+				// TODO: this should compact the traces in the current Generation
 				scheduler.nextGeneration();
 			} while (inputItem);
 

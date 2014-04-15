@@ -41,5 +41,7 @@ define(
 			this.trace.prefixes.push(otherParentThread.trace);
 			this.badness = Math.max(this.badness, badness);
 		};
+
+		return Thread;
 	}
 );
