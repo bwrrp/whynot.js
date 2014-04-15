@@ -1,15 +1,32 @@
+/**
+ * @module whynot
+ */
 define(
 	[
-		'./scheduler'
+		'./Scheduler'
 	],
-	function(Scheduler) {
+	function(
+		Scheduler
+		) {
 		'use strict';
 
+		/**
+		 * A virtual machine to execute whynot programs.
+		 *
+		 * @class VM
+		 * @constructor
+		 *
+		 * @param {Array} program The program to run, as created by the Assembler
+		 */
 		function VM(program) {
-			this.program = program;
-			this.scheduler = new Scheduler(2, program.length);
+			this._program = program;
+			this._scheduler = new Scheduler(2, program.length);
 		}
 
+		/**
+		 * Resets the VM for a new
+		 * @return {[type]} [description]
+		 */
 		VM.prototype.reset = function() {
 			this.scheduler.reset();
 
@@ -17,28 +34,49 @@ define(
 			this.scheduler.addThread(0, [], 0, 0);
 		};
 
+		/**
+		 * Executes the program in the VM with the given input stream.
+		 *
+		 * @method execute
+		 *
+		 * @param {Function} input Should return the next input item when called,
+		 *                           or null when no further input is available.
+		 *
+		 * @return {Trace[]} All Traces which lead to acceptance of the input stream 
+		 */
 		VM.prototype.execute = function(input) {
-			this.reset();
+			var scheduler = this._scheduler,
+				program = this._program;
 
-			var scheduler = this.scheduler,
+			// Reset the scheduler
+			scheduler.reset();
+
+			// Add initial thread
+			scheduler.addThread(0, 0);
+
+			var acceptingTraces = [],
+				inputIndex = -1,
 				inputItem;
 			do {
 				// Get next thread to execute
 				var thread = scheduler.getNextThread();
-				if (!thread)
+				if (!thread) {
 					break;
+				}
 
 				// Read next input item
-				inputItem = input.next();
+				++inputIndex;
+				inputItem = input();
 
 				while (thread) {
-					var instruction = this.program[thread.pc];
+					var instruction = program[thread.pc];
 
 					switch (instruction.op) {
 						case 'accept':
-							// Only accept if empty
-							if (!inputItem)
-								return thread.record || true;
+							// Only accept if we reached the end of the input
+							if (!inputItem) {
+								acceptingTraces.push(thread.trace);
+							}
 							break;
 
 						case 'fail':
@@ -46,40 +84,54 @@ define(
 							break;
 
 						case 'bad':
+							// Continue at next pc with added badness
 							scheduler.addThread(
+								0,
 								thread.pc + 1,
-								thread.record,
-								thread.badness + instruction.data,
-								0);
+								thread,
+								thread.badness + instruction.data);
 							break;
 
 						case 'test':
-							if (!inputItem || !instruction.func(inputItem, instruction.data))
+							// Fail if out of input
+							if (!inputItem) {
 								break;
+							}
+							// Fail if input does not match
+							if (!instruction.func(inputItem, instruction.data)) {
+								break;
+							}
+							// Continue in next generation, preserving badness
 							scheduler.addThread(
+								1,
 								thread.pc + 1,
-								thread.record,
-								thread.badness,
-								1);
+								thread,
+								thread.badness);
 							break;
 
 						case 'jump':
+							// Spawn new threads for all targets
 							for (var iTarget = 0, nTargets = instruction.data.length; iTarget < nTargets; ++iTarget) {
 								scheduler.addThread(
+									0,
 									instruction.data[iTarget],
-									iTarget === 0 ? thread.record : thread.record.concat(),
-									thread.badness,
-									0);
+									thread,
+									thread.badness);
 							}
 							break;
 
 						case 'record':
-							instruction.func(thread.record, instruction.data, input.pos);
+							// Invoke record callback
+							var record = instruction.func(instruction.data, inputIndex);
+							if (record) {
+								thread.trace.records.push(record);
+							}
+							// Continue with next instruction
 							scheduler.addThread(
+								0,
 								thread.pc + 1,
-								thread.record,
-								thread.badness,
-								0);
+								thread,
+								thread.badness);
 							break;
 					}
 
@@ -87,10 +139,11 @@ define(
 					thread = scheduler.getNextThread();
 				}
 
+				// Continue with next generation
 				scheduler.nextGeneration();
 			} while (inputItem);
 
-			return false;
+			return acceptingTraces;
 		};
 
 		return VM;

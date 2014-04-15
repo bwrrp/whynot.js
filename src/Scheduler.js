@@ -1,123 +1,105 @@
+/**
+ * @module whynot
+ */
 define(
-	function() {
+	[
+		'./Generation'
+	],
+	function(
+		Generation
+		) {
 		'use strict';
 
-		function Scheduler(numLists, programLength) {
-			this.threadGeneration = 0;
-			this.instructionGenerations = [];
+		var REPEAT_BADNESS = 1.0;
 
-			this.threadLists = [];
-			this.currentList = 0;
-			this.nextThread = 0;
-			this.oldThreads = [];
-
-			var list;
-			for (list = 0; list < numLists; ++list) {
-				this.threadLists.push([]);
+		/**
+		 * Schedules Threads to run in the current or a future Generation.
+		 *
+		 * @class Scheduler
+		 * @constructor
+		 * 
+		 * @param {Number} numGenerations Number of Generations to plan ahead
+		 * @param {Number} programLength  Length of the program being run
+		 */
+		function Scheduler(numGenerations, programLength) {
+			// The active and scheduled generations
+			this._generations = [];
+			for (var i = 0; i < numGenerations; ++i) {
+				this._generations.push(new Generation(programLength));
 			}
-
-			for (var i = 0; i < programLength; ++i) {
-				var generations = [];
-				for (list = 0; list < numLists; ++list) {
-					generations.push([]);
-				}
-				this.instructionGenerations.push(generations);
-			}
+			// The number of generations executed so far
+			this._generationsCompleted = 0;
 		}
 
-		Scheduler.prototype.clearThreadList = function(list) {
-			this.oldThreads.push.apply(this.oldThreads, this.threadLists[list]);
-			this.threadLists[list].length = 0;
-		};
-
+		/**
+		 * Resets the Scheduler for reuse.
+		 *
+		 * @method reset
+		 */
 		Scheduler.prototype.reset = function() {
-			// Reset thread generation and pointers
-			this.threadGeneration = 0;
-			this.currentList = 0;
-			this.nextThread = 0;
-
-			for (var list = 0, numLists = this.threadLists.length; list < numLists; ++list) {
-				// Recycle threads
-				this.clearThreadList(list);
-
-				// Reset instruction generations
-				for (var i = 0, l = this.instructionGenerations.length; i < l; ++i) {
-					this.instructionGenerations[i][list] = -1;
-				}
+			// Reset each generation
+			for (var i = 0, l = this._generations.length; i < l; ++i) {
+				this._generations[i].reset();
 			}
+			this._generationsCompleted = 0;
 		};
 
-		Scheduler.prototype.getNewThread = function(pc, record, badness) {
-			var thread = this.oldThreads.pop() || {
-				pc: pc,
-				record: record,
-				badness: badness
-			};
-			thread.pc = pc;
-			thread.record = record;
-			thread.badness = badness;
-
-			return thread;
-		};
-
-		function findInsertionIndex(threadList, nextThreadIndex, badness) {
-			// Perform a binary search to find the index of the first thread with lower badness
-			var low = nextThreadIndex,
-				high = threadList.length;
-			while (low < high) {
-				// Use zero-filling shift as integer division
-				var mid = (low + high) >>> 1;
-				// Compare to mid point, preferring right in case of equality
-				if (badness < threadList[mid].badness) {
-					// Thread goes in lower half
-					high = mid;
-				} else {
-					// Thread goes in upper half
-					low = mid + 1;
-				}
+		function getRelativeGeneration(scheduler, generationOffset) {
+			// Determine generation to insert the new thread for
+			var numGenerations = scheduler._generations.length;
+			if (generationOffset >= numGenerations) {
+				throw new Error('Not enough active generations to schedule that far ahead');
 			}
-
-			return low;
+			var generationNumber = scheduler._generationsCompleted + generationOffset;
+			return scheduler._generations[generationNumberForThread % numGenerations];
 		}
 
-		Scheduler.prototype.addThread = function(pc, record, badness, generationOffset) {
-			// Only add threads for in-program locations
-			if (pc >= this.instructionGenerations.length)
-				return;
+		/**
+		 * Adds a Thread to the Generation at the given offset relative to the current one.
+		 *
+		 * @method addThread
+		 *
+		 * @param {Number} generationOffset Offset of the target generation, relative to the current
+		 * @param {Number} pc               Program counter for the new Thread
+		 * @param {Thread} [parentThread]   Thread which spawned the new Thread
+		 * @param {Number} [badness]        Increasing badness decreases thread priority
+		 *
+		 * @return {Thread|null} The Thread that was added, or null if no thread was added
+		 */
+		Scheduler.prototype.addThread = function(generationOffset, pc, parentThread, badness) {
+			// Prefer non-repeating threads over repeating ones
+			if (parentThread && parentThread.trace.contains(pc)) {
+				badness += REPEAT_BADNESS;
+			}
 
-			// Determine list and generation for the new thread
-			var numLists = this.threadLists.length,
-				list = (this.currentList + generationOffset) % numLists,
-				instructionGeneration = this.instructionGenerations[pc][list],
-				threadGeneration = this.threadGeneration + generationOffset;
+			var generationForThread = getRelativeGeneration(this, generationOffset);
 
-			// Is a thread for this instruction already present in the list? 
-			if (instructionGeneration === threadGeneration)
-				return;
-
-			var thread = this.getNewThread(pc, record, badness);
-
-			this.instructionGenerations[pc][list] = threadGeneration;
-
-			// Schedule thread according to badness
-			var threadList = this.threadLists[list],
-				index = findInsertionIndex(threadList, generationOffset ? 0 : this.nextThread, badness);
-			threadList.splice(index, 0, thread);
+			// Add thread to the generation
+			return generationForThread.addThread(pc, parentThread, badness);
 		};
 
+		/**
+		 * Returns the next thread to run in the current Generation.
+		 *
+		 * @method getNextThread
+		 * 
+		 * @return {Thread|null} The next Thread to run, or null if there are none left
+		 */
 		Scheduler.prototype.getNextThread = function() {
-			var currentThreadList = this.threadLists[this.currentList];
-			return currentThreadList[this.nextThread++];
+			var currentGeneration = getRelativeGeneration(this, 0);
+			return currentGeneration.getNextThread();
 		};
 
+		/**
+		 * Switches to the next Generation.
+		 * 
+		 * @method nextGeneration
+		 */
 		Scheduler.prototype.nextGeneration = function() {
-			// Recycle current thread list and move to next
-			this.clearThreadList(this.currentList);
-			this.currentList = (this.currentList + 1) % this.threadLists.length;
-			this.nextThread = 0;
-
-			// Increment thread generation
-			++this.threadGeneration;
+			// Recycle current generation and move to next
+			var currentGeneration = getRelativeGeneration(this, 0);
+			currentGeneration.reset();
+			++this._generationsCompleted;
 		};
 
 		return Scheduler;
