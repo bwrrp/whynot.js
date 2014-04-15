@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "Generic VM-based structure matching framework",
   "keywords": [
-    "Language"
+    "Language",
     "Matching",
     "Regex",
     "Structure"
