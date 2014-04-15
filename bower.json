@@ -7,6 +7,15 @@
   ],
   "description": "Generic VM-based structure matching framework",
   "main": "src/main.js",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "Language",
+    "Matching",
+    "Regex",
+    "Structure"
+  ],
   "license": "MIT",
   "ignore": [
     "**/.*",
