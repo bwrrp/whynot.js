@@ -100,7 +100,12 @@ define(
 			// If a thread for pc already exists in this generation, combine traces and return
 			var existingThreadForProgramCounter = this._threadsByProgramCounter[pc];
 			if (existingThreadForProgramCounter) {
-				existingThreadForProgramCounter.join(parentThread, badness);
+				// Detect repetition in the same generation, which would cause cyclic traces
+				if (!parentThread.trace.contains(pc)) {
+					// Non-cyclic trace, join threads
+					existingThreadForProgramCounter.join(parentThread, badness);
+				}
+
 				return null;
 			}
 
