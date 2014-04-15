@@ -8,5 +8,19 @@
     "Structure"
   ],
   "author": "Stef Busking",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bwrrp/whynot.js"
+  },
+  "scripts": {
+    "test": "testem -f test/testem.json ci",
+    "test-dev": "testem -f test/testem.json"
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "mocha": "^1.18.2",
+    "testem": "^0.6.15",
+    "requirejs": "^2.1.11"
+  }
 }
