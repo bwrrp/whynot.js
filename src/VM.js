@@ -24,17 +24,6 @@ define(
 		}
 
 		/**
-		 * Resets the VM for a new
-		 * @return {[type]} [description]
-		 */
-		VM.prototype.reset = function() {
-			this.scheduler.reset();
-
-			// Initialize initial thread
-			this.scheduler.addThread(0, [], 0, 0);
-		};
-
-		/**
 		 * Executes the program in the VM with the given input stream.
 		 *
 		 * @method execute
