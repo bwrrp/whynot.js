@@ -51,7 +51,7 @@ define(
 				throw new Error('Not enough active generations to schedule that far ahead');
 			}
 			var generationNumber = scheduler._generationsCompleted + generationOffset;
-			return scheduler._generations[generationNumberForThread % numGenerations];
+			return scheduler._generations[generationNumber % numGenerations];
 		}
 
 		/**
