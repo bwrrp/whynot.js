@@ -34,13 +34,18 @@ define(
 		 * @method reset
 		 */
 		Generation.prototype.reset = function() {
-			// Recycle threads
-			this._oldThreads.push.apply(this._oldThreads, this._threadList);
+			// Compact and recycle threads
+			var i, l;
+			for (i = 0, l = this._threadList.length; i < l; ++i) {
+				var thread = this._threadList[i];
+				thread.compact();
+				this._oldThreads.push(thread);
+			}
 			this._threadList.length = 0;
 			// Reset thread counter
 			this._nextThread = 0;
 			// Reset threads by program counter lookup
-			for (var i = 0, l = this._programLength; i < l; ++i) {
+			for (i = 0, l = this._programLength; i < l; ++i) {
 				this._threadsByProgramCounter[i] = null;
 			}
 		};

@@ -128,8 +128,8 @@ define(
 					thread = scheduler.getNextThread();
 				}
 
-				// Continue with next generation
-				// TODO: this should compact the traces in the current Generation
+				// End current Generation and continue with the next
+				// This automatically compacts the Traces in the old Generation
 				scheduler.nextGeneration();
 			} while (inputItem);
 

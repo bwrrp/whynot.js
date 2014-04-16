@@ -42,6 +42,15 @@ define(
 			this.badness = Math.max(this.badness, badness);
 		};
 
+		/**
+		 * Compacts the Thread's footprint when its Generation ends.
+		 *
+		 * @method compact
+		 */
+		Thread.prototype.compact = function() {
+			this.trace.compact();
+		};
+
 		return Thread;
 	}
 );
