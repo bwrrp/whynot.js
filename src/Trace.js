@@ -18,10 +18,46 @@ define(
 			this.head = [pc];
 			this.records = [];
 			this.prefixes = [];
+
 			if (precedingTrace) {
 				this.prefixes.push(precedingTrace);
+				this._visitedInstructions = Object.create(precedingTrace._visitedInstructions);
+			} else {
+				this._visitedInstructions = Object.create(null);
 			}
+			this._visitedInstructions[pc] = true;
 		}
+
+		/**
+		 * Combines the Trace with the given prefix, thereby recording multiple ways to get
+		 * to the current trace's head. Assumes the Trace has not yet been compacted.
+		 *
+		 * @method join
+		 *
+		 * @param {Trace} prefixTrace The Trace to add as a prefix of the current
+		 */
+		Trace.prototype.join = function(prefixTrace) {
+			this.prefixes.push(prefixTrace);
+
+			// Merge prefixTrace's set of visited instructions into our own
+			var visitedInstructions = Object.keys(prefixTrace._visitedInstructions);
+			for (var i = 0, l = visitedInstructions.length; i < l; ++i) {
+				this._visitedInstructions[visitedInstructions[i]] = true;
+			}
+		};
+
+		/**
+		 * Returns whether the Trace has visited the specified instruction.
+		 *
+		 * @method contains
+		 * 
+		 * @param {Number} pc Program counter for the instruction to test
+		 * 
+		 * @return {Boolean} Whether the trace has visited the instruction
+		 */
+		Trace.prototype.contains = function(pc) {
+			return !!this._visitedInstructions[pc];
+		};
 
 		/**
 		 * Compacts the trace, concatenating all non-branching prefixes.

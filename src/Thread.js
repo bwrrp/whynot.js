@@ -38,7 +38,7 @@ define(
 		 * @param  {Number} [badness]           Badness of the other thread
 		 */
 		Thread.prototype.join = function(otherParentThread, badness) {
-			this.trace.prefixes.push(otherParentThread.trace);
+			this.trace.join(otherParentThread.trace);
 			this.badness = Math.max(this.badness, badness);
 		};
 
