@@ -40,13 +40,16 @@ define(
 				});
 
 				it('generates an accepting trace at the end of input', function() {
-					var traces = vm.execute(createInput([]));
-					chai.expect(traces.length).to.equal(1);
+					var result = vm.execute(createInput([]));
+					chai.expect(result.success).to.equal(true);
+					chai.expect(result.acceptingTraces.length).to.equal(1);
 				});
 
 				it('fails when invoked with current input', function() {
-					var traces = vm.execute(createInput([1]));
-					chai.expect(traces.length).to.equal(0);
+					var result = vm.execute(createInput([1]));
+					chai.expect(result.success).to.equal(false);
+					chai.expect(result.acceptingTraces.length).to.equal(0);
+					chai.expect(result.failingTraces.length).to.be.above(0);
 				});
 			});
 
@@ -59,8 +62,8 @@ define(
 				});
 
 				it('ends the thread', function() {
-					chai.expect(vm.execute(createInput([])).length).to.equal(0);
-					chai.expect(vm.execute(createInput([1])).length).to.equal(0);
+					chai.expect(vm.execute(createInput([])).success).to.equal(false);
+					chai.expect(vm.execute(createInput([1])).success).to.equal(false);
 				});
 			});
 
@@ -88,10 +91,10 @@ define(
 				});
 
 				it('lowers thread priority by its cost', function() {
-					var leftTraces = vmLeftBad.execute(createInput([])),
-						rightTraces = vmRightBad.execute(createInput([]));
-					chai.expect(flattenTrace(leftTraces[0])).to.deep.equal([[0, 3, 4, 5], [0, 1, 2, 5]]);
-					chai.expect(flattenTrace(rightTraces[0])).to.deep.equal([[0, 1, 2, 5], [0, 3, 4, 5]]);
+					var leftResult = vmLeftBad.execute(createInput([])),
+						rightResult = vmRightBad.execute(createInput([]));
+					chai.expect(flattenTrace(leftResult.acceptingTraces[0])).to.deep.equal([[0, 3, 4, 5], [0, 1, 2, 5]]);
+					chai.expect(flattenTrace(rightResult.acceptingTraces[0])).to.deep.equal([[0, 1, 2, 5], [0, 3, 4, 5]]);
 				});
 			});
 
@@ -109,13 +112,18 @@ define(
 				});
 
 				it('moves a thread to the next generation when the test succeeds', function() {
-					var traces = vm.execute(createInput(['meep']));
-					chai.expect(traces.length).to.equal(1);
+					var result = vm.execute(createInput(['meep']));
+					chai.expect(result.success).to.equal(true);
+					chai.expect(result.acceptingTraces.length).to.equal(1);
+					chai.expect(result.acceptingTraces[0].head).to.deep.equal([0, 1]);
 				});
 
 				it('ends the thread when the test fails', function() {
-					var traces = vm.execute(createInput(['bla']));
-					chai.expect(traces.length).to.equal(0);
+					var result = vm.execute(createInput(['bla']));
+					chai.expect(result.success).to.equal(false);
+					chai.expect(result.acceptingTraces.length).to.equal(0);
+					chai.expect(result.failingTraces.length).to.equal(1);
+					chai.expect(result.failingTraces[0].head).to.deep.equal([0]);
 				});
 			});
 
@@ -125,7 +133,9 @@ define(
 						assembler.jump([1]);
 						assembler.accept();
 					});
-					chai.expect(vm.execute(createInput([])).map(flattenTrace)).to.deep.equal([[[0, 1]]]);
+					var result = vm.execute(createInput([]));
+					chai.expect(result.success).to.equal(true);
+					chai.expect(result.acceptingTraces.map(flattenTrace)).to.deep.equal([[[0, 1]]]);
 				});
 
 				it('can create multiple new threads', function() {
@@ -134,7 +144,9 @@ define(
 						assembler.accept();
 						assembler.accept();
 					});
-					chai.expect(vm.execute(createInput([])).map(flattenTrace)).to.deep.equal([[[0, 1]],[[0, 2]]]);
+					var result = vm.execute(createInput([]));
+					chai.expect(result.success).to.equal(true);
+					chai.expect(result.acceptingTraces.map(flattenTrace)).to.deep.equal([[[0, 1]],[[0, 2]]]);
 				});
 			});
 
@@ -145,9 +157,9 @@ define(
 						assembler.accept();
 					});
 
-					var trace = vm.execute(createInput([]))[0];
-
-					chai.expect(trace.records).to.deep.equal(['meep']);
+					var result = vm.execute(createInput([]));
+					chai.expect(result.success).to.equal(true);
+					chai.expect(result.acceptingTraces[0].records).to.deep.equal(['meep']);
 				});
 
 				it('can use a recorder callback', function() {
@@ -158,9 +170,9 @@ define(
 						assembler.accept();
 					});
 
-					var trace = vm.execute(createInput([]))[0];
-
-					chai.expect(trace.records).to.deep.equal(['0-MEEP']);
+					var result = vm.execute(createInput([]));
+					chai.expect(result.success).to.equal(true);
+					chai.expect(result.acceptingTraces[0].records).to.deep.equal(['0-MEEP']);
 				});
 			});
 		});

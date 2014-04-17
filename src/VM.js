@@ -3,10 +3,12 @@
  */
 define(
 	[
-		'./Scheduler'
+		'./Scheduler',
+		'./Result'
 	],
 	function(
-		Scheduler
+		Scheduler,
+		Result
 		) {
 		'use strict';
 
@@ -31,7 +33,9 @@ define(
 		 * @param {Function} input Should return the next input item when called,
 		 *                           or null when no further input is available.
 		 *
-		 * @return {Trace[]} All Traces which lead to acceptance of the input stream 
+		 * @return {Result} Result of the execution, containing all Traces that lead to acceptance
+		 *                    of the input, and all traces which lead to failure in the last
+		 *                    Generation.
 		 */
 		VM.prototype.execute = function(input) {
 			var scheduler = this._scheduler,
@@ -44,6 +48,7 @@ define(
 			scheduler.addThread(0, 0);
 
 			var acceptingTraces = [],
+				failingTraces = [],
 				inputIndex = -1,
 				inputItem;
 			do {
@@ -52,6 +57,9 @@ define(
 				if (!thread) {
 					break;
 				}
+
+				// We only record failing traces for the last active Generation
+				failingTraces.length = 0;
 
 				// Read next input item
 				++inputIndex;
@@ -65,11 +73,14 @@ define(
 							// Only accept if we reached the end of the input
 							if (!inputItem) {
 								acceptingTraces.push(thread.trace);
+							} else {
+								failingTraces.push(thread.trace);
 							}
 							break;
 
 						case 'fail':
 							// Branch is forbidden, end the thread
+							failingTraces.push(thread.trace);
 							break;
 
 						case 'bad':
@@ -84,10 +95,12 @@ define(
 						case 'test':
 							// Fail if out of input
 							if (!inputItem) {
+								failingTraces.push(thread.trace);
 								break;
 							}
 							// Fail if input does not match
 							if (!instruction.func(inputItem, instruction.data)) {
+								failingTraces.push(thread.trace);
 								break;
 							}
 							// Continue in next generation, preserving badness
@@ -133,7 +146,7 @@ define(
 				scheduler.nextGeneration();
 			} while (inputItem);
 
-			return acceptingTraces;
+			return new Result(acceptingTraces, failingTraces);
 		};
 
 		return VM;
