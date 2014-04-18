@@ -79,8 +79,18 @@ define(
 							break;
 
 						case 'fail':
-							// Branch is forbidden, end the thread
-							failingTraces.push(thread.trace);
+							// Is the failure conditional?
+							if (!instruction.func || instruction.func.call(undefined)) {
+								// Branch is forbidden, end the thread
+								failingTraces.push(thread.trace);
+								break;
+							}
+							// Condition failed, continue at next instruction
+							scheduler.addThread(
+								0,
+								thread.pc + 1,
+								thread,
+								thread.badness);
 							break;
 
 						case 'bad':

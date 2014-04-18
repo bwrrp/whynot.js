@@ -89,7 +89,7 @@ define(
 			});
 
 			describe('.accept()', function() {
-				it('generates a accept instruction', function() {
+				it('generates an accept instruction', function() {
 					var instruction = assembler.accept();
 					chai.expect(instruction.op).to.equal('accept');
 				});
@@ -97,6 +97,37 @@ define(
 				it('appends the instruction to the program', function() {
 					var instruction = assembler.accept();
 					chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+				});
+			});
+
+			describe('.fail()', function() {
+				describe('unconditional', function() {
+					it('generates a fail instruction', function() {
+						var instruction = assembler.fail();
+						chai.expect(instruction.op).to.equal('fail');
+						chai.expect(instruction.func).to.equal(null);
+					});
+
+					it('appends the instruction to the program', function() {
+						var instruction = assembler.fail();
+						chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+					});
+				});
+				describe('conditional', function() {
+					function conditional() {
+						return false;
+					}
+
+					it('generates a fail instruction', function() {
+						var instruction = assembler.fail(conditional);
+						chai.expect(instruction.op).to.equal('fail');
+						chai.expect(instruction.func).to.equal(conditional);
+					});
+
+					it('appends the instruction to the program', function() {
+						var instruction = assembler.fail(conditional);
+						chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+					});
 				});
 			});
 		});

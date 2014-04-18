@@ -54,16 +54,51 @@ define(
 			});
 
 			describe('fail', function() {
-				var vm;
-				beforeEach(function() {
-					vm = whynot.compileVM(function(assembler) {
-						assembler.fail();
+				describe('unconditional', function() {
+					var vm;
+					beforeEach(function() {
+						vm = whynot.compileVM(function(assembler) {
+							assembler.fail();
+						});
+					});
+
+					it('ends the thread', function() {
+						chai.expect(vm.execute(createInput([])).success).to.equal(false);
+						chai.expect(vm.execute(createInput([1])).success).to.equal(false);
 					});
 				});
+				
+				describe('conditional', function() {
+					var vm,
+						condition = false;
+					beforeEach(function() {
+						vm = whynot.compileVM(function(assembler) {
+							assembler.fail(function() {
+								return condition;
+							});
+							assembler.accept();
+						});
+					});
 
-				it('ends the thread', function() {
-					chai.expect(vm.execute(createInput([])).success).to.equal(false);
-					chai.expect(vm.execute(createInput([1])).success).to.equal(false);
+					it('ends the thread if the condition predicate returns true', function() {
+						condition = true;
+						var resultWithoutInput = vm.execute(createInput([]));
+						chai.expect(resultWithoutInput.success).to.equal(false);
+						chai.expect(resultWithoutInput.failingTraces[0].head).to.deep.equal([0]);
+						var resultWithInput = vm.execute(createInput([1]));
+						chai.expect(resultWithInput.success).to.equal(false);
+						chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0]);
+					});
+
+					it('continues the thread if the condition predicate returns false', function() {
+						condition = false;
+						var resultWithoutInput = vm.execute(createInput([]));
+						chai.expect(resultWithoutInput.success).to.equal(true);
+						chai.expect(resultWithoutInput.acceptingTraces[0].head).to.deep.equal([0, 1]);
+						var resultWithInput = vm.execute(createInput([1]));
+						chai.expect(resultWithInput.success).to.equal(false);
+						chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0, 1]);
+					});
 				});
 			});
 

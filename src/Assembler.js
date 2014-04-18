@@ -130,14 +130,18 @@ define(
 		 * The 'fail' instruction ends the current Thread.
 		 *
 		 * @method fail
+		 *
+		 * @param {Function} [predicate] Optional callback to make the fail conditional, if this
+		 *                                 returns true the thread will end, otherwise it will
+		 *                                 continue.
 		 * 
 		 * @return {Object} The new instruction
 		 */
-		Assembler.prototype.fail = function() {
+		Assembler.prototype.fail = function(predicate) {
 			return addInstruction(
 				this.program,
 				'fail',
-				null,
+				predicate || null,
 				null
 			);
 		};
