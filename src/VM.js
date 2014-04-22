@@ -30,14 +30,15 @@ define(
 		 *
 		 * @method execute
 		 *
-		 * @param {Function} input Should return the next input item when called,
-		 *                           or null when no further input is available.
+		 * @param {Function} input     Should return the next input item when called,
+		 *                               or null when no further input is available.
+		 * @param {Object}   [options] Optional object passed to all instruction callbacks.
 		 *
 		 * @return {Result} Result of the execution, containing all Traces that lead to acceptance
 		 *                    of the input, and all traces which lead to failure in the last
 		 *                    Generation.
 		 */
-		VM.prototype.execute = function(input) {
+		VM.prototype.execute = function(input, options) {
 			var scheduler = this._scheduler,
 				program = this._program;
 
@@ -80,7 +81,9 @@ define(
 
 						case 'fail':
 							// Is the failure conditional?
-							if (!instruction.func || instruction.func.call(undefined)) {
+							var isFailingCondition = !instruction.func ||
+									instruction.func.call(undefined, options);
+							if (isFailingCondition) {
 								// Branch is forbidden, end the thread
 								failingTraces.push(thread.trace);
 								break;
@@ -109,7 +112,9 @@ define(
 								break;
 							}
 							// Fail if input does not match
-							if (!instruction.func(inputItem, instruction.data)) {
+							var isInputAccepted = instruction.func.call(undefined,
+									inputItem, instruction.data, options);
+							if (!isInputAccepted) {
 								failingTraces.push(thread.trace);
 								break;
 							}
@@ -134,7 +139,8 @@ define(
 
 						case 'record':
 							// Invoke record callback
-							var record = instruction.func(instruction.data, inputIndex);
+							var record = instruction.func.call(undefined,
+									instruction.data, inputIndex, options);
 							if (record) {
 								thread.trace.records.push(record);
 							}

@@ -100,6 +100,36 @@ define(
 						chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0, 1]);
 					});
 				});
+
+				describe('conditional with options', function() {
+					var vm;
+					beforeEach(function() {
+						vm = whynot.compileVM(function(assembler) {
+							assembler.fail(function(options) {
+								return options.shouldFail;
+							});
+							assembler.accept();
+						});
+					});
+
+					it('ends the thread if the condition predicate returns true', function() {
+						var resultWithoutInput = vm.execute(createInput([]), {shouldFail: true});
+						chai.expect(resultWithoutInput.success).to.equal(false);
+						chai.expect(resultWithoutInput.failingTraces[0].head).to.deep.equal([0]);
+						var resultWithInput = vm.execute(createInput([1]), {shouldFail: true});
+						chai.expect(resultWithInput.success).to.equal(false);
+						chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0]);
+					});
+
+					it('continues the thread if the condition predicate returns false', function() {
+						var resultWithoutInput = vm.execute(createInput([]), {shouldFail: false});
+						chai.expect(resultWithoutInput.success).to.equal(true);
+						chai.expect(resultWithoutInput.acceptingTraces[0].head).to.deep.equal([0, 1]);
+						var resultWithInput = vm.execute(createInput([1]), {shouldFail: false});
+						chai.expect(resultWithInput.success).to.equal(false);
+						chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0, 1]);
+					});
+				});
 			});
 
 			describe('bad', function() {
@@ -160,6 +190,32 @@ define(
 					chai.expect(result.failingTraces.length).to.equal(1);
 					chai.expect(result.failingTraces[0].head).to.deep.equal([0]);
 				});
+
+				describe('with options', function() {
+					beforeEach(function() {
+						vm = whynot.compileVM(function(assembler) {
+							assembler.test(function(item, data, options) {
+								return options.shouldAccept;
+							});
+							assembler.accept();
+						});
+					});
+
+					it('moves a thread to the next generation when the test succeeds', function() {
+						var result = vm.execute(createInput(['meep']), {shouldAccept: true});
+						chai.expect(result.success).to.equal(true);
+						chai.expect(result.acceptingTraces.length).to.equal(1);
+						chai.expect(result.acceptingTraces[0].head).to.deep.equal([0, 1]);
+					});
+
+					it('ends the thread when the test fails', function() {
+						var result = vm.execute(createInput(['meep']), {shouldAccept: false});
+						chai.expect(result.success).to.equal(false);
+						chai.expect(result.acceptingTraces.length).to.equal(0);
+						chai.expect(result.failingTraces.length).to.equal(1);
+						chai.expect(result.failingTraces[0].head).to.deep.equal([0]);
+					});
+				});
 			});
 
 			describe('jump', function() {
@@ -208,6 +264,19 @@ define(
 					var result = vm.execute(createInput([]));
 					chai.expect(result.success).to.equal(true);
 					chai.expect(result.acceptingTraces[0].records).to.deep.equal(['0-MEEP']);
+				});
+
+				it('can use options in the recorder callback', function() {
+					var vm = whynot.compileVM(function(assembler) {
+						assembler.record('meep', function(data, index, options) {
+							return index + '-' + data.toUpperCase() + '-' + options.suffix;
+						});
+						assembler.accept();
+					});
+
+					var result = vm.execute(createInput([]), {suffix: 'BLA'});
+					chai.expect(result.success).to.equal(true);
+					chai.expect(result.acceptingTraces[0].records).to.deep.equal(['0-MEEP-BLA']);
 				});
 			});
 		});
