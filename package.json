@@ -1,6 +1,6 @@
 {
   "name": "whynot.js",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Generic VM-based structure matching framework",
   "keywords": [
     "Language",

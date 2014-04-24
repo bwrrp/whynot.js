@@ -12,6 +12,8 @@ define(
 		) {
 		'use strict';
 
+		var NUMBER_OF_SCHEDULED_GENERATIONS = 2;
+
 		/**
 		 * A virtual machine to execute whynot programs.
 		 *
@@ -22,7 +24,27 @@ define(
 		 */
 		function VM(program) {
 			this._program = program;
-			this._scheduler = new Scheduler(2, program.length);
+
+			// Use multiple schedulers to make the VM reentrant. This way, one can implement
+			// recursion by executing a VM inside a test, fail or record callback.
+			this._schedulers = [];
+			this._nextFreeScheduler = 0;
+		}
+
+		function getScheduler(vm) {
+			var scheduler;
+			if (vm._nextFreeScheduler < vm._schedulers.length) {
+				scheduler = vm._schedulers[vm._nextFreeScheduler];
+			} else {
+				scheduler = new Scheduler(NUMBER_OF_SCHEDULED_GENERATIONS, vm._program.length);
+				vm._schedulers.push(scheduler);
+			}
+			++vm._nextFreeScheduler;
+			return scheduler;
+		}
+
+		function releaseScheduler(vm) {
+			--vm._nextFreeScheduler;
 		}
 
 		/**
@@ -39,7 +61,7 @@ define(
 		 *                    Generation.
 		 */
 		VM.prototype.execute = function(input, options) {
-			var scheduler = this._scheduler,
+			var scheduler = getScheduler(this),
 				program = this._program;
 
 			// Reset the scheduler
@@ -161,6 +183,9 @@ define(
 				// This automatically compacts the Traces in the old Generation
 				scheduler.nextGeneration();
 			} while (inputItem);
+
+			// Release the scheduler
+			releaseScheduler(this);
 
 			return new Result(acceptingTraces, failingTraces);
 		};

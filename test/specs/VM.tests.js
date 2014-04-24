@@ -279,6 +279,47 @@ define(
 					chai.expect(result.acceptingTraces[0].records).to.deep.equal(['0-MEEP-BLA']);
 				});
 			});
+
+			describe('reentrancy', function() {
+				var vm;
+				function getVM() {
+					return vm;
+				}
+				beforeEach(function() {
+					vm = whynot.compileVM(function(assembler) {
+						var stackFrame = {};
+						assembler.test(function(item) {
+							stackFrame.info = getVM().execute(createInput(item));
+							return true;
+						});
+						assembler.record(null, function() {
+							return stackFrame.info;
+						});
+						assembler.jump([0, 3]);
+						assembler.accept();
+					});
+				});
+
+				function computeMaxDepth(result) {
+					return result.acceptingTraces.reduce(function(max, trace) {
+						console.group('accepting trace');
+						var maxDepthForTrace = 1 + trace.records.reduce(function(max, result) {
+							console.group('accepting record');
+							var maxDepthForRecord = computeMaxDepth(result);
+							console.groupEnd('accepting record');
+							return Math.max(maxDepthForRecord, max);
+						}, 0);
+						console.groupEnd('accepting trace');
+						return Math.max(maxDepthForTrace, max);
+					}, 0);
+				}
+
+				it('invoking a VM while executing does not disturb the outer execution', function() {
+					var result = vm.execute(createInput([[[], []], [], [[[[]]], []]]));
+					chai.expect(result.success).to.equal(true);
+					chai.expect(computeMaxDepth(result)).to.equal(4);
+				});
+			});
 		});
 	}
 );
