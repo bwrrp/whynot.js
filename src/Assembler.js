@@ -34,15 +34,16 @@ define(
 		 * 
 		 * @param {Function} matcher Callback to invoke for the input,
 		 *                             should return true to accept, false to reject.
+		 * @param {Any}      [data]  Data to be passed to the matcher callback. Defaults to null.
 		 *
 		 * @return {Object} The new instruction
 		 */
-		Assembler.prototype.test = function(matcher) {
+		Assembler.prototype.test = function(matcher, data) {
 			return addInstruction(
 				this.program,
 				'test',
 				matcher,
-				null
+				data === undefined ? null : data
 			);
 		};
 

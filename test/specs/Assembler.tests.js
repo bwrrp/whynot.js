@@ -24,6 +24,13 @@ define(
 					chai.expect(instruction.func).to.equal(truth);
 				});
 
+				it('generates a test instruction with data', function() {
+					var instruction = assembler.test(truth, 'meep');
+					chai.expect(instruction.op).to.equal('test');
+					chai.expect(instruction.func).to.equal(truth);
+					chai.expect(instruction.data).to.equal('meep');
+				});
+
 				it('appends the instruction to the program', function() {
 					var instruction = assembler.test(truth);
 					chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
