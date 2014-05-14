@@ -1,4 +1,4 @@
-# whynot.js [![Build Status](https://travis-ci.org/bwrrp/whynot.js.png?branch=master)](https://travis-ci.org/bwrrp/whynot.js)
+# whynot.js [![Build Status](https://travis-ci.org/bwrrp/whynot.js.png?branch=master)](https://travis-ci.org/bwrrp/whynot.js) [![devDependency Status](https://david-dm.org/bwrrp/whynot.js/dev-status.svg)](https://david-dm.org/bwrrp/whynot.js#info=devDependencies)
 
 Generic VM-based formal language matching framework, inspired by [http://swtch.com/~rsc/regexp/](http://swtch.com/~rsc/regexp/)
 
