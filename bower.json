@@ -19,6 +19,7 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
+    "*.sublime-*",
     "node_modules",
     "test"
   ]
