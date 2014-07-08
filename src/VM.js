@@ -20,16 +20,19 @@ define(
 		 * @class VM
 		 * @constructor
 		 *
-		 * @param {Array} program The program to run, as created by the Assembler
+		 * @param {Array}    program         The program to run, as created by the Assembler
+		 * @param {Thread[]} [oldThreadList] Array used for recycling Thread objects. An existing
+		 *                                     array can be passed in to share recycled threads
+		 *                                     between VMs.
 		 */
-		function VM(program) {
+		function VM(program, oldThreadList) {
 			this._program = program;
 
 			// Use multiple schedulers to make the VM reentrant. This way, one can implement
 			// recursion by executing a VM inside a test, fail or record callback.
 			this._schedulers = [];
 			this._nextFreeScheduler = 0;
-			this._oldThreadList = [];
+			this._oldThreadList = oldThreadList || [];
 		}
 
 		function getScheduler(vm) {

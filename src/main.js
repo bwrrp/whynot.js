@@ -41,16 +41,19 @@ define(
 			 * Helper function that creates a new VM using the specified callback for compilation
 			 *
 			 * @method compileVM
-			 * 
-			 * @param {Function} compile Function used to compile the program,
-			 *                             invoked with an Assembler as the only parameter.
+			 *
+			 * @param {Function} compile         Function used to compile the program, invoked
+			 *                                     with an Assembler as the only parameter.
+			 * @param {Thread[]} [oldThreadList] Array used for recycling Thread objects. An
+			 *                                     existing array can be passed in to share
+			 *                                     recycled threads between VMs.
 			 *
 			 * @return {VM} VM running the compiled program
 			 */
-			compileVM: function(compile) {
+			compileVM: function(compile, oldThreadList) {
 				var assembler = new Assembler();
 				compile(assembler);
-				return new VM(assembler.program);
+				return new VM(assembler.program, oldThreadList);
 			}
 		};
 	}
