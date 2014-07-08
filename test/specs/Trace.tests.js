@@ -7,11 +7,13 @@ define(
 		) {
 		'use strict';
 
+		var PROGRAM_LENGTH = 10;
+
 		describe('Trace', function() {
 			describe('no preceding trace', function() {
 				var trace;
 				beforeEach(function() {
-					trace = new Trace(4);
+					trace = new Trace(4, PROGRAM_LENGTH);
 				});
 
 				it('has a head', function() {
@@ -41,8 +43,8 @@ define(
 				var rootTrace,
 					trace;
 				beforeEach(function() {
-					rootTrace = new Trace(1);
-					trace = new Trace(4, rootTrace);
+					rootTrace = new Trace(1, PROGRAM_LENGTH);
+					trace = new Trace(4, PROGRAM_LENGTH, rootTrace);
 				});
 
 				it('has a head', function() {
@@ -89,9 +91,9 @@ define(
 					otherRootTrace,
 					trace;
 				beforeEach(function() {
-					rootTrace = new Trace(1);
-					otherRootTrace = new Trace(2);
-					trace = new Trace(4, rootTrace);
+					rootTrace = new Trace(1, PROGRAM_LENGTH);
+					otherRootTrace = new Trace(2, PROGRAM_LENGTH);
+					trace = new Trace(4, PROGRAM_LENGTH, rootTrace);
 
 					trace.prefixes.push(otherRootTrace);
 				});

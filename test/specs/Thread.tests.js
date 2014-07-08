@@ -7,11 +7,13 @@ define(
 		) {
 		'use strict';
 
+		var PROGRAM_LENGTH = 10;
+
 		describe('Thread', function() {
 			describe('no preceding thread', function() {
 				var thread;
 				beforeEach(function() {
-					thread = new Thread(4, null, 123);
+					thread = new Thread(4, PROGRAM_LENGTH, null, 123);
 				});
 
 				it('has a program counter', function() {
@@ -31,8 +33,8 @@ define(
 				var rootThread,
 					thread;
 				beforeEach(function() {
-					rootThread = new Thread(1, null, 123);
-					thread = new Thread(4, rootThread, 456);
+					rootThread = new Thread(1, PROGRAM_LENGTH, null, 123);
+					thread = new Thread(4, PROGRAM_LENGTH, rootThread, 456);
 				});
 
 				it('has a program counter', function() {
@@ -53,9 +55,9 @@ define(
 					otherRootThread,
 					thread;
 				beforeEach(function() {
-					rootThread = new Thread(1, null, 123);
-					otherRootThread = new Thread(2, null, 234);
-					thread = new Thread(4, rootThread, 456);
+					rootThread = new Thread(1, PROGRAM_LENGTH, null, 123);
+					otherRootThread = new Thread(2, PROGRAM_LENGTH, null, 234);
+					thread = new Thread(4, PROGRAM_LENGTH, rootThread, 456);
 
 					thread.join(otherRootThread, 789);
 				});

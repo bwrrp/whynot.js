@@ -51,14 +51,14 @@ define(
 			}
 		};
 
-		function createThread(oldThreads, pc, parentThread, badness) {
+		function createThread(oldThreads, pc, programLength, parentThread, badness) {
 			if (!oldThreads.length) {
-				return new Thread(pc, parentThread, badness);
+				return new Thread(pc, programLength, parentThread, badness);
 			}
 
 			// Recycle existing thread
 			var thread = oldThreads.pop();
-			Thread.call(thread, pc, parentThread, badness);
+			Thread.call(thread, pc, programLength, parentThread, badness);
 			return thread;
 		}
 
@@ -115,7 +115,12 @@ define(
 				return null;
 			}
 
-			var thread = createThread(this._oldThreads, pc, parentThread, badness);
+			var thread = createThread(
+				this._oldThreads,
+				pc,
+				this._programLength,
+				parentThread,
+				badness);
 
 			// Schedule thread according to badness
 			var index = findInsertionIndex(this._threadList, this._nextThread, badness);

@@ -10,20 +10,20 @@ define(
 		 *
 		 * @class Trace
 		 * @constructor
-		 * 
+		 *
 		 * @param {Number} pc               Program counter for the most recent instruction
 		 * @param {Trace}  [precedingTrace] Trace that preceded the current one
 		 */
-		function Trace(pc, precedingTrace) {
+		function Trace(pc, programLength, precedingTrace) {
 			this.head = [pc];
 			this.records = [];
 			this.prefixes = [];
 
 			if (precedingTrace) {
 				this.prefixes.push(precedingTrace);
-				this._visitedInstructions = Object.create(precedingTrace._visitedInstructions);
+				this._visitedInstructions = precedingTrace._visitedInstructions.slice(0);
 			} else {
-				this._visitedInstructions = Object.create(null);
+				this._visitedInstructions = new Array(programLength);
 			}
 			this._visitedInstructions[pc] = true;
 		}
@@ -40,9 +40,10 @@ define(
 			this.prefixes.push(prefixTrace);
 
 			// Merge prefixTrace's set of visited instructions into our own
-			var visitedInstructions = Object.keys(prefixTrace._visitedInstructions);
-			for (var i = 0, l = visitedInstructions.length; i < l; ++i) {
-				this._visitedInstructions[visitedInstructions[i]] = true;
+			for (var i = 0, l = this._visitedInstructions.length; i < l; ++i) {
+				if (prefixTrace._visitedInstructions[i]) {
+					this._visitedInstructions[i] = true;
+				}
 			}
 		};
 
@@ -50,9 +51,9 @@ define(
 		 * Returns whether the Trace has visited the specified instruction.
 		 *
 		 * @method contains
-		 * 
+		 *
 		 * @param {Number} pc Program counter for the instruction to test
-		 * 
+		 *
 		 * @return {Boolean} Whether the trace has visited the instruction
 		 */
 		Trace.prototype.contains = function(pc) {
