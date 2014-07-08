@@ -19,6 +19,8 @@ define(
 			this.records = [];
 			this.prefixes = [];
 
+			this._programLength = programLength;
+
 			if (precedingTrace) {
 				this.prefixes.push(precedingTrace);
 				this._visitedInstructions = precedingTrace._visitedInstructions.slice(0);
@@ -40,7 +42,7 @@ define(
 			this.prefixes.push(prefixTrace);
 
 			// Merge prefixTrace's set of visited instructions into our own
-			for (var i = 0, l = this._visitedInstructions.length; i < l; ++i) {
+			for (var i = 0, l = this._programLength; i < l; ++i) {
 				if (prefixTrace._visitedInstructions[i]) {
 					this._visitedInstructions[i] = true;
 				}
