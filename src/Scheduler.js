@@ -20,7 +20,7 @@ define(
 		 *
 		 * @param {Number}   numGenerations Number of Generations to plan ahead
 		 * @param {Number}   programLength  Length of the program being run
-		 * @param {Thread[]} programLength  Array used for recycling Thread objects
+		 * @param {Thread[]} oldThreadList  Array used for recycling Thread objects
 		 */
 		function Scheduler(numGenerations, programLength, oldThreadList) {
 			// The active and scheduled generations
