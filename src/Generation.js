@@ -15,12 +15,13 @@ define(
 		 *
 		 * @class Generation
 		 * @constructor
-		 * 
-		 * @param {Number} programLength The length of the program being run
+		 *
+		 * @param {Number}   programLength The length of the program being run
+		 * @param {Thread[]} oldThreadList Array used for recycling Thread objects
 		 */
-		function Generation(programLength) {
+		function Generation(programLength, oldThreadList) {
 			this._threadList = [];
-			this._oldThreads = [];
+			this._oldThreads = oldThreadList;
 
 			this._nextThread = 0;
 
@@ -89,7 +90,7 @@ define(
 		 * thread's history.
 		 *
 		 * @method addThread
-		 * 
+		 *
 		 * @param {Number} pc             Program counter for the new Thread
 		 * @param {Thread} [parentThread] Thread which spawned the new Thread
 		 * @param {Number} [badness]      Increasing badness decreases thread priority
@@ -129,7 +130,7 @@ define(
 		 * Returns the next Thread to run for this generation.
 		 *
 		 * @method getNextThread
-		 * 
+		 *
 		 * @return {Thread|null} The Thread to run, or null if there are no threads left.
 		 */
 		Generation.prototype.getNextThread = function() {

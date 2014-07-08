@@ -29,6 +29,7 @@ define(
 			// recursion by executing a VM inside a test, fail or record callback.
 			this._schedulers = [];
 			this._nextFreeScheduler = 0;
+			this._oldThreadList = [];
 		}
 
 		function getScheduler(vm) {
@@ -36,7 +37,10 @@ define(
 			if (vm._nextFreeScheduler < vm._schedulers.length) {
 				scheduler = vm._schedulers[vm._nextFreeScheduler];
 			} else {
-				scheduler = new Scheduler(NUMBER_OF_SCHEDULED_GENERATIONS, vm._program.length);
+				scheduler = new Scheduler(
+					NUMBER_OF_SCHEDULED_GENERATIONS,
+					vm._program.length,
+					vm._oldThreadList);
 				vm._schedulers.push(scheduler);
 			}
 			++vm._nextFreeScheduler;

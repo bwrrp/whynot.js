@@ -12,7 +12,7 @@ define(
 		describe('Scheduler', function() {
 			var scheduler;
 			beforeEach(function() {
-				scheduler = new Scheduler(2, 10);
+				scheduler = new Scheduler(2, 10, []);
 			});
 
 			describe('.reset()', function() {

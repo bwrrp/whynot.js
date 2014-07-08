@@ -17,15 +17,16 @@ define(
 		 *
 		 * @class Scheduler
 		 * @constructor
-		 * 
-		 * @param {Number} numGenerations Number of Generations to plan ahead
-		 * @param {Number} programLength  Length of the program being run
+		 *
+		 * @param {Number}   numGenerations Number of Generations to plan ahead
+		 * @param {Number}   programLength  Length of the program being run
+		 * @param {Thread[]} programLength  Array used for recycling Thread objects
 		 */
-		function Scheduler(numGenerations, programLength) {
+		function Scheduler(numGenerations, programLength, oldThreadList) {
 			// The active and scheduled generations
 			this._generations = [];
 			for (var i = 0; i < numGenerations; ++i) {
-				this._generations.push(new Generation(programLength));
+				this._generations.push(new Generation(programLength, oldThreadList));
 			}
 			// The number of generations executed so far
 			this._generationsCompleted = 0;
@@ -82,7 +83,7 @@ define(
 		 * Returns the next thread to run in the current Generation.
 		 *
 		 * @method getNextThread
-		 * 
+		 *
 		 * @return {Thread|null} The next Thread to run, or null if there are none left
 		 */
 		Scheduler.prototype.getNextThread = function() {
@@ -92,7 +93,7 @@ define(
 
 		/**
 		 * Switches to the next Generation.
-		 * 
+		 *
 		 * @method nextGeneration
 		 */
 		Scheduler.prototype.nextGeneration = function() {
