@@ -13,8 +13,9 @@ define(
 		 *
 		 * @param {Number} pc               Program counter for the most recent instruction
 		 * @param {Trace}  [precedingTrace] Trace that preceded the current one
+		 * @param {Number} generationNumber The index of the current generation
 		 */
-		function Trace(pc, programLength, precedingTrace) {
+		function Trace(pc, programLength, precedingTrace, generationNumber) {
 			this.head = [pc];
 			this.records = [];
 			this.prefixes = [];
@@ -27,7 +28,7 @@ define(
 			} else {
 				this._visitedInstructions = new Array(programLength);
 			}
-			this._visitedInstructions[pc] = true;
+			this._visitedInstructions[pc] = generationNumber;
 		}
 
 		/**
@@ -43,23 +44,29 @@ define(
 
 			// Merge prefixTrace's set of visited instructions into our own
 			for (var i = 0, l = this._programLength; i < l; ++i) {
-				if (prefixTrace._visitedInstructions[i]) {
-					this._visitedInstructions[i] = true;
-				}
+				// Keep the highest generation, per instruction visited
+				this._visitedInstructions[i] = Math.max(
+					this._visitedInstructions[i] || 0,
+					prefixTrace._visitedInstructions[i] || 0);
 			}
 		};
 
 		/**
-		 * Returns whether the Trace has visited the specified instruction.
+		 * Returns whether the Trace has visited the specified instruction, in the given generation.
+		 * If no generation is given, it is tested if the trace has passed the instruction at all.
 		 *
 		 * @method contains
 		 *
-		 * @param {Number} pc Program counter for the instruction to test
+		 * @param {Number} pc           Program counter for the instruction to test
+		 * @param {Number} [generation] The index of the generation to test for
 		 *
 		 * @return {Boolean} Whether the trace has visited the instruction
 		 */
-		Trace.prototype.contains = function(pc) {
-			return !!this._visitedInstructions[pc];
+		Trace.prototype.contains = function(pc, generation) {
+			if (generation === undefined) {
+				return this._visitedInstructions[pc] !== undefined;
+			}
+			return this._visitedInstructions[pc] === generation;
 		};
 
 		/**
