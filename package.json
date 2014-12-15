@@ -1,6 +1,6 @@
 {
   "name": "whynot.js",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Generic VM-based structure matching framework",
   "keywords": [
     "Language",
@@ -8,7 +8,10 @@
     "Regex",
     "Structure"
   ],
-  "author": "Stef Busking",
+  "author": "Stef Busking <stef.busking@gmail.com>",
+  "contributors": [
+    "Martin Middel <martinmiddel@gmail.com>"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -1,9 +1,10 @@
 {
   "name": "whynot",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "homepage": "https://github.com/bwrrp/whynot.js",
   "authors": [
-    "Stef Busking <stef.busking@gmail.com>"
+    "Stef Busking <stef.busking@gmail.com>",
+    "Martin Middel <martinmiddel@gmail.com>"
   ],
   "description": "Generic VM-based structure matching framework",
   "main": "src/main.js",
