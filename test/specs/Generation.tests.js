@@ -12,7 +12,7 @@ define(
 		describe('Generation', function() {
 			var generation;
 			beforeEach(function() {
-				generation = new Generation(10, []);
+				generation = new Generation(10, [], 0);
 			});
 
 			describe('.reset()', function() {

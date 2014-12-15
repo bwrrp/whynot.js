@@ -16,10 +16,11 @@ define(
 		 * @class Generation
 		 * @constructor
 		 *
-		 * @param {Number}   programLength The length of the program being run
-		 * @param {Thread[]} oldThreadList Array used for recycling Thread objects
+		 * @param {Number}   programLength    The length of the program being run
+		 * @param {Thread[]} oldThreadList    Array used for recycling Thread objects
+		 * @param {Number}   generationNumber The index of generation
 		 */
-		function Generation(programLength, oldThreadList) {
+		function Generation(programLength, oldThreadList, generationNumber) {
 			this._threadList = [];
 			this._oldThreads = oldThreadList;
 
@@ -27,14 +28,18 @@ define(
 
 			this._programLength = programLength;
 			this._threadsByProgramCounter = new Array(programLength);
+
+			this._generationNumber = generationNumber;
 		}
 
 		/**
 		 * Resets the Generation for reuse.
 		 *
 		 * @method reset
+		 *
+		 * @param generationNumber The new index of this generation. Used to test if certain Traces have passed a given PC before
 		 */
-		Generation.prototype.reset = function() {
+		Generation.prototype.reset = function(generationNumber) {
 			// Compact and recycle threads
 			var i, l;
 			for (i = 0, l = this._threadList.length; i < l; ++i) {
@@ -49,16 +54,18 @@ define(
 			for (i = 0, l = this._programLength; i < l; ++i) {
 				this._threadsByProgramCounter[i] = null;
 			}
+
+			this._generationNumber = generationNumber;
 		};
 
-		function createThread(oldThreads, pc, programLength, parentThread, badness) {
+		function createThread(oldThreads, pc, programLength, parentThread, badness, generationNumber) {
 			if (!oldThreads.length) {
-				return new Thread(pc, programLength, parentThread, badness);
+				return new Thread(pc, programLength, parentThread, badness, generationNumber);
 			}
 
 			// Recycle existing thread
 			var thread = oldThreads.pop();
-			Thread.call(thread, pc, programLength, parentThread, badness);
+			Thread.call(thread, pc, programLength, parentThread, badness, generationNumber);
 			return thread;
 		}
 
@@ -107,7 +114,7 @@ define(
 			var existingThreadForProgramCounter = this._threadsByProgramCounter[pc];
 			if (existingThreadForProgramCounter) {
 				// Detect repetition in the same generation, which would cause cyclic traces
-				if (!parentThread.trace.contains(pc)) {
+				if (!parentThread.trace.contains(pc, this._generationNumber)) {
 					// Non-cyclic trace, join threads
 					existingThreadForProgramCounter.join(parentThread, badness);
 				}
@@ -120,7 +127,8 @@ define(
 				pc,
 				this._programLength,
 				parentThread,
-				badness);
+				badness,
+				this._generationNumber);
 
 			// Schedule thread according to badness
 			var index = findInsertionIndex(this._threadList, this._nextThread, badness);

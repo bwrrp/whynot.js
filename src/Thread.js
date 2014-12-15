@@ -16,17 +16,20 @@ define(
 		 * @class Thread
 		 * @constructor
 		 *
-		 * @param {Number} pc             Program counter for the scheduled instruction
-		 * @param {Thread} [parentThread] The thread that spawned this thread
-		 * @param {Number} [badness]      Increasing badness decreases thread priority
+		 * @param {Number} pc               Program counter for the scheduled instruction
+		 * @param {Thread} [parentThread]   The thread that spawned this thread
+		 * @param {Number} [badness]        Increasing badness decreases thread priority
+		 * @param {Number} generationNumber The index of the genaration this Thread is running in
 		 */
-		function Thread(pc, programLength, parentThread, badness) {
+		function Thread(pc, programLength, parentThread, badness, generationNumber) {
 			this.pc = pc;
 
 			var prefixTrace = parentThread ? parentThread.trace : null;
-			this.trace = new Trace(pc, programLength, prefixTrace);
+			this.trace = new Trace(pc, programLength, prefixTrace, generationNumber);
 
 			this.badness = badness || 0;
+
+			this._generationNumber = generationNumber;
 		}
 
 		/**

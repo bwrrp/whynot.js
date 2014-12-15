@@ -26,7 +26,7 @@ define(
 			// The active and scheduled generations
 			this._generations = [];
 			for (var i = 0; i < numGenerations; ++i) {
-				this._generations.push(new Generation(programLength, oldThreadList));
+				this._generations.push(new Generation(programLength, oldThreadList, i));
 			}
 			// The number of generations executed so far
 			this._generationsCompleted = 0;
@@ -40,7 +40,7 @@ define(
 		Scheduler.prototype.reset = function() {
 			// Reset each generation
 			for (var i = 0, l = this._generations.length; i < l; ++i) {
-				this._generations[i].reset();
+				this._generations[i].reset(i);
 			}
 			this._generationsCompleted = 0;
 		};
@@ -99,7 +99,7 @@ define(
 		Scheduler.prototype.nextGeneration = function() {
 			// Recycle current generation and move to next
 			var currentGeneration = getRelativeGeneration(this, 0);
-			currentGeneration.reset();
+			currentGeneration.reset(this._generationsCompleted);
 			++this._generationsCompleted;
 		};
 
