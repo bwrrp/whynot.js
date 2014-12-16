@@ -19,16 +19,32 @@ define(
 			this.head = [pc];
 			this.records = [];
 			this.prefixes = [];
+			this._descendants = [];
 
 			this._programLength = programLength;
 
 			if (precedingTrace) {
 				this.prefixes.push(precedingTrace);
+				precedingTrace._descendants.push(this);
 				this._visitedInstructions = precedingTrace._visitedInstructions.slice(0);
 			} else {
 				this._visitedInstructions = new Array(programLength);
 			}
 			this._visitedInstructions[pc] = generationNumber;
+		}
+
+		function mergeVisitedInstructions(targetVisitedInstructions, otherVisitedInstructions, programLength) {
+			for (var i = 0; i < programLength; ++i) {
+				var ourGeneration = targetVisitedInstructions[i],
+					otherGeneration = otherVisitedInstructions[i];
+
+				if (ourGeneration === undefined) {
+					targetVisitedInstructions[i] = otherGeneration;
+				} else if (otherGeneration !== undefined) {
+					targetVisitedInstructions[i] = Math.max(
+						ourGeneration, otherGeneration);
+				}
+			}
 		}
 
 		/**
@@ -42,13 +58,17 @@ define(
 		Trace.prototype.join = function(prefixTrace) {
 			this.prefixes.push(prefixTrace);
 
-			// Merge prefixTrace's set of visited instructions into our own
-			for (var i = 0, l = this._programLength; i < l; ++i) {
-				// Keep the highest generation, per instruction visited
-				this._visitedInstructions[i] = Math.max(
-					this._visitedInstructions[i] || 0,
-					prefixTrace._visitedInstructions[i] || 0);
-			}
+			(function mergeVisitedInstructionsIntoTrace(trace) {
+				// Merge prefixTrace's set of visited instructions into our own
+				mergeVisitedInstructions(
+					trace._visitedInstructions,
+					prefixTrace._visitedInstructions,
+					trace._programLength);
+				// Do the same for the descendants
+				for (var i = 0, l = trace._descendants.length; i < l; ++i) {
+					mergeVisitedInstructionsIntoTrace(trace._descendants[i]);
+				}
+			})(this);
 		};
 
 		/**
