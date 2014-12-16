@@ -122,6 +122,54 @@ define(
 					});
 				});
 			});
+
+			describe('querying', function() {
+				var rootTrace1,
+					rootTrace2,
+					trace1,
+					trace2;
+				beforeEach(function() {
+					rootTrace1 = new Trace(1, PROGRAM_LENGTH, null, 0);
+					rootTrace2 = new Trace(2, PROGRAM_LENGTH, null, 1);
+					trace1 = new Trace(3, PROGRAM_LENGTH, rootTrace1, 1);
+					trace2 = new Trace(1, PROGRAM_LENGTH, rootTrace2, 1);
+				});
+
+				it('can check whether a trace visited an instruction in any generation', function() {
+					chai.expect(trace1.contains(1)).to.equal(true);
+					chai.expect(trace1.contains(2)).to.equal(false);
+					chai.expect(trace1.contains(3)).to.equal(true);
+				});
+
+				it('can check whether a trace visited an instruction in a specific generation', function() {
+					chai.expect(trace1.contains(1, 0)).to.equal(true);
+					chai.expect(trace1.contains(1, 1)).to.equal(false);
+					chai.expect(trace1.contains(2, 0)).to.equal(false);
+					chai.expect(trace1.contains(2, 1)).to.equal(false);
+					chai.expect(trace1.contains(3, 0)).to.equal(false);
+					chai.expect(trace1.contains(3, 1)).to.equal(true);
+				});
+
+				it('checks all prefixes, considering the most recent generation only', function() {
+					trace1.join(trace2);
+					chai.expect(trace1.contains(1, 0)).to.equal(false);
+					chai.expect(trace1.contains(1, 1)).to.equal(true);
+					chai.expect(trace1.contains(2, 0)).to.equal(false);
+					chai.expect(trace1.contains(2, 1)).to.equal(true);
+					chai.expect(trace1.contains(3, 0)).to.equal(false);
+					chai.expect(trace1.contains(3, 1)).to.equal(true);
+				});
+
+				it('also updates descendant traces when a prefix is merged', function() {
+					rootTrace1.join(rootTrace2);
+					chai.expect(trace1.contains(1, 0)).to.equal(true);
+					chai.expect(trace1.contains(1, 1)).to.equal(false);
+					chai.expect(trace1.contains(2, 0)).to.equal(false);
+					chai.expect(trace1.contains(2, 1)).to.equal(true);
+					chai.expect(trace1.contains(3, 0)).to.equal(false);
+					chai.expect(trace1.contains(3, 1)).to.equal(true);
+				});
+			});
 		});
 	}
 );
