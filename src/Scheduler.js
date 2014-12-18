@@ -99,7 +99,7 @@ define(
 		Scheduler.prototype.nextGeneration = function() {
 			// Recycle current generation and move to next
 			var currentGeneration = getRelativeGeneration(this, 0);
-			currentGeneration.reset(this._generationsCompleted);
+			currentGeneration.reset(this._generationsCompleted + this._generations.length);
 			++this._generationsCompleted;
 		};
 
