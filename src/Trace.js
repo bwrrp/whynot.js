@@ -20,6 +20,7 @@ define(
 			this.records = [];
 			this.prefixes = [];
 			this._descendants = [];
+			this._isCompacted = false;
 
 			this._programLength = programLength;
 
@@ -57,6 +58,7 @@ define(
 		 */
 		Trace.prototype.join = function(prefixTrace) {
 			this.prefixes.push(prefixTrace);
+			this._isCompacted = false;
 
 			(function mergeVisitedInstructionsIntoTrace(trace) {
 				// Merge prefixTrace's set of visited instructions into our own
@@ -95,6 +97,10 @@ define(
 		 * @method compact
 		 */
 		Trace.prototype.compact = function() {
+			if (this._isCompacted) {
+				return;
+			}
+
 			var trace = this;
 			while (trace.prefixes.length === 1) {
 				// Trace has a single prefix, combine traces
@@ -108,6 +114,8 @@ define(
 				// Continue
 				trace = prefix;
 			}
+			this._isCompacted = true;
+
 			// Recurse
 			for (var i = 0, l = trace.prefixes.length; i < l; ++i) {
 				trace.prefixes[i].compact();
