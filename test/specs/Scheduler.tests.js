@@ -44,13 +44,6 @@ define(
 					chai.expect(nextGenThread).to.equal(rootThread);
 					chai.expect(scheduler.getNextThread()).to.equal(null);
 				});
-
-				it('increases badness for repeating threads', function() {
-					var rootThread = scheduler.addThread(0, 0, null, 0),
-						repeatingThread = scheduler.addThread(1, 0, rootThread, 0);
-
-					chai.expect(repeatingThread.badness).to.be.above(0);
-				});
 			});
 		});
 	}

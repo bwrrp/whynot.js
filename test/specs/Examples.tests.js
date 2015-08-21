@@ -407,8 +407,103 @@ define(
 
 					// Remark the individual explorations may not all be schema-valid, though the string may be completed using the previous example.
 				});
+			});
+		});
+
+		describe('greediness using badness', function () {
+			function createInput(array) {
+				var i = 0;
+				return function() {
+					return array[i++] || null;
+				};
+			}
 
 
+			it('provides ordering on badness over joined threads: greedy to start', function () {
+				var vm = whynot.compileVM(function (assembler) {
+						// As a regex: roughly A*(.*), with the latter group in non-greedy capturing mode
+						// Aims to match AAABBB to AAA(BBB) as opposed to either (AAABBB), A(AABBB), AA(ABBB), AAA(BBB)
+						// A*
+						var start = assembler.jump([]),
+							startIndex = 0;
+						start.data.push(assembler.program.length);
+						assembler.test(function (input) { return input === 'A'; });
+						var endOfStar = assembler.jump([startIndex]);
+						start.data.push(assembler.program.length);
+
+						// Record position, to make a start of the CG
+						assembler.record({}, function (_, index) {
+							return index;
+						});
+
+						// .*, non-greedy
+						var start2Index = assembler.program.length,
+							start2 = assembler.jump([]);
+						start2.data.push(assembler.program.length);
+						assembler.bad();
+						assembler.test(function(input) { return true; });
+						assembler.jump([start2Index]);
+						start2.data.push(assembler.program.length);
+
+						// Done
+						assembler.accept();
+					});
+
+				var result = vm.execute(createInput(['A', 'A', 'A', 'B', 'B', 'B']));
+				//                                    0    1    2    3    4    5    6
+				//                                                   '--- Expect CG to start here
+				var firstRecord = (function findFirstRecord (trace) {
+						if (trace.records.length) {
+							return trace.records[0];
+						}
+
+						return findFirstRecord(trace.prefixes[0]);
+					})(result.acceptingTraces[0]);
+				chai.expect(firstRecord).to.equal(3);
+			});
+
+			it('provides ordering on badness over joined threads, greedy to end', function () {
+				var vm = whynot.compileVM(function (assembler) {
+						// As a regex: roughly .*(A*), with the latter group in non-greedy capturing mode
+						// Aims to match BBBAAA to (BBB)AAA as opposed to either (BBBAAA), B(BBAA), BB(BAAA), (BBB)AAA
+
+						// .*, non-greedy
+						var start2Index = assembler.program.length,
+							start2 = assembler.jump([]);
+						start2.data.push(assembler.program.length);
+						assembler.bad();
+						assembler.test(function(input) { return true; });
+						assembler.jump([start2Index]);
+						start2.data.push(assembler.program.length);
+
+						// Record position, to make a start of the CG
+						assembler.record({}, function (_, index) {
+							return index;
+						});
+
+						// A*
+						var startIndex = assembler.program.length,
+							start = assembler.jump([]);
+						start.data.push(assembler.program.length);
+						assembler.test(function (input) { return input === 'A'; });
+						var endOfStar = assembler.jump([startIndex]);
+						start.data.push(assembler.program.length);
+
+						// Done
+						assembler.accept();
+					});
+
+				var result = vm.execute(createInput(['B', 'B', 'B', 'A', 'A', 'A']));
+				//                                    0    1    2    3    4    5    6
+				//                                                   '--- Expect CG to start here
+				var firstRecord = (function findFirstRecord (trace) {
+						if (trace.records.length) {
+							return trace.records[0];
+						}
+
+						return findFirstRecord(trace.prefixes[0]);
+					})(result.acceptingTraces[0]);
+				chai.expect(firstRecord).to.equal(3);
 			});
 		});
 	}

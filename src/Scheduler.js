@@ -10,8 +10,6 @@ define(
 		) {
 		'use strict';
 
-		var REPEAT_BADNESS = 1.0;
-
 		/**
 		 * Schedules Threads to run in the current or a future Generation.
 		 *
@@ -68,11 +66,6 @@ define(
 		 * @return {Thread|null} The Thread that was added, or null if no thread was added
 		 */
 		Scheduler.prototype.addThread = function(generationOffset, pc, parentThread, badness) {
-			// Prefer non-repeating threads over repeating ones
-			if (parentThread && parentThread.trace.contains(pc)) {
-				badness += REPEAT_BADNESS;
-			}
-
 			var generationForThread = getRelativeGeneration(this, generationOffset);
 
 			// Add thread to the generation
