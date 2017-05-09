@@ -18,14 +18,14 @@ export default class Assembler {
 
 	/**
 	 * The 'test' instruction validates and consumes an input item.
-	 * If the matcher returns true, execution continues in the next Generation, otherwise
-	 * execution of the current Thread ends.
+	 * 
+	 * If the matcher returns true, execution continues in the next Generation, otherwise execution of the current 
+	 * Thread ends.
 	 *
-	 * @param {TestFunc} matcher Callback to invoke for the input,
-	 *                             should return true to accept, false to reject.
-	 * @param {any}      [data]  Data to be passed to the matcher callback. Defaults to null.
+	 * @param matcher Callback to invoke for the input, should return true to accept, false to reject.
+	 * @param data    Data to be passed to the matcher callback. Defaults to null.
 	 *
-	 * @return {Instruction} The new instruction
+	 * @return The new instruction
 	 */
 	test (matcher: TestFunc, data?: any): Instruction {
 		return addInstruction(
@@ -37,12 +37,12 @@ export default class Assembler {
 	}
 
 	/**
-	 * The 'jump' instruction continues execution in the current Generation at any number
-	 * of other locations. A new Thread will be spawned for each target.
+	 * The 'jump' instruction continues execution in the current Generation at any number of other locations. A new 
+	 * Thread will be spawned for each target.
 	 *
-	 * @param {number[]} targets Program counters at which to continue execution
+	 * @param targets Program counters at which to continue execution
 	 * 
-	 * @return {Instruction} The new instruction
+	 * @return The new instruction
 	 */
 	jump (targets: number[]): Instruction {
 		return addInstruction(
@@ -54,14 +54,14 @@ export default class Assembler {
 	}
 
 	/**
-	 * The 'record' instruction adds a custom record to the current Thread's trace and
-	 * resumes execution at the next instruction in the same Generation.
+	 * The 'record' instruction adds a custom record to the current Thread's trace and resumes execution at the next 
+	 * instruction in the same Generation.
 	 *
-	 * @param {any}        data       Data to record
-	 * @param {RecordFunc} [recorder] Callback to generate the record based on data and the 
-	 *                                  current input position. Defaults to recording data.
+	 * @param data     Data to record
+	 * @param recorder Callback to generate the record based on data and the current input position. Defaults to 
+	 *                   recording data.
 	 *
-	 * @return {Instruction} The new instruction
+	 * @return The new instruction
 	 */
 	record (data: any, recorder: RecordFunc = defaultRecorder): Instruction {
 		return addInstruction(
@@ -73,12 +73,11 @@ export default class Assembler {
 	}
 
 	/**
-	 * The 'bad' instruction permanently lowers the priority of all threads originating in
-	 * the current one.
+	 * The 'bad' instruction permanently lowers the priority of all threads originating in the current one.
 	 *
-	 * @param {number} cost Amount to increase badness with. Defaults to 1.
+	 * @param cost Amount to increase badness with. Defaults to 1.
 	 * 
-	 * @return {Instruction} The new instruction
+	 * @return The new instruction
 	 */
 	bad (cost: number = 1): Instruction {
 		return addInstruction(
@@ -90,10 +89,10 @@ export default class Assembler {
 	}
 
 	/**
-	 * The 'accept' instruction causes the VM to yield the current Thread's Trace upon
-	 * completion, provided all input has been consumed. Otherwise, the Thread ends.
+	 * The 'accept' instruction causes the VM to yield the current Thread's Trace upon completion, provided all input 
+	 * has been consumed. Otherwise, the Thread ends.
 	 *
-	 * @return {Instruction} The new instruction
+	 * @return The new instruction
 	 */
 	accept (): Instruction {
 		return addInstruction(
@@ -107,11 +106,10 @@ export default class Assembler {
 	/**
 	 * The 'fail' instruction ends the current Thread.
 	 *
-	 * @param {FailFunc} [predicate] Optional callback to make the fail conditional, if this
-	 *                                 returns true the thread will end, otherwise it will
-	 *                                 continue.
+	 * @param predicate Optional callback to make the fail conditional, if this returns true the thread will end, 
+	 *                    otherwise it will continue.
 	 * 
-	 * @return {Instruction} The new instruction
+	 * @return The new instruction
 	 */
 	fail (predicate?: FailFunc): Instruction {
 		return addInstruction(

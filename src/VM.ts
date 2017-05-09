@@ -15,16 +15,15 @@ export default class VM {
 	private _oldThreadList: Thread[];
 
     /**
-	 * @param {Array}    program         The program to run, as created by the Assembler
-	 * @param {Thread[]} [oldThreadList] Array used for recycling Thread objects. An existing
-	 *                                     array can be passed in to share recycled threads
-	 *                                     between VMs.
+	 * @param program       The program to run, as created by the Assembler
+	 * @param oldThreadList Array used for recycling Thread objects. An existing array can be passed in to share 
+	 *                        recycled threads between VMs.
 	 */
 	constructor (program: Instruction[], oldThreadList: Thread[] = []) {
 		this._program = program;
 
-		// Use multiple schedulers to make the VM reentrant. This way, one can implement
-		// recursion by executing a VM inside a test, fail or record callback.
+		// Use multiple schedulers to make the VM reentrant. This way, one can implement recursion by executing a VM
+		// inside a test, fail or record callback.
 		this._schedulers = [];
 		this._nextFreeScheduler = 0;
 		this._oldThreadList = oldThreadList;
@@ -54,13 +53,11 @@ export default class VM {
 	/**
 	 * Executes the program in the VM with the given input stream.
 	 *
-	 * @param {Function} input     Should return the next input item when called,
-	 *                               or null when no further input is available.
-	 * @param {Object}   [options] Optional object passed to all instruction callbacks.
+	 * @param input   Should return the next input item when called, or null when no further input is available.
+	 * @param options Optional object passed to all instruction callbacks.
 	 *
-	 * @return {Result} Result of the execution, containing all Traces that lead to acceptance
-	 *                    of the input, and all traces which lead to failure in the last
-	 *                    Generation.
+	 * @return Result of the execution, containing all Traces that lead to acceptance of the input, and all traces 
+	 *           which lead to failure in the last Generation.
 	 */
 	execute (input: () => any | null, options?: object) {
 		const scheduler = this._getScheduler();
@@ -191,8 +188,7 @@ export default class VM {
 				thread = scheduler.getNextThread();
 			}
 
-			// End current Generation and continue with the next
-			// This automatically compacts the Traces in the old Generation
+			// End current Generation and continue with the next. This compacts the Traces in the old Generation.
 			scheduler.nextGeneration();
 		} while (inputItem !== null && inputItem !== undefined);
 

@@ -18,6 +18,7 @@
   "scripts": {
     "build:amd": "rimraf lib && tsc --module amd",
     "build:commonjs": "rimraf lib && tsc --module commonjs",
+    "docs": "typedoc --out docs --excludePrivate --excludeNotExported src/index.ts",
     "test": "tsc -P test && mocha --recursive test/bin/test"
   },
   "repository": {
@@ -30,6 +31,7 @@
     "chai": "^3.5.0",
     "mocha": "^3.3.0",
     "rimraf": "^2.6.1",
+    "typedoc": "^0.6.0",
     "typescript": "^2.3.2"
   }
 }

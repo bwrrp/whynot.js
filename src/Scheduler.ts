@@ -9,9 +9,9 @@ export default class Scheduler {
 	private _generationsCompleted: number;
 
     /**
-	 * @param {number}   numGenerations Number of Generations to plan ahead
-	 * @param {number}   programLength  Length of the program being run
-	 * @param {Thread[]} oldThreadList  Array used for recycling Thread objects
+	 * @param numGenerations Number of Generations to plan ahead
+	 * @param programLength  Length of the program being run
+	 * @param oldThreadList  Array used for recycling Thread objects
 	 */
 	constructor (numGenerations: number, programLength: number, oldThreadList: Thread[]) {
 		// The active and scheduled generations
@@ -47,12 +47,12 @@ export default class Scheduler {
 	/**
 	 * Adds a Thread to the Generation at the given offset relative to the current one.
 	 *
-	 * @param {number} generationOffset Offset of the target generation, relative to the current
-	 * @param {number} pc               Program counter for the new Thread
-	 * @param {Thread} [parentThread]   Thread which spawned the new Thread
-	 * @param {number} [badness]        Increasing badness decreases thread priority
+	 * @param generationOffset Offset of the target generation, relative to the current
+	 * @param pc               Program counter for the new Thread
+	 * @param parentThread     Thread which spawned the new Thread
+	 * @param badness          Increasing badness decreases thread priority
 	 *
-	 * @return {Thread|null} The Thread that was added, or null if no thread was added
+	 * @return The Thread that was added, or null if no thread was added
 	 */
 	addThread (generationOffset: number, pc: number, parentThread?: Thread, badness?: number): Thread | null {
 		const generationForThread = this._getRelativeGeneration(generationOffset);
@@ -64,7 +64,7 @@ export default class Scheduler {
 	/**
 	 * Returns the next thread to run in the current Generation.
 	 *
-	 * @return {Thread|null} The next Thread to run, or null if there are none left
+	 * @return The next Thread to run, or null if there are none left
 	 */
 	getNextThread (): Thread | null {
 		const currentGeneration = this._getRelativeGeneration(0);

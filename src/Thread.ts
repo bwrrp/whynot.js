@@ -2,7 +2,6 @@ import Trace from './Trace';
 
 /**
  * A Thread represents scheduled execution of a specific instruction.
- *
  */
 export default class Thread {
 	public pc: number;
@@ -12,11 +11,11 @@ export default class Thread {
 	private _generationNumber: number;
 
     /**
-	 * @param {number} pc               Program counter for the scheduled instruction
-	 * @param {number} programLength    Length of the current program
-	 * @param {Thread} [parentThread]   The thread that spawned this thread
-	 * @param {number} [badness]        Increasing badness decreases thread priority
-	 * @param {number} generationNumber The index of the genaration this Thread is running in
+	 * @param pc               Program counter for the scheduled instruction
+	 * @param programLength    Length of the current program
+	 * @param parentThread     The thread that spawned this thread
+	 * @param badness          Increasing badness decreases thread priority
+	 * @param generationNumber The index of the genaration this Thread is running in
 	 */
 	constructor (pc: number, programLength: number, parentThread: Thread | undefined, badness: number = 0, generationNumber: number) {
 		this.pc = pc;

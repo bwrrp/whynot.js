@@ -44,9 +44,9 @@ export default class Generation {
 	private _generationNumber: number;
 
     /**
-	 * @param {Number}   programLength    The length of the program being run
-	 * @param {Thread[]} oldThreadList    Array used for recycling Thread objects
-	 * @param {Number}   generationNumber The index of generation
+	 * @param programLength    The length of the program being run
+	 * @param oldThreadList    Array used for recycling Thread objects
+	 * @param generationNumber The index of generation
 	 */
 	constructor (programLength: number, oldThreadList: Thread[], generationNumber: number) {
 		this._oldThreads = oldThreadList;
@@ -58,7 +58,8 @@ export default class Generation {
 	/**
 	 * Resets the Generation for reuse.
 	 *
-	 * @param generationNumber The new index of this generation. Used to test if certain Traces have passed a given PC before
+	 * @param generationNumber The new index of this generation. Used to test if certain Traces have processed a given 
+	 * PC before.
 	 */
 	reset (generationNumber: number) {
 		// Compact and recycle threads
@@ -81,16 +82,16 @@ export default class Generation {
 
 	/**
 	 * Adds a Thread to the Generation.
-	 * Only a single thread can be added for each instruction, subsequent threads are joined
-	 * with the previous threads. All traces are preserved, but only a single
-	 * thread continues execution. This works, because instructions never depend on a
-	 * thread's history.
+	 * 
+	 * Only a single thread can be added for each instruction, subsequent threads are joined with the previous threads. 
+	 * All traces are preserved, but only a single thread continues execution. This works, because instructions never 
+	 * depend on a thread's history.
 	 *
-	 * @param {Number} pc             Program counter for the new Thread
-	 * @param {Thread} [parentThread] Thread which spawned the new Thread
-	 * @param {Number} [badness]      Increasing badness decreases thread priority
+	 * @param pc           Program counter for the new Thread
+	 * @param parentThread Thread which spawned the new Thread
+	 * @param badness      Increasing badness decreases thread priority
 	 *
-	 * @return {Thread|null} The Thread that was added, or null if no thread was added
+	 * @return The Thread that was added, or null if no thread was added
 	 */
 	addThread (pc: number, parentThread?: Thread, badness: number = 0): Thread | null {
 		// Only add threads for in-program locations
@@ -131,9 +132,7 @@ export default class Generation {
 	/**
 	 * Returns the next Thread to run for this generation.
 	 *
-	 * @method getNextThread
-	 *
-	 * @return {Thread|null} The Thread to run, or null if there are no threads left.
+	 * @return The Thread to run, or null if there are no threads left.
 	 */
 	getNextThread (): Thread | null {
 		if (this._nextThread >= this._threadList.length) {

@@ -25,6 +25,12 @@ export default class Trace {
 	private _programLength: number;
 	private _visitedInstructions: number[];
 
+    /**
+	 * @param pc               Program counter for the scheduled instruction
+	 * @param programLength    Length of the current program
+	 * @param precedingTrace   The trace to append this trace to
+	 * @param generationNumber The index of the genaration this Trace's Thread is running in
+	 */
 	constructor (pc: number, programLength: number, precedingTrace: Trace | null, generationNumber: number) {
 		this.head = [pc];
 		this._programLength = programLength;
@@ -41,10 +47,11 @@ export default class Trace {
 	}
 
 	/**
-	 * Combines the Trace with the given prefix, thereby recording multiple ways to get
-	 * to the current trace's head. Assumes the Trace has not yet been compacted.
+	 * Combines the Trace with the given prefix, thereby recording multiple ways to get to the current trace's head.
+	 * 
+	 * Assumes the Trace has not yet been compacted.
 	 *
-	 * @param {Trace} prefixTrace The Trace to add as a prefix of the current
+	 * @param prefixTrace The Trace to add as a prefix of the current
 	 */
 	join (prefixTrace: Trace) {
 		this.prefixes.push(prefixTrace);
@@ -65,12 +72,13 @@ export default class Trace {
 
 	/**
 	 * Returns whether the Trace has visited the specified instruction, in the given generation.
+	 * 
 	 * If no generation is given, it is tested if the trace has passed the instruction at all.
 	 *
-	 * @param {Number} pc           Program counter for the instruction to test
-	 * @param {Number} [generation] The index of the generation to test for
+	 * @param pc         Program counter for the instruction to test
+	 * @param generation The index of the generation to test for
 	 *
-	 * @return {Boolean} Whether the trace has visited the instruction
+	 * @return Whether the trace has visited the instruction
 	 */
 	contains (pc: number, generation?: number): boolean {
 		if (generation === undefined) {
