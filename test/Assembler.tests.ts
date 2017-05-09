@@ -62,7 +62,7 @@ describe('Assembler', () => {
 			});
 		});
 		describe('with recorder', () => {
-			function recorder (_data: any, _index: number, _options?: object) {
+			function recorder (_data: any, _index: number) {
 				return 'meep';
 			}
 

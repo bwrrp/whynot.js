@@ -1,12 +1,12 @@
-export type FailFunc = (options?: object) => boolean;
-export type TestFunc = (inputItem: any, data: any, options?: object) => boolean;
-export type RecordFunc = (data: any, inputIndex: number, options?: object) => any | null;
+export type FailFunc<O = void> = (options?: O) => boolean;
+export type TestFunc<O = void> = (inputItem: any, data: any, options?: O) => boolean;
+export type RecordFunc<O = void> = (data: any, inputIndex: number, options?: O) => any | null;
 
 /**
  * Represents a single instruction in a whynot program.
  */
-export interface Instruction {
+export interface Instruction<O = void> {
     op: string,
-    func?: FailFunc | TestFunc | RecordFunc | null,
+    func?: FailFunc<O> | TestFunc<O> | RecordFunc<O> | null,
     data?: any
 }

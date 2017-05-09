@@ -8,8 +8,8 @@ const NUMBER_OF_SCHEDULED_GENERATIONS = 2;
 /**
  * A virtual machine to execute whynot programs.
  */
-export default class VM {
-	private _program: Instruction[];
+export default class VM<O = void> {
+	private _program: Instruction<O>[];
 	private _schedulers: Scheduler[] = [];
 	private _nextFreeScheduler: number = 0;
 	private _oldThreadList: Thread[];
@@ -19,7 +19,7 @@ export default class VM {
 	 * @param oldThreadList Array used for recycling Thread objects. An existing array can be passed in to share 
 	 *                        recycled threads between VMs.
 	 */
-	constructor (program: Instruction[], oldThreadList: Thread[] = []) {
+	constructor (program: Instruction<O>[], oldThreadList: Thread[] = []) {
 		this._program = program;
 
 		// Use multiple schedulers to make the VM reentrant. This way, one can implement recursion by executing a VM
@@ -59,7 +59,7 @@ export default class VM {
 	 * @return Result of the execution, containing all Traces that lead to acceptance of the input, and all traces 
 	 *           which lead to failure in the last Generation.
 	 */
-	execute (input: () => any | null, options?: object) {
+	execute (input: () => any | null, options?: O) {
 		const scheduler = this._getScheduler();
 		const program = this._program;
 
@@ -103,7 +103,7 @@ export default class VM {
 
 					case 'fail': {
 						// Is the failure conditional?
-                        const func = instruction.func as FailFunc;
+                        const func = instruction.func as FailFunc<O>;
 						const isFailingCondition = !func || func(options);
 						if (isFailingCondition) {
 							// Branch is forbidden, end the thread
@@ -137,7 +137,7 @@ export default class VM {
 							break;
 						}
 						// Fail if input does not match
-                        const func = instruction.func as TestFunc;
+                        const func = instruction.func as TestFunc<O>;
 						const isInputAccepted = func(inputItem, instruction.data, options);
 						if (!isInputAccepted) {
 							failingTraces.push(thread.trace);
@@ -168,7 +168,7 @@ export default class VM {
 
 					case 'record': {
 						// Invoke record callback
-						const func = instruction.func as RecordFunc;
+						const func = instruction.func as RecordFunc<O>;
 						const record = func(instruction.data, inputIndex, options);
 						if (record !== null && record !== undefined) {
 							thread.trace.records.push(record);

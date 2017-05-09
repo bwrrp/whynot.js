@@ -28,7 +28,7 @@ describe('VM', () => {
 	describe('accept', () => {
 		let vm: VM;
 		beforeEach(() => {
-			vm = whynot.compileVM(function (assembler: Assembler) {
+			vm = whynot.compileVM(assembler => {
 				assembler.accept();
 			});
 		});
@@ -51,7 +51,7 @@ describe('VM', () => {
 		describe('unconditional', () => {
 			let vm: VM;
 			beforeEach(() => {
-				vm = whynot.compileVM(function (assembler: Assembler) {
+				vm = whynot.compileVM(assembler => {
 					assembler.fail();
 				});
 			});
@@ -66,7 +66,7 @@ describe('VM', () => {
 			let vm: VM;
 			let condition: boolean;
 			beforeEach(() => {
-				vm = whynot.compileVM(function (assembler: Assembler) {
+				vm = whynot.compileVM(assembler => {
 					assembler.fail(() => {
 						return condition;
 					});
@@ -97,30 +97,31 @@ describe('VM', () => {
 		});
 
 		describe('conditional with options', () => {
-			let vm: VM;
+			type Options = { shouldFail: boolean };
+			let vm: VM<Options>;
 			beforeEach(() => {
-				vm = whynot.compileVM(function (assembler: Assembler) {
-					assembler.fail(function (options: any) {
-						return options.shouldFail;
+				vm = whynot.compileVM<Options>(assembler => {
+					assembler.fail(function (options) {
+						return !!options && options.shouldFail;
 					});
 					assembler.accept();
 				});
 			});
 
 			it('ends the thread if the condition predicate returns true', () => {
-				const resultWithoutInput = vm.execute(createInput([]), {shouldFail: true});
+				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: true });
 				chai.expect(resultWithoutInput.success).to.equal(false);
 				chai.expect(resultWithoutInput.failingTraces[0].head).to.deep.equal([0]);
-				const resultWithInput = vm.execute(createInput([1]), {shouldFail: true});
+				const resultWithInput = vm.execute(createInput([1]), { shouldFail: true });
 				chai.expect(resultWithInput.success).to.equal(false);
 				chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0]);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
-				const resultWithoutInput = vm.execute(createInput([]), {shouldFail: false});
+				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: false });
 				chai.expect(resultWithoutInput.success).to.equal(true);
 				chai.expect(resultWithoutInput.acceptingTraces[0].head).to.deep.equal([0, 1]);
-				const resultWithInput = vm.execute(createInput([1]), {shouldFail: false});
+				const resultWithInput = vm.execute(createInput([1]), { shouldFail: false });
 				chai.expect(resultWithInput.success).to.equal(false);
 				chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0, 1]);
 			});
@@ -132,7 +133,7 @@ describe('VM', () => {
 		let vmRightBad: VM;
 		beforeEach(() => {
 			// Create two branches of equal length, one badness 1, the other 0
-			vmLeftBad = whynot.compileVM(function (assembler: Assembler) {
+			vmLeftBad = whynot.compileVM(assembler => {
 				assembler.jump([1, 3]); // 0
 				assembler.bad(100);     // 1
 				assembler.jump([5]);    // 2
@@ -140,7 +141,7 @@ describe('VM', () => {
 				assembler.jump([5]);    // 4
 				assembler.accept();     // 5
 			});
-			vmRightBad = whynot.compileVM(function (assembler: Assembler) {
+			vmRightBad = whynot.compileVM(assembler => {
 				assembler.jump([1, 3]); // 0
 				assembler.bad(1);       // 1
 				assembler.jump([5]);    // 2
@@ -165,7 +166,7 @@ describe('VM', () => {
 
 		let vm: VM;
 		beforeEach(() => {
-			vm = whynot.compileVM(function (assembler: Assembler) {
+			vm = whynot.compileVM(assembler => {
 				assembler.test(isMeep);
 				assembler.accept();
 			});
@@ -187,8 +188,10 @@ describe('VM', () => {
 		});
 
 		describe('with options', () => {
+            type Options = { shouldAccept: boolean };
+			let vm: VM<Options>;
 			beforeEach(() => {
-				vm = whynot.compileVM(function (assembler: Assembler) {
+				vm = whynot.compileVM<Options>(assembler => {
 					assembler.test(function (_item: string, _data: any, options: any) {
 						return options.shouldAccept;
 					});
@@ -197,14 +200,14 @@ describe('VM', () => {
 			});
 
 			it('moves a thread to the next generation when the test succeeds', () => {
-				const result = vm.execute(createInput(['meep']), {shouldAccept: true});
+				const result = vm.execute(createInput(['meep']), { shouldAccept: true });
 				chai.expect(result.success).to.equal(true);
 				chai.expect(result.acceptingTraces.length).to.equal(1);
 				chai.expect(result.acceptingTraces[0].head).to.deep.equal([0, 1]);
 			});
 
 			it('ends the thread when the test fails', () => {
-				const result = vm.execute(createInput(['meep']), {shouldAccept: false});
+				const result = vm.execute(createInput(['meep']), { shouldAccept: false });
 				chai.expect(result.success).to.equal(false);
 				chai.expect(result.acceptingTraces.length).to.equal(0);
 				chai.expect(result.failingTraces.length).to.equal(1);
@@ -215,7 +218,7 @@ describe('VM', () => {
 
 	describe('jump', () => {
 		it('can create a single new thread', () => {
-			const vm = whynot.compileVM(function (assembler: Assembler) {
+			const vm = whynot.compileVM(assembler => {
 				assembler.jump([1]);
 				assembler.accept();
 			});
@@ -225,7 +228,7 @@ describe('VM', () => {
 		});
 
 		it('can create multiple new threads', () => {
-			const vm = whynot.compileVM(function (assembler: Assembler) {
+			const vm = whynot.compileVM(assembler => {
 				assembler.jump([1, 2]);
 				assembler.accept();
 				assembler.accept();
@@ -238,7 +241,7 @@ describe('VM', () => {
 
 	describe('record', () => {
 		it('can record static data', () => {
-			const vm = whynot.compileVM(function (assembler: Assembler) {
+			const vm = whynot.compileVM(assembler => {
 				assembler.record('meep');
 				assembler.accept();
 			});
@@ -248,7 +251,7 @@ describe('VM', () => {
 		});
 
 		it('can use a recorder callback', () => {
-			const vm = whynot.compileVM(function (assembler: Assembler) {
+			const vm = whynot.compileVM(assembler => {
 				assembler.record('meep', function (data: string, index: number) {
 					return index + '-' + data.toUpperCase();
 				});
@@ -260,7 +263,8 @@ describe('VM', () => {
 		});
 
 		it('can use options in the recorder callback', () => {
-			const vm = whynot.compileVM(function (assembler: Assembler) {
+            type Options = { suffix: string };
+			const vm = whynot.compileVM<Options>(assembler => {
 				assembler.record('meep', function (data: string, index: number, options: any) {
 					return index + '-' + data.toUpperCase() + '-' + options.suffix;
 				});
@@ -278,7 +282,7 @@ describe('VM', () => {
 			return vm;
 		}
 		beforeEach(() => {
-			vm = whynot.compileVM(function (assembler: Assembler) {
+			vm = whynot.compileVM(assembler => {
 				const stackFrame: any = {};
 				assembler.test(function (item: any[]): boolean {
 					stackFrame.info = getVM().execute(createInput(item));
