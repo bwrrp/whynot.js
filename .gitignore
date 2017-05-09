@@ -1,2 +1,4 @@
+/dist/
+/lib/
+/test/bin/
 node_modules/
-*.sublime-workspace

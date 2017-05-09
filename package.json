@@ -1,30 +1,35 @@
 {
   "name": "whynot.js",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "description": "Generic VM-based structure matching framework",
+  "author": "Stef Busking <stef.busking@gmail.com>",
+  "contributors": [
+    "Martin Middel <martinmiddel@gmail.com>"
+  ],
+  "license": "MIT",
   "keywords": [
     "Language",
     "Matching",
     "Regex",
     "Structure"
   ],
-  "author": "Stef Busking <stef.busking@gmail.com>",
-  "contributors": [
-    "Martin Middel <martinmiddel@gmail.com>"
-  ],
-  "license": "MIT",
+  "main": "dist/whynot.js",
+  "module": "lib/index.js",
+  "scripts": {
+    "build:amd": "rimraf lib && tsc --module amd",
+    "build:commonjs": "rimraf lib && tsc --module commonjs",
+    "test": "tsc -P test && mocha --recursive test/bin/test"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/bwrrp/whynot.js"
   },
-  "scripts": {
-    "test": "testem -f test/testem.json ci",
-    "test-dev": "testem -f test/testem.json"
-  },
   "devDependencies": {
-    "chai": "^1.9.1",
-    "mocha": "^1.18.2",
-    "testem": "^0.6.15",
-    "requirejs": "^2.1.11"
+    "@types/chai": "^3.5.2",
+    "@types/mocha": "^2.2.41",
+    "chai": "^3.5.0",
+    "mocha": "^3.3.0",
+    "rimraf": "^2.6.1",
+    "typescript": "^2.3.2"
   }
 }
