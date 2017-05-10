@@ -8,8 +8,8 @@ const NUMBER_OF_SCHEDULED_GENERATIONS = 2;
 /**
  * A virtual machine to execute whynot programs.
  */
-export default class VM<O = void> {
-	private _program: Instruction<O>[];
+export default class VM<I, O = void> {
+	private _program: Instruction<I, O>[];
 	private _schedulers: Scheduler[] = [];
 	private _nextFreeScheduler: number = 0;
 	private _oldThreadList: Thread[];
@@ -19,7 +19,7 @@ export default class VM<O = void> {
 	 * @param oldThreadList Array used for recycling Thread objects. An existing array can be passed in to share 
 	 *                        recycled threads between VMs.
 	 */
-	constructor (program: Instruction<O>[], oldThreadList: Thread[] = []) {
+	constructor (program: Instruction<I, O>[], oldThreadList: Thread[] = []) {
 		this._program = program;
 
 		// Use multiple schedulers to make the VM reentrant. This way, one can implement recursion by executing a VM
@@ -59,7 +59,7 @@ export default class VM<O = void> {
 	 * @return Result of the execution, containing all Traces that lead to acceptance of the input, and all traces 
 	 *           which lead to failure in the last Generation.
 	 */
-	execute (input: () => any | null, options?: O) {
+	execute (input: () => I | null, options?: O) {
 		const scheduler = this._getScheduler();
 		const program = this._program;
 
@@ -72,7 +72,7 @@ export default class VM<O = void> {
 		const acceptingTraces = [];
 		const failingTraces = [];
 		let inputIndex = -1;
-		let inputItem;
+		let inputItem: I | null;
 		do {
 			// Get next thread to execute
 			let thread = scheduler.getNextThread();
@@ -137,7 +137,7 @@ export default class VM<O = void> {
 							break;
 						}
 						// Fail if input does not match
-                        const func = instruction.func as TestFunc<O>;
+                        const func = instruction.func as TestFunc<I, O>;
 						const isInputAccepted = func(inputItem, instruction.data, options);
 						if (!isInputAccepted) {
 							failingTraces.push(thread.trace);

@@ -1,6 +1,6 @@
 import { Instruction, FailFunc, TestFunc, RecordFunc } from './Instruction';
 
-function addInstruction<O> (program: Instruction<O>[], op: string, func: FailFunc<O> | TestFunc<O> | RecordFunc<O> | null, data: any): Instruction<O> {
+function addInstruction<I, O> (program: Instruction<I, O>[], op: string, func: FailFunc<O> | TestFunc<I, O> | RecordFunc<O> | null, data: any): Instruction<I, O> {
 	const instruction = { op, func, data };
 	program.push(instruction);
 	return instruction;
@@ -13,8 +13,8 @@ function defaultRecorder (data: any, _inputIndex: number) {
 /**
  * The Assembler is used to generate a whynot program by appending instructions.
  */
-export default class Assembler<O = void> {
-	program: Instruction<O>[] = [];
+export default class Assembler<I, O = void> {
+	program: Instruction<I, O>[] = [];
 
 	/**
 	 * The 'test' instruction validates and consumes an input item.
@@ -27,7 +27,7 @@ export default class Assembler<O = void> {
 	 *
 	 * @return The new instruction
 	 */
-	test (matcher: TestFunc<O>, data?: any): Instruction<O> {
+	test (matcher: TestFunc<I, O>, data?: any): Instruction<I, O> {
 		return addInstruction(
 			this.program,
 			'test',
@@ -44,7 +44,7 @@ export default class Assembler<O = void> {
 	 * 
 	 * @return The new instruction
 	 */
-	jump (targets: number[]): Instruction<O> {
+	jump (targets: number[]): Instruction<I, O> {
 		return addInstruction(
 			this.program,
 			'jump',
@@ -63,7 +63,7 @@ export default class Assembler<O = void> {
 	 *
 	 * @return The new instruction
 	 */
-	record (data: any, recorder: RecordFunc<O> = defaultRecorder): Instruction<O> {
+	record (data: any, recorder: RecordFunc<O> = defaultRecorder): Instruction<I, O> {
 		return addInstruction(
 			this.program,
 			'record',
@@ -79,7 +79,7 @@ export default class Assembler<O = void> {
 	 * 
 	 * @return The new instruction
 	 */
-	bad (cost: number = 1): Instruction<O> {
+	bad (cost: number = 1): Instruction<I, O> {
 		return addInstruction(
 			this.program,
 			'bad',
@@ -94,7 +94,7 @@ export default class Assembler<O = void> {
 	 *
 	 * @return The new instruction
 	 */
-	accept (): Instruction<O> {
+	accept (): Instruction<I, O> {
 		return addInstruction(
 			this.program,
 			'accept',
@@ -111,8 +111,8 @@ export default class Assembler<O = void> {
 	 * 
 	 * @return The new instruction
 	 */
-	fail (predicate?: FailFunc<O>): Instruction<O> {
-		return addInstruction(
+	fail (predicate?: FailFunc<O>): Instruction<I, O> {
+		return addInstruction<I, O>(
 			this.program,
 			'fail',
 			predicate || null,

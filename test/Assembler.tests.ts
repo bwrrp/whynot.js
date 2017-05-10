@@ -4,9 +4,9 @@ import { RecordFunc } from "../src/Instruction";
 import * as chai from 'chai';
 
 describe('Assembler', () => {
-	let assembler: Assembler;
+	let assembler: Assembler<void>;
 	beforeEach(() => {
-		assembler = new Assembler();
+		assembler = new Assembler<void>();
 	});
 
 	function truth () {

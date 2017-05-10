@@ -26,9 +26,9 @@ describe('VM', () => {
 	}
 
 	describe('accept', () => {
-		let vm: VM;
+		let vm: VM<void>;
 		beforeEach(() => {
-			vm = whynot.compileVM(assembler => {
+			vm = whynot.compileVM<void>(assembler => {
 				assembler.accept();
 			});
 		});
@@ -49,9 +49,9 @@ describe('VM', () => {
 
 	describe('fail', () => {
 		describe('unconditional', () => {
-			let vm: VM;
+			let vm: VM<void>;
 			beforeEach(() => {
-				vm = whynot.compileVM(assembler => {
+				vm = whynot.compileVM<void>(assembler => {
 					assembler.fail();
 				});
 			});
@@ -63,10 +63,10 @@ describe('VM', () => {
 		});
 		
 		describe('conditional', () => {
-			let vm: VM;
+			let vm: VM<void>;
 			let condition: boolean;
 			beforeEach(() => {
-				vm = whynot.compileVM(assembler => {
+				vm = whynot.compileVM<void>(assembler => {
 					assembler.fail(() => {
 						return condition;
 					});
@@ -98,9 +98,9 @@ describe('VM', () => {
 
 		describe('conditional with options', () => {
 			type Options = { shouldFail: boolean };
-			let vm: VM<Options>;
+			let vm: VM<number, Options>;
 			beforeEach(() => {
-				vm = whynot.compileVM<Options>(assembler => {
+				vm = whynot.compileVM<number, Options>(assembler => {
 					assembler.fail(function (options) {
 						return !!options && options.shouldFail;
 					});
@@ -129,11 +129,11 @@ describe('VM', () => {
 	});
 
 	describe('bad', () => {
-		let vmLeftBad: VM;
-		let vmRightBad: VM;
+		let vmLeftBad: VM<void>;
+		let vmRightBad: VM<void>;
 		beforeEach(() => {
 			// Create two branches of equal length, one badness 1, the other 0
-			vmLeftBad = whynot.compileVM(assembler => {
+			vmLeftBad = whynot.compileVM<void>(assembler => {
 				assembler.jump([1, 3]); // 0
 				assembler.bad(100);     // 1
 				assembler.jump([5]);    // 2
@@ -141,7 +141,7 @@ describe('VM', () => {
 				assembler.jump([5]);    // 4
 				assembler.accept();     // 5
 			});
-			vmRightBad = whynot.compileVM(assembler => {
+			vmRightBad = whynot.compileVM<void>(assembler => {
 				assembler.jump([1, 3]); // 0
 				assembler.bad(1);       // 1
 				assembler.jump([5]);    // 2
@@ -164,9 +164,9 @@ describe('VM', () => {
 			return item === 'meep';
 		}
 
-		let vm: VM;
+		let vm: VM<string>;
 		beforeEach(() => {
-			vm = whynot.compileVM(assembler => {
+			vm = whynot.compileVM<string>(assembler => {
 				assembler.test(isMeep);
 				assembler.accept();
 			});
@@ -189,9 +189,9 @@ describe('VM', () => {
 
 		describe('with options', () => {
             type Options = { shouldAccept: boolean };
-			let vm: VM<Options>;
+			let vm: VM<string, Options>;
 			beforeEach(() => {
-				vm = whynot.compileVM<Options>(assembler => {
+				vm = whynot.compileVM<string, Options>(assembler => {
 					assembler.test(function (_item: string, _data: any, options: any) {
 						return options.shouldAccept;
 					});
@@ -264,7 +264,7 @@ describe('VM', () => {
 
 		it('can use options in the recorder callback', () => {
             type Options = { suffix: string };
-			const vm = whynot.compileVM<Options>(assembler => {
+			const vm = whynot.compileVM<void, Options>(assembler => {
 				assembler.record('meep', function (data: string, index: number, options: any) {
 					return index + '-' + data.toUpperCase() + '-' + options.suffix;
 				});
@@ -277,14 +277,14 @@ describe('VM', () => {
 	});
 
 	describe('reentrancy', () => {
-		let vm: VM;
-		function getVM (): VM {
+		let vm: VM<any[]>;
+		function getVM (): VM<any[]> {
 			return vm;
 		}
 		beforeEach(() => {
-			vm = whynot.compileVM(assembler => {
-				const stackFrame: any = {};
-				assembler.test(function (item: any[]): boolean {
+			vm = whynot.compileVM<any[]>(assembler => {
+				const stackFrame: { info?: Result } = {};
+				assembler.test(item => {
 					stackFrame.info = getVM().execute(createInput(item));
 					return true;
 				});

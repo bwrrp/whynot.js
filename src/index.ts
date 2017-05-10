@@ -14,10 +14,10 @@ export { default as VM } from './VM';
  *
  * @return VM running the compiled program
  */
-export function compileVM<O = void> (compile: (assembler: Assembler<O>) => void, oldThreadList?: Thread[]): VM<O> {
-	const assembler = new Assembler<O>();
+export function compileVM<I, O = void> (compile: (assembler: Assembler<I, O>) => void, oldThreadList?: Thread[]): VM<I, O> {
+	const assembler = new Assembler<I, O>();
 	compile(assembler);
-	return new VM<O>(assembler.program, oldThreadList);
+	return new VM<I, O>(assembler.program, oldThreadList);
 }
 
 export default { Assembler, VM, compileVM };

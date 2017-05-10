@@ -27,7 +27,7 @@ describe('whynot.js examples', () => {
 		// by its children.
 		// The compile function traverses the AST recursively and generates a whynot
 		// program using the provided assembler.
-		function compile (assembler: Assembler, ast: any[], recordMissing: boolean) {
+		function compile (assembler: Assembler<string>, ast: any[], recordMissing: boolean) {
 			let i: number;
 			const l = ast.length;
 			switch (ast[0]) {
@@ -90,12 +90,12 @@ describe('whynot.js examples', () => {
 		}
 
 		// We can now define a simple helper to glue everything together
-		function compileRegexVM (regex: string, recordMissing: boolean): VM {
+		function compileRegexVM (regex: string, recordMissing: boolean): VM<string> {
 			// Use the generated parser for a quick AST
 			const ast = regexParser.parse(regex);
 
 			// Compile the AST into a whynot VM
-			return whynot.compileVM(function (assembler) {
+			return whynot.compileVM(assembler => {
 				compile(assembler, ast, recordMissing);
 				// Any threads that made it to the end of the program have successfully
 				// matched the complete input and can be accepted.
@@ -181,7 +181,7 @@ describe('whynot.js examples', () => {
 		// by its children.
 		// The compile function traverses the AST recursively and generates a whynot
 		// program using the provided assembler.
-		function compile (assembler: Assembler, ast: any[], recordingMode: boolean) {
+		function compile (assembler: Assembler<string>, ast: any[], recordingMode: boolean) {
 			let i: number;
 			const l = ast.length;
 			switch (ast[0]) {
@@ -276,12 +276,12 @@ describe('whynot.js examples', () => {
 		}
 
 		// We can now define a simple helper to glue everything together
-		function compileRegexVM (regex: string, recordMissing: boolean): VM {
+		function compileRegexVM (regex: string, recordMissing: boolean): VM<string> {
 			// Use the generated parser for a quick AST
 			const ast = regexParser.parse(regex);
 
 			// Compile the AST into a whynot VM
-			return whynot.compileVM(function (assembler: Assembler) {
+			return whynot.compileVM(assembler => {
 				compile(assembler, ast, recordMissing);
 				// Any threads that made it to the end of the program have successfully
 				// matched the complete input and can be accepted.
@@ -414,32 +414,26 @@ describe('whynot.js examples', () => {
 
 	describe('greediness using badness', () => {
 		it('provides ordering on badness over joined threads: greedy to start', () => {
-			const vm = whynot.compileVM(function (assembler: Assembler) {
+			const vm = whynot.compileVM<string>(assembler => {
 				// As a regex: roughly A*(.*), with the latter group in non-greedy capturing mode
 				// Aims to match AAABBB to AAA(BBB) as opposed to either (AAABBB), A(AABBB), AA(ABBB), AAA(BBB)
 				// A*
 				const startIndex = 0;
 				const start = assembler.jump([]);
 				start.data.push(assembler.program.length);
-				assembler.test(function (input: string) { 
-					return input === 'A';
-				});
+				assembler.test(input => input === 'A');
 				const endOfStar = assembler.jump([startIndex]);
 				start.data.push(assembler.program.length);
 
 				// Record position, to make a start of the CG
-				assembler.record({}, function (_, index) {
-					return index;
-				});
+				assembler.record({}, (_, index) => index);
 
 				// .*, non-greedy
 				const start2Index = assembler.program.length;
 				const start2 = assembler.jump([]);
 				start2.data.push(assembler.program.length);
 				assembler.bad();
-				assembler.test(function (input: string) { 
-					return true; 
-				});
+				assembler.test(_input => true);
 				assembler.jump([start2Index]);
 				start2.data.push(assembler.program.length);
 
@@ -461,7 +455,7 @@ describe('whynot.js examples', () => {
 		});
 
 		it('provides ordering on badness over joined threads, greedy to end', () => {
-			const vm = whynot.compileVM(function (assembler: Assembler) {
+			const vm = whynot.compileVM<string>(assembler => {
 				// As a regex: roughly .*(A*), with the latter group in non-greedy capturing mode
 				// Aims to match BBBAAA to (BBB)AAA as opposed to either (BBBAAA), B(BBAA), BB(BAAA), (BBB)AAA
 
