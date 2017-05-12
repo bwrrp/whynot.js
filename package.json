@@ -14,13 +14,14 @@
     "Structure"
   ],
   "main": "dist/whynot.js",
-  "module": "lib/index.js",
+  "module": "dist/whynot.mjs",
   "scripts": {
     "build:amd": "rimraf lib && tsc --module amd",
     "build:commonjs": "rimraf lib && tsc --module commonjs",
-    "build:umd": "rimraf dist && rimraf lib && tsc && rollup -c",
+    "build:es": "rimraf lib && tsc --module es6",
+    "build:bundle": "rimraf dist && rimraf lib && tsc && rollup -c",
     "docs": "typedoc --out docs --excludePrivate --excludeNotExported src/index.ts",
-    "test": "tsc -P test && mocha --recursive test/bin/test"
+    "test": "rimraf test/bin && tsc -P test && mocha --recursive test/bin/test"
   },
   "repository": {
     "type": "git",
