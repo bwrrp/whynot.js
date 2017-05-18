@@ -10,7 +10,7 @@ export default class Thread {
 
 	private _generationNumber: number;
 
-    /**
+	/**
 	 * @param pc               Program counter for the scheduled instruction
 	 * @param programLength    Length of the current program
 	 * @param parentThread     The thread that spawned this thread
@@ -35,7 +35,7 @@ export default class Thread {
 	 * @param badness           Badness of the other thread
 	 */
 	join (otherParentThread?: Thread, badness: number = 0) {
-        if (otherParentThread) {
+		if (otherParentThread) {
 			this.trace.join(otherParentThread.trace);
 		}
 		this.badness = Math.max(this.badness, badness);

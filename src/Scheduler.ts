@@ -8,7 +8,7 @@ export default class Scheduler {
 	private _generations: Generation[] = [];
 	private _generationsCompleted: number;
 
-    /**
+	/**
 	 * @param numGenerations Number of Generations to plan ahead
 	 * @param programLength  Length of the program being run
 	 * @param oldThreadList  Array used for recycling Thread objects

@@ -14,9 +14,9 @@ export default class VM<I, O = void> {
 	private _nextFreeScheduler: number = 0;
 	private _oldThreadList: Thread[];
 
-    /**
+	/**
 	 * @param program       The program to run, as created by the Assembler
-	 * @param oldThreadList Array used for recycling Thread objects. An existing array can be passed in to share 
+	 * @param oldThreadList Array used for recycling Thread objects. An existing array can be passed in to share
 	 *                        recycled threads between VMs.
 	 */
 	constructor (program: Instruction<I, O>[], oldThreadList: Thread[] = []) {
@@ -33,7 +33,7 @@ export default class VM<I, O = void> {
 		let scheduler;
 		if (this._nextFreeScheduler < this._schedulers.length) {
 			scheduler = this._schedulers[this._nextFreeScheduler];
-		} 
+		}
 		else {
 			scheduler = new Scheduler(
 				NUMBER_OF_SCHEDULED_GENERATIONS,
@@ -56,7 +56,7 @@ export default class VM<I, O = void> {
 	 * @param input   Should return the next input item when called, or null when no further input is available.
 	 * @param options Optional object passed to all instruction callbacks.
 	 *
-	 * @return Result of the execution, containing all Traces that lead to acceptance of the input, and all traces 
+	 * @return Result of the execution, containing all Traces that lead to acceptance of the input, and all traces
 	 *           which lead to failure in the last Generation.
 	 */
 	execute (input: () => I | null, options?: O) {
@@ -95,7 +95,7 @@ export default class VM<I, O = void> {
 						// Only accept if we reached the end of the input
 						if (inputItem === null || inputItem === undefined) {
 							acceptingTraces.push(thread.trace);
-						} 
+						}
 						else {
 							failingTraces.push(thread.trace);
 						}
@@ -103,7 +103,7 @@ export default class VM<I, O = void> {
 
 					case 'fail': {
 						// Is the failure conditional?
-                        const func = instruction.func as FailFunc<O>;
+						const func = instruction.func as FailFunc<O>;
 						const isFailingCondition = !func || func(options);
 						if (isFailingCondition) {
 							// Branch is forbidden, end the thread
@@ -137,7 +137,7 @@ export default class VM<I, O = void> {
 							break;
 						}
 						// Fail if input does not match
-                        const func = instruction.func as TestFunc<I, O>;
+						const func = instruction.func as TestFunc<I, O>;
 						const isInputAccepted = func(inputItem, instruction.data, options);
 						if (!isInputAccepted) {
 							failingTraces.push(thread.trace);
