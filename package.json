@@ -32,14 +32,14 @@
     "url": "https://github.com/bwrrp/whynot.js"
   },
   "devDependencies": {
-    "@types/chai": "^3.5.2",
+    "@types/chai": "^4.0.4",
     "@types/mocha": "^2.2.41",
-    "chai": "^3.5.0",
+    "chai": "^4.1.2",
     "mocha": "^3.3.0",
     "rimraf": "^2.6.1",
-    "rollup": "^0.41.6",
+    "rollup": "^0.49.2",
     "rollup-plugin-babili": "^3.0.0",
-    "typedoc": "^0.6.0",
+    "typedoc": "^0.8.0",
     "typescript": "^2.3.2"
   }
 }
