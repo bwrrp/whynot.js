@@ -1,8 +1,6 @@
 import Assembler from '../src/Assembler';
 import { RecordFunc } from '../src/Instruction';
 
-import * as chai from 'chai';
-
 describe('Assembler', () => {
 	let assembler: Assembler<void>;
 	beforeEach(() => {
@@ -16,33 +14,33 @@ describe('Assembler', () => {
 	describe('.test()', () => {
 		it('generates a test instruction', () => {
 			const instruction = assembler.test(truth);
-			chai.expect(instruction.op).to.equal('test');
-			chai.expect(instruction.func).to.equal(truth);
+			expect(instruction.op).toBe('test');
+			expect(instruction.func).toBe(truth);
 		});
 
 		it('generates a test instruction with data', () => {
 			const instruction = assembler.test(truth, 'meep');
-			chai.expect(instruction.op).to.equal('test');
-			chai.expect(instruction.func).to.equal(truth);
-			chai.expect(instruction.data).to.equal('meep');
+			expect(instruction.op).toBe('test');
+			expect(instruction.func).toBe(truth);
+			expect(instruction.data).toBe('meep');
 		});
 
 		it('appends the instruction to the program', () => {
 			const instruction = assembler.test(truth);
-			chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+			expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 		});
 	});
 
 	describe('.jump()', () => {
 		it('generates a jump instruction', () => {
 			const instruction = assembler.jump([1, 2, 3]);
-			chai.expect(instruction.op).to.equal('jump');
-			chai.expect(instruction.data).to.deep.equal([1, 2, 3]);
+			expect(instruction.op).toBe('jump');
+			expect(instruction.data).toEqual([1, 2, 3]);
 		});
 
 		it('appends the instruction to the program', () => {
 			const instruction = assembler.jump([]);
-			chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+			expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 		});
 	});
 
@@ -52,13 +50,13 @@ describe('Assembler', () => {
 		describe('without recorder', () => {
 			it('generates a record instruction', () => {
 				const instruction = assembler.record(data);
-				chai.expect(instruction.op).to.equal('record');
-				chai.expect((instruction.func as RecordFunc)(instruction.data, 0)).to.equal(data);
+				expect(instruction.op).toBe('record');
+				expect((instruction.func as RecordFunc)(instruction.data, 0)).toBe(data);
 			});
 
 			it('appends the instruction to the program', () => {
 				const instruction = assembler.record(data);
-				chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+				expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 			});
 		});
 		describe('with recorder', () => {
@@ -68,13 +66,13 @@ describe('Assembler', () => {
 
 			it('generates a record instruction', () => {
 				const instruction = assembler.record(data, recorder);
-				chai.expect(instruction.op).to.equal('record');
-				chai.expect((instruction.func as RecordFunc)(instruction.data, 0)).to.equal('meep');
+				expect(instruction.op).toBe('record');
+				expect((instruction.func as RecordFunc)(instruction.data, 0)).toBe('meep');
 			});
 
 			it('appends the instruction to the program', () => {
 				const instruction = assembler.record(data, recorder);
-				chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+				expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 			});
 		});
 	});
@@ -82,24 +80,24 @@ describe('Assembler', () => {
 	describe('.bad()', () => {
 		it('generates a bad instruction', () => {
 			const instruction = assembler.bad();
-			chai.expect(instruction.op).to.equal('bad');
+			expect(instruction.op).toBe('bad');
 		});
 
 		it('appends the instruction to the program', () => {
 			const instruction = assembler.bad();
-			chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+			expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 		});
 	});
 
 	describe('.accept()', () => {
 		it('generates an accept instruction', () => {
 			const instruction = assembler.accept();
-			chai.expect(instruction.op).to.equal('accept');
+			expect(instruction.op).toBe('accept');
 		});
 
 		it('appends the instruction to the program', () => {
 			const instruction = assembler.accept();
-			chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+			expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 		});
 	});
 
@@ -107,13 +105,13 @@ describe('Assembler', () => {
 		describe('unconditional', () => {
 			it('generates a fail instruction', () => {
 				const instruction = assembler.fail();
-				chai.expect(instruction.op).to.equal('fail');
-				chai.expect(instruction.func).to.equal(null);
+				expect(instruction.op).toBe('fail');
+				expect(instruction.func).toBe(null);
 			});
 
 			it('appends the instruction to the program', () => {
 				const instruction = assembler.fail();
-				chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+				expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 			});
 		});
 		describe('conditional', () => {
@@ -123,13 +121,13 @@ describe('Assembler', () => {
 
 			it('generates a fail instruction', () => {
 				const instruction = assembler.fail(conditional);
-				chai.expect(instruction.op).to.equal('fail');
-				chai.expect(instruction.func).to.equal(conditional);
+				expect(instruction.op).toBe('fail');
+				expect(instruction.func).toBe(conditional);
 			});
 
 			it('appends the instruction to the program', () => {
 				const instruction = assembler.fail(conditional);
-				chai.expect(assembler.program[assembler.program.length - 1]).to.equal(instruction);
+				expect(assembler.program[assembler.program.length - 1]).toBe(instruction);
 			});
 		});
 	});

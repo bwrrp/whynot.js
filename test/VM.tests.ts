@@ -2,8 +2,6 @@ import Result from '../src/Result';
 import Trace from '../src/Trace';
 import { Assembler, VM, default as whynot } from '../src/index';
 
-import * as chai from 'chai';
-
 describe('VM', () => {
 	function createInput(array: any[]): () => any | null {
 		let i = 0;
@@ -34,15 +32,15 @@ describe('VM', () => {
 
 		it('generates an accepting trace at the end of input', () => {
 			const result = vm.execute(createInput([]));
-			chai.expect(result.success).to.equal(true);
-			chai.expect(result.acceptingTraces.length).to.equal(1);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces.length).toBe(1);
 		});
 
 		it('fails when invoked with current input', () => {
 			const result = vm.execute(createInput([1]));
-			chai.expect(result.success).to.equal(false);
-			chai.expect(result.acceptingTraces.length).to.equal(0);
-			chai.expect(result.failingTraces.length).to.be.above(0);
+			expect(result.success).toBe(false);
+			expect(result.acceptingTraces.length).toBe(0);
+			expect(result.failingTraces.length).toBeGreaterThan(0);
 		});
 	});
 
@@ -56,8 +54,8 @@ describe('VM', () => {
 			});
 
 			it('ends the thread', () => {
-				chai.expect(vm.execute(createInput([])).success).to.equal(false);
-				chai.expect(vm.execute(createInput([1])).success).to.equal(false);
+				expect(vm.execute(createInput([])).success).toBe(false);
+				expect(vm.execute(createInput([1])).success).toBe(false);
 			});
 		});
 
@@ -77,21 +75,21 @@ describe('VM', () => {
 			it('ends the thread if the condition predicate returns true', () => {
 				condition = true;
 				const resultWithoutInput = vm.execute(createInput([]));
-				chai.expect(resultWithoutInput.success).to.equal(false);
-				chai.expect(resultWithoutInput.failingTraces[0].head).to.deep.equal([0]);
+				expect(resultWithoutInput.success).toBe(false);
+				expect(resultWithoutInput.failingTraces[0].head).toEqual([0]);
 				const resultWithInput = vm.execute(createInput([1]));
-				chai.expect(resultWithInput.success).to.equal(false);
-				chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0]);
+				expect(resultWithInput.success).toBe(false);
+				expect(resultWithInput.failingTraces[0].head).toEqual([0]);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
 				condition = false;
 				const resultWithoutInput = vm.execute(createInput([]));
-				chai.expect(resultWithoutInput.success).to.equal(true);
-				chai.expect(resultWithoutInput.acceptingTraces[0].head).to.deep.equal([0, 1]);
+				expect(resultWithoutInput.success).toBe(true);
+				expect(resultWithoutInput.acceptingTraces[0].head).toEqual([0, 1]);
 				const resultWithInput = vm.execute(createInput([1]));
-				chai.expect(resultWithInput.success).to.equal(false);
-				chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0, 1]);
+				expect(resultWithInput.success).toBe(false);
+				expect(resultWithInput.failingTraces[0].head).toEqual([0, 1]);
 			});
 		});
 
@@ -109,20 +107,20 @@ describe('VM', () => {
 
 			it('ends the thread if the condition predicate returns true', () => {
 				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: true });
-				chai.expect(resultWithoutInput.success).to.equal(false);
-				chai.expect(resultWithoutInput.failingTraces[0].head).to.deep.equal([0]);
+				expect(resultWithoutInput.success).toBe(false);
+				expect(resultWithoutInput.failingTraces[0].head).toEqual([0]);
 				const resultWithInput = vm.execute(createInput([1]), { shouldFail: true });
-				chai.expect(resultWithInput.success).to.equal(false);
-				chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0]);
+				expect(resultWithInput.success).toBe(false);
+				expect(resultWithInput.failingTraces[0].head).toEqual([0]);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
 				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: false });
-				chai.expect(resultWithoutInput.success).to.equal(true);
-				chai.expect(resultWithoutInput.acceptingTraces[0].head).to.deep.equal([0, 1]);
+				expect(resultWithoutInput.success).toBe(true);
+				expect(resultWithoutInput.acceptingTraces[0].head).toEqual([0, 1]);
 				const resultWithInput = vm.execute(createInput([1]), { shouldFail: false });
-				chai.expect(resultWithInput.success).to.equal(false);
-				chai.expect(resultWithInput.failingTraces[0].head).to.deep.equal([0, 1]);
+				expect(resultWithInput.success).toBe(false);
+				expect(resultWithInput.failingTraces[0].head).toEqual([0, 1]);
 			});
 		});
 	});
@@ -153,12 +151,14 @@ describe('VM', () => {
 		it('lowers thread priority by its cost', () => {
 			const leftResult = vmLeftBad.execute(createInput([]));
 			const rightResult = vmRightBad.execute(createInput([]));
-			chai
-				.expect(flattenTrace(leftResult.acceptingTraces[0]))
-				.to.deep.equal([[0, 3, 4, 5], [0, 1, 2, 5]]);
-			chai
-				.expect(flattenTrace(rightResult.acceptingTraces[0]))
-				.to.deep.equal([[0, 1, 2, 5], [0, 3, 4, 5]]);
+			expect(flattenTrace(leftResult.acceptingTraces[0])).toEqual([
+				[0, 3, 4, 5],
+				[0, 1, 2, 5]
+			]);
+			expect(flattenTrace(rightResult.acceptingTraces[0])).toEqual([
+				[0, 1, 2, 5],
+				[0, 3, 4, 5]
+			]);
 		});
 	});
 
@@ -177,17 +177,17 @@ describe('VM', () => {
 
 		it('moves a thread to the next generation when the test succeeds', () => {
 			const result = vm.execute(createInput(['meep']));
-			chai.expect(result.success).to.equal(true);
-			chai.expect(result.acceptingTraces.length).to.equal(1);
-			chai.expect(result.acceptingTraces[0].head).to.deep.equal([0, 1]);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces.length).toBe(1);
+			expect(result.acceptingTraces[0].head).toEqual([0, 1]);
 		});
 
 		it('ends the thread when the test fails', () => {
 			const result = vm.execute(createInput(['bla']));
-			chai.expect(result.success).to.equal(false);
-			chai.expect(result.acceptingTraces.length).to.equal(0);
-			chai.expect(result.failingTraces.length).to.equal(1);
-			chai.expect(result.failingTraces[0].head).to.deep.equal([0]);
+			expect(result.success).toBe(false);
+			expect(result.acceptingTraces.length).toBe(0);
+			expect(result.failingTraces.length).toBe(1);
+			expect(result.failingTraces[0].head).toEqual([0]);
 		});
 
 		describe('with options', () => {
@@ -204,17 +204,17 @@ describe('VM', () => {
 
 			it('moves a thread to the next generation when the test succeeds', () => {
 				const result = vm.execute(createInput(['meep']), { shouldAccept: true });
-				chai.expect(result.success).to.equal(true);
-				chai.expect(result.acceptingTraces.length).to.equal(1);
-				chai.expect(result.acceptingTraces[0].head).to.deep.equal([0, 1]);
+				expect(result.success).toBe(true);
+				expect(result.acceptingTraces.length).toBe(1);
+				expect(result.acceptingTraces[0].head).toEqual([0, 1]);
 			});
 
 			it('ends the thread when the test fails', () => {
 				const result = vm.execute(createInput(['meep']), { shouldAccept: false });
-				chai.expect(result.success).to.equal(false);
-				chai.expect(result.acceptingTraces.length).to.equal(0);
-				chai.expect(result.failingTraces.length).to.equal(1);
-				chai.expect(result.failingTraces[0].head).to.deep.equal([0]);
+				expect(result.success).toBe(false);
+				expect(result.acceptingTraces.length).toBe(0);
+				expect(result.failingTraces.length).toBe(1);
+				expect(result.failingTraces[0].head).toEqual([0]);
 			});
 		});
 	});
@@ -226,10 +226,8 @@ describe('VM', () => {
 				assembler.accept();
 			});
 			const result = vm.execute(createInput([]));
-			chai.expect(result.success).to.equal(true);
-			chai
-				.expect(result.acceptingTraces.map(trace => flattenTrace(trace)))
-				.to.deep.equal([[[0, 1]]]);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces.map(trace => flattenTrace(trace))).toEqual([[[0, 1]]]);
 		});
 
 		it('can create multiple new threads', () => {
@@ -239,10 +237,11 @@ describe('VM', () => {
 				assembler.accept();
 			});
 			const result = vm.execute(createInput([]));
-			chai.expect(result.success).to.equal(true);
-			chai
-				.expect(result.acceptingTraces.map(trace => flattenTrace(trace)))
-				.to.deep.equal([[[0, 1]], [[0, 2]]]);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces.map(trace => flattenTrace(trace))).toEqual([
+				[[0, 1]],
+				[[0, 2]]
+			]);
 		});
 	});
 
@@ -253,8 +252,8 @@ describe('VM', () => {
 				assembler.accept();
 			});
 			const result = vm.execute(createInput([]));
-			chai.expect(result.success).to.equal(true);
-			chai.expect(result.acceptingTraces[0].records).to.deep.equal(['meep']);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces[0].records).toEqual(['meep']);
 		});
 
 		it('can use a recorder callback', () => {
@@ -265,8 +264,8 @@ describe('VM', () => {
 				assembler.accept();
 			});
 			const result = vm.execute(createInput([]));
-			chai.expect(result.success).to.equal(true);
-			chai.expect(result.acceptingTraces[0].records).to.deep.equal(['0-MEEP']);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP']);
 		});
 
 		it('can use options in the recorder callback', () => {
@@ -278,8 +277,8 @@ describe('VM', () => {
 				assembler.accept();
 			});
 			const result = vm.execute(createInput([]), { suffix: 'BLA' });
-			chai.expect(result.success).to.equal(true);
-			chai.expect(result.acceptingTraces[0].records).to.deep.equal(['0-MEEP-BLA']);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP-BLA']);
 		});
 	});
 
@@ -305,24 +304,20 @@ describe('VM', () => {
 
 		function computeMaxDepth(result: Result): number {
 			return result.acceptingTraces.reduce(function(max: number, trace: Trace) {
-				console.group && console.group('accepting trace');
 				const maxDepthForTrace =
 					1 +
 					trace.records.reduce(function(max, result) {
-						console.group && console.group('accepting record');
 						const maxDepthForRecord = computeMaxDepth(result);
-						console.groupEnd && console.groupEnd();
 						return Math.max(maxDepthForRecord, max);
 					}, 0);
-				console.groupEnd && console.groupEnd();
 				return Math.max(maxDepthForTrace, max);
 			}, 0);
 		}
 
 		it('invoking a VM while executing does not disturb the outer execution', () => {
 			const result = vm.execute(createInput([[[], []], [], [[[[]]], []]]));
-			chai.expect(result.success).to.equal(true);
-			chai.expect(computeMaxDepth(result)).to.equal(4);
+			expect(result.success).toBe(true);
+			expect(computeMaxDepth(result)).toBe(4);
 		});
 	});
 });

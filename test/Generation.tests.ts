@@ -1,8 +1,6 @@
 import Generation from '../src/Generation';
 import Thread from '../src/Thread';
 
-import * as chai from 'chai';
-
 describe('Generation', () => {
 	let generation: Generation;
 	beforeEach(() => {
@@ -12,7 +10,7 @@ describe('Generation', () => {
 	describe('.reset()', () => {
 		it('empties the Generation', () => {
 			generation.reset(0);
-			chai.expect(generation.getNextThread()).to.equal(null);
+			expect(generation.getNextThread()).toBe(null);
 		});
 	});
 
@@ -24,12 +22,12 @@ describe('Generation', () => {
 			});
 
 			it('returns the thread', () => {
-				chai.expect(addedThread).to.be.an.instanceOf(Thread);
+				expect(addedThread).toBeInstanceOf(Thread);
 			});
 
 			it('returns the thread when scheduled', () => {
 				const nextThread = generation.getNextThread();
-				chai.expect(nextThread).to.equal(addedThread);
+				expect(nextThread).toBe(addedThread);
 			});
 		});
 
@@ -45,14 +43,14 @@ describe('Generation', () => {
 
 			it('joins non-repeating threads', () => {
 				const joiningThread = generation.addThread(2, forkLeft);
-				chai.expect(joiningThread).to.equal(null);
-				chai.expect(forkRight.trace.prefixes.length).to.equal(2);
+				expect(joiningThread).toBe(null);
+				expect(forkRight.trace.prefixes.length).toBe(2);
 			});
 
 			it('discards repeating threads', () => {
 				const repeatingThread = generation.addThread(0, forkLeft);
-				chai.expect(repeatingThread).to.equal(null);
-				chai.expect(rootThread.trace.prefixes.length).to.equal(0);
+				expect(repeatingThread).toBe(null);
+				expect(rootThread.trace.prefixes.length).toBe(0);
 			});
 		});
 	});
@@ -78,8 +76,8 @@ describe('Generation', () => {
 				const expectedBadness = threadSpecs[i].badness;
 
 				const nextThread = generation.getNextThread() as Thread;
-				chai.expect(nextThread.pc).to.equal(expectedPC);
-				chai.expect(nextThread.badness).to.equal(expectedBadness);
+				expect(nextThread.pc).toBe(expectedPC);
+				expect(nextThread.badness).toBe(expectedBadness);
 			}
 		}
 

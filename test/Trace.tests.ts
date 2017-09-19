@@ -1,7 +1,5 @@
 import Trace from '../src/Trace';
 
-import * as chai from 'chai';
-
 const PROGRAM_LENGTH = 10;
 
 describe('Trace', () => {
@@ -12,24 +10,24 @@ describe('Trace', () => {
 		});
 
 		it('has a head', () => {
-			chai.expect(trace.head).to.deep.equal([4]);
+			expect(trace.head).toEqual([4]);
 		});
 
 		it('has no records', () => {
-			chai.expect(trace.records.length).to.equal(0);
+			expect(trace.records.length).toBe(0);
 		});
 
 		it('has no prefixes', () => {
-			chai.expect(trace.prefixes.length).to.equal(0);
+			expect(trace.prefixes.length).toBe(0);
 		});
 
 		describe('.compact()', () => {
 			it('does not change the trace', () => {
 				trace.compact();
 
-				chai.expect(trace.head).to.deep.equal([4]);
-				chai.expect(trace.records.length).to.equal(0);
-				chai.expect(trace.prefixes.length).to.equal(0);
+				expect(trace.head).toEqual([4]);
+				expect(trace.records.length).toBe(0);
+				expect(trace.prefixes.length).toBe(0);
 			});
 		});
 	});
@@ -43,25 +41,25 @@ describe('Trace', () => {
 		});
 
 		it('has a head', () => {
-			chai.expect(trace.head).to.deep.equal([4]);
+			expect(trace.head).toEqual([4]);
 		});
 
 		it('has no records', () => {
-			chai.expect(trace.records.length).to.equal(0);
+			expect(trace.records.length).toBe(0);
 		});
 
 		it('has a single prefix', () => {
-			chai.expect(trace.prefixes.length).to.equal(1);
-			chai.expect(trace.prefixes[0].head).to.deep.equal([1]);
+			expect(trace.prefixes.length).toBe(1);
+			expect(trace.prefixes[0].head).toEqual([1]);
 		});
 
 		describe('.compact()', () => {
 			it('combines the traces', () => {
 				trace.compact();
 
-				chai.expect(trace.head).to.deep.equal([1, 4]);
-				chai.expect(trace.records.length).to.equal(0);
-				chai.expect(trace.prefixes.length).to.equal(0);
+				expect(trace.head).toEqual([1, 4]);
+				expect(trace.records.length).toBe(0);
+				expect(trace.prefixes.length).toBe(0);
 			});
 
 			describe('with records', () => {
@@ -73,9 +71,9 @@ describe('Trace', () => {
 				it('combines the traces', () => {
 					trace.compact();
 
-					chai.expect(trace.head).to.deep.equal([1, 4]);
-					chai.expect(trace.records).to.deep.equal(['bla', 'meep']);
-					chai.expect(trace.prefixes.length).to.equal(0);
+					expect(trace.head).toEqual([1, 4]);
+					expect(trace.records).toEqual(['bla', 'meep']);
+					expect(trace.prefixes.length).toBe(0);
 				});
 			});
 		});
@@ -94,26 +92,26 @@ describe('Trace', () => {
 		});
 
 		it('has a head', () => {
-			chai.expect(trace.head).to.deep.equal([4]);
+			expect(trace.head).toEqual([4]);
 		});
 
 		it('has no records', () => {
-			chai.expect(trace.records.length).to.equal(0);
+			expect(trace.records.length).toBe(0);
 		});
 
 		it('has a two prefixes', () => {
-			chai.expect(trace.prefixes.length).to.equal(2);
-			chai.expect(trace.prefixes[0].head).to.deep.equal([1]);
-			chai.expect(trace.prefixes[1].head).to.deep.equal([2]);
+			expect(trace.prefixes.length).toBe(2);
+			expect(trace.prefixes[0].head).toEqual([1]);
+			expect(trace.prefixes[1].head).toEqual([2]);
 		});
 
 		describe('.compact()', () => {
 			it('does not change the trace', () => {
 				trace.compact();
 
-				chai.expect(trace.head).to.deep.equal([4]);
-				chai.expect(trace.records.length).to.equal(0);
-				chai.expect(trace.prefixes.length).to.equal(2);
+				expect(trace.head).toEqual([4]);
+				expect(trace.records.length).toBe(0);
+				expect(trace.prefixes.length).toBe(2);
 			});
 		});
 	});
@@ -131,38 +129,38 @@ describe('Trace', () => {
 		});
 
 		it('can check whether a trace visited an instruction in any generation', () => {
-			chai.expect(trace1.contains(1)).to.equal(true);
-			chai.expect(trace1.contains(2)).to.equal(false);
-			chai.expect(trace1.contains(3)).to.equal(true);
+			expect(trace1.contains(1)).toBe(true);
+			expect(trace1.contains(2)).toBe(false);
+			expect(trace1.contains(3)).toBe(true);
 		});
 
 		it('can check whether a trace visited an instruction in a specific generation', () => {
-			chai.expect(trace1.contains(1, 0)).to.equal(true);
-			chai.expect(trace1.contains(1, 1)).to.equal(false);
-			chai.expect(trace1.contains(2, 0)).to.equal(false);
-			chai.expect(trace1.contains(2, 1)).to.equal(false);
-			chai.expect(trace1.contains(3, 0)).to.equal(false);
-			chai.expect(trace1.contains(3, 1)).to.equal(true);
+			expect(trace1.contains(1, 0)).toBe(true);
+			expect(trace1.contains(1, 1)).toBe(false);
+			expect(trace1.contains(2, 0)).toBe(false);
+			expect(trace1.contains(2, 1)).toBe(false);
+			expect(trace1.contains(3, 0)).toBe(false);
+			expect(trace1.contains(3, 1)).toBe(true);
 		});
 
 		it('checks all prefixes, considering the most recent generation only', () => {
 			trace1.join(trace2);
-			chai.expect(trace1.contains(1, 0)).to.equal(false);
-			chai.expect(trace1.contains(1, 1)).to.equal(true);
-			chai.expect(trace1.contains(2, 0)).to.equal(false);
-			chai.expect(trace1.contains(2, 1)).to.equal(true);
-			chai.expect(trace1.contains(3, 0)).to.equal(false);
-			chai.expect(trace1.contains(3, 1)).to.equal(true);
+			expect(trace1.contains(1, 0)).toBe(false);
+			expect(trace1.contains(1, 1)).toBe(true);
+			expect(trace1.contains(2, 0)).toBe(false);
+			expect(trace1.contains(2, 1)).toBe(true);
+			expect(trace1.contains(3, 0)).toBe(false);
+			expect(trace1.contains(3, 1)).toBe(true);
 		});
 
 		it('also updates descendant traces when a prefix is merged', () => {
 			rootTrace1.join(rootTrace2);
-			chai.expect(trace1.contains(1, 0)).to.equal(true);
-			chai.expect(trace1.contains(1, 1)).to.equal(false);
-			chai.expect(trace1.contains(2, 0)).to.equal(false);
-			chai.expect(trace1.contains(2, 1)).to.equal(true);
-			chai.expect(trace1.contains(3, 0)).to.equal(false);
-			chai.expect(trace1.contains(3, 1)).to.equal(true);
+			expect(trace1.contains(1, 0)).toBe(true);
+			expect(trace1.contains(1, 1)).toBe(false);
+			expect(trace1.contains(2, 0)).toBe(false);
+			expect(trace1.contains(2, 1)).toBe(true);
+			expect(trace1.contains(3, 0)).toBe(false);
+			expect(trace1.contains(3, 1)).toBe(true);
 		});
 	});
 });
