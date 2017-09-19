@@ -5,19 +5,18 @@ import { Assembler, VM, default as whynot } from '../src/index';
 import * as chai from 'chai';
 
 describe('VM', () => {
-	function createInput (array: any[]): () => any | null {
+	function createInput(array: any[]): () => any | null {
 		let i = 0;
 		return () => {
 			return array[i++] || null;
 		};
 	}
 
-	function flattenTrace (trace: Trace, head: number[] = [], flatTraces: number[][] = []) {
+	function flattenTrace(trace: Trace, head: number[] = [], flatTraces: number[][] = []) {
 		var combinedHead = trace.head.concat(head);
 		if (!trace.prefixes.length) {
 			flatTraces.push(combinedHead);
-		} 
-		else {
+		} else {
 			for (var i = 0, l = trace.prefixes.length; i < l; ++i) {
 				flattenTrace(trace.prefixes[i], combinedHead, flatTraces);
 			}
@@ -61,7 +60,7 @@ describe('VM', () => {
 				chai.expect(vm.execute(createInput([1])).success).to.equal(false);
 			});
 		});
-		
+
 		describe('conditional', () => {
 			let vm: VM<void>;
 			let condition: boolean;
@@ -101,7 +100,7 @@ describe('VM', () => {
 			let vm: VM<number, Options>;
 			beforeEach(() => {
 				vm = whynot.compileVM<number, Options>(assembler => {
-					assembler.fail(function (options) {
+					assembler.fail(function(options) {
 						return !!options && options.shouldFail;
 					});
 					assembler.accept();
@@ -135,32 +134,36 @@ describe('VM', () => {
 			// Create two branches of equal length, one badness 1, the other 0
 			vmLeftBad = whynot.compileVM<void>(assembler => {
 				assembler.jump([1, 3]); // 0
-				assembler.bad(100);     // 1
-				assembler.jump([5]);    // 2
-				assembler.bad(1);       // 3
-				assembler.jump([5]);    // 4
-				assembler.accept();     // 5
+				assembler.bad(100); // 1
+				assembler.jump([5]); // 2
+				assembler.bad(1); // 3
+				assembler.jump([5]); // 4
+				assembler.accept(); // 5
 			});
 			vmRightBad = whynot.compileVM<void>(assembler => {
 				assembler.jump([1, 3]); // 0
-				assembler.bad(1);       // 1
-				assembler.jump([5]);    // 2
-				assembler.bad(100);     // 3
-				assembler.jump([5]);    // 4
-				assembler.accept();     // 5
+				assembler.bad(1); // 1
+				assembler.jump([5]); // 2
+				assembler.bad(100); // 3
+				assembler.jump([5]); // 4
+				assembler.accept(); // 5
 			});
 		});
 
 		it('lowers thread priority by its cost', () => {
 			const leftResult = vmLeftBad.execute(createInput([]));
 			const rightResult = vmRightBad.execute(createInput([]));
-			chai.expect(flattenTrace(leftResult.acceptingTraces[0])).to.deep.equal([[0, 3, 4, 5], [0, 1, 2, 5]]);
-			chai.expect(flattenTrace(rightResult.acceptingTraces[0])).to.deep.equal([[0, 1, 2, 5], [0, 3, 4, 5]]);
+			chai
+				.expect(flattenTrace(leftResult.acceptingTraces[0]))
+				.to.deep.equal([[0, 3, 4, 5], [0, 1, 2, 5]]);
+			chai
+				.expect(flattenTrace(rightResult.acceptingTraces[0]))
+				.to.deep.equal([[0, 1, 2, 5], [0, 3, 4, 5]]);
 		});
 	});
 
 	describe('test', () => {
-		function isMeep (item: string) {
+		function isMeep(item: string) {
 			return item === 'meep';
 		}
 
@@ -188,11 +191,11 @@ describe('VM', () => {
 		});
 
 		describe('with options', () => {
-            type Options = { shouldAccept: boolean };
+			type Options = { shouldAccept: boolean };
 			let vm: VM<string, Options>;
 			beforeEach(() => {
 				vm = whynot.compileVM<string, Options>(assembler => {
-					assembler.test(function (_item: string, _data: any, options: any) {
+					assembler.test(function(_item: string, _data: any, options: any) {
 						return options.shouldAccept;
 					});
 					assembler.accept();
@@ -224,7 +227,9 @@ describe('VM', () => {
 			});
 			const result = vm.execute(createInput([]));
 			chai.expect(result.success).to.equal(true);
-			chai.expect(result.acceptingTraces.map(trace => flattenTrace(trace))).to.deep.equal([[[0, 1]]]);
+			chai
+				.expect(result.acceptingTraces.map(trace => flattenTrace(trace)))
+				.to.deep.equal([[[0, 1]]]);
 		});
 
 		it('can create multiple new threads', () => {
@@ -235,7 +240,9 @@ describe('VM', () => {
 			});
 			const result = vm.execute(createInput([]));
 			chai.expect(result.success).to.equal(true);
-			chai.expect(result.acceptingTraces.map(trace => flattenTrace(trace))).to.deep.equal([[[0, 1]],[[0, 2]]]);
+			chai
+				.expect(result.acceptingTraces.map(trace => flattenTrace(trace)))
+				.to.deep.equal([[[0, 1]], [[0, 2]]]);
 		});
 	});
 
@@ -252,7 +259,7 @@ describe('VM', () => {
 
 		it('can use a recorder callback', () => {
 			const vm = whynot.compileVM(assembler => {
-				assembler.record('meep', function (data: string, index: number) {
+				assembler.record('meep', function(data: string, index: number) {
 					return index + '-' + data.toUpperCase();
 				});
 				assembler.accept();
@@ -263,14 +270,14 @@ describe('VM', () => {
 		});
 
 		it('can use options in the recorder callback', () => {
-            type Options = { suffix: string };
+			type Options = { suffix: string };
 			const vm = whynot.compileVM<void, Options>(assembler => {
-				assembler.record('meep', function (data: string, index: number, options: any) {
+				assembler.record('meep', function(data: string, index: number, options: any) {
 					return index + '-' + data.toUpperCase() + '-' + options.suffix;
 				});
 				assembler.accept();
 			});
-			const result = vm.execute(createInput([]), {suffix: 'BLA'});
+			const result = vm.execute(createInput([]), { suffix: 'BLA' });
 			chai.expect(result.success).to.equal(true);
 			chai.expect(result.acceptingTraces[0].records).to.deep.equal(['0-MEEP-BLA']);
 		});
@@ -278,7 +285,7 @@ describe('VM', () => {
 
 	describe('reentrancy', () => {
 		let vm: VM<any[]>;
-		function getVM (): VM<any[]> {
+		function getVM(): VM<any[]> {
 			return vm;
 		}
 		beforeEach(() => {
@@ -296,15 +303,17 @@ describe('VM', () => {
 			});
 		});
 
-		function computeMaxDepth (result: Result): number {
-			return result.acceptingTraces.reduce(function (max: number, trace: Trace) {
+		function computeMaxDepth(result: Result): number {
+			return result.acceptingTraces.reduce(function(max: number, trace: Trace) {
 				console.group && console.group('accepting trace');
-				const maxDepthForTrace = 1 + trace.records.reduce(function (max, result) {
-					console.group && console.group('accepting record');
-					const maxDepthForRecord = computeMaxDepth(result);
-					console.groupEnd && console.groupEnd();
-					return Math.max(maxDepthForRecord, max);
-				}, 0);
+				const maxDepthForTrace =
+					1 +
+					trace.records.reduce(function(max, result) {
+						console.group && console.group('accepting record');
+						const maxDepthForRecord = computeMaxDepth(result);
+						console.groupEnd && console.groupEnd();
+						return Math.max(maxDepthForRecord, max);
+					}, 0);
 				console.groupEnd && console.groupEnd();
 				return Math.max(maxDepthForTrace, max);
 			}, 0);

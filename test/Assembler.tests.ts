@@ -1,5 +1,5 @@
 import Assembler from '../src/Assembler';
-import { RecordFunc } from "../src/Instruction";
+import { RecordFunc } from '../src/Instruction';
 
 import * as chai from 'chai';
 
@@ -9,7 +9,7 @@ describe('Assembler', () => {
 		assembler = new Assembler<void>();
 	});
 
-	function truth () {
+	function truth() {
 		return true;
 	}
 
@@ -62,7 +62,7 @@ describe('Assembler', () => {
 			});
 		});
 		describe('with recorder', () => {
-			function recorder (_data: any, _index: number) {
+			function recorder(_data: any, _index: number) {
 				return 'meep';
 			}
 
@@ -117,7 +117,7 @@ describe('Assembler', () => {
 			});
 		});
 		describe('conditional', () => {
-			function conditional () {
+			function conditional() {
 				return false;
 			}
 

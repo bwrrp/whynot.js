@@ -1,12 +1,15 @@
-function mergeVisitedInstructions (targetVisitedInstructions: number[], otherVisitedInstructions: number[], programLength: number) {
+function mergeVisitedInstructions(
+	targetVisitedInstructions: number[],
+	otherVisitedInstructions: number[],
+	programLength: number
+) {
 	for (let i = 0; i < programLength; ++i) {
 		const ourGeneration = targetVisitedInstructions[i];
 		const otherGeneration = otherVisitedInstructions[i];
 
 		if (ourGeneration === undefined) {
 			targetVisitedInstructions[i] = otherGeneration;
-		} 
-		else if (otherGeneration !== undefined) {
+		} else if (otherGeneration !== undefined) {
 			targetVisitedInstructions[i] = Math.max(ourGeneration, otherGeneration);
 		}
 	}
@@ -25,13 +28,18 @@ export default class Trace {
 	private _programLength: number;
 	private _visitedInstructions: number[];
 
-    /**
+	/**
 	 * @param pc               Program counter for the scheduled instruction
 	 * @param programLength    Length of the current program
 	 * @param precedingTrace   The trace to append this trace to
 	 * @param generationNumber The index of the genaration this Trace's Thread is running in
 	 */
-	constructor (pc: number, programLength: number, precedingTrace: Trace | null, generationNumber: number) {
+	constructor(
+		pc: number,
+		programLength: number,
+		precedingTrace: Trace | null,
+		generationNumber: number
+	) {
 		this.head = [pc];
 		this._programLength = programLength;
 
@@ -39,30 +47,31 @@ export default class Trace {
 			this.prefixes.push(precedingTrace);
 			precedingTrace._descendants.push(this);
 			this._visitedInstructions = precedingTrace._visitedInstructions.slice(0);
-		} 
-		else {
+		} else {
 			this._visitedInstructions = new Array(programLength);
 		}
 		this._visitedInstructions[pc] = generationNumber;
 	}
 
 	/**
-	 * Combines the Trace with the given prefix, thereby recording multiple ways to get to the current trace's head.
-	 * 
+	 * Combines the Trace with the given prefix, thereby recording multiple ways to get to the
+	 * current trace's head.
+	 *
 	 * Assumes the Trace has not yet been compacted.
 	 *
 	 * @param prefixTrace The Trace to add as a prefix of the current
 	 */
-	join (prefixTrace: Trace) {
+	join(prefixTrace: Trace) {
 		this.prefixes.push(prefixTrace);
 		this._isCompacted = false;
 
-		(function mergeVisitedInstructionsIntoTrace (trace: Trace) {
+		(function mergeVisitedInstructionsIntoTrace(trace: Trace) {
 			// Merge prefixTrace's set of visited instructions into our own
 			mergeVisitedInstructions(
 				trace._visitedInstructions,
 				prefixTrace._visitedInstructions,
-				trace._programLength);
+				trace._programLength
+			);
 			// Do the same for the descendants
 			for (let i = 0, l = trace._descendants.length; i < l; ++i) {
 				mergeVisitedInstructionsIntoTrace(trace._descendants[i]);
@@ -72,7 +81,7 @@ export default class Trace {
 
 	/**
 	 * Returns whether the Trace has visited the specified instruction, in the given generation.
-	 * 
+	 *
 	 * If no generation is given, it is tested if the trace has passed the instruction at all.
 	 *
 	 * @param pc         Program counter for the instruction to test
@@ -80,7 +89,7 @@ export default class Trace {
 	 *
 	 * @return Whether the trace has visited the instruction
 	 */
-	contains (pc: number, generation?: number): boolean {
+	contains(pc: number, generation?: number): boolean {
 		if (generation === undefined) {
 			return this._visitedInstructions[pc] !== undefined;
 		}
@@ -90,7 +99,7 @@ export default class Trace {
 	/**
 	 * Compacts the trace, concatenating all non-branching prefixes.
 	 */
-	compact () {
+	compact() {
 		if (this._isCompacted) {
 			return;
 		}

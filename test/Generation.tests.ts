@@ -58,18 +58,21 @@ describe('Generation', () => {
 	});
 
 	describe('.getNextThread()', () => {
-		type ThreadSpec = { pc: number, parent?: number, badness: number };
-		function schedule (generation: Generation, threadSpecs: ThreadSpec[]) {
+		type ThreadSpec = { pc: number; parent?: number; badness: number };
+		function schedule(generation: Generation, threadSpecs: ThreadSpec[]) {
 			const threads = [];
 			for (let i = 0, l = threadSpecs.length; i < l; ++i) {
 				const pc = threadSpecs[i].pc;
-				const parentThread = threadSpecs[i].parent === undefined ? null : threads[threadSpecs[i].parent as number];
+				const parentThread =
+					threadSpecs[i].parent === undefined
+						? null
+						: threads[threadSpecs[i].parent as number];
 				const badness = threadSpecs[i].badness;
 				threads.push(generation.addThread(pc, parentThread || undefined, badness));
 			}
 		}
 
-		function expectOrder (generation: Generation, threadSpecs: ThreadSpec[]) {
+		function expectOrder(generation: Generation, threadSpecs: ThreadSpec[]) {
 			for (let i = 0, l = threadSpecs.length; i < l; ++i) {
 				const expectedPC = threadSpecs[i].pc;
 				const expectedBadness = threadSpecs[i].badness;
@@ -82,37 +85,35 @@ describe('Generation', () => {
 
 		it('should return threads with lower badness before higher ones', () => {
 			schedule(generation, [
-				{pc: 0, parent: undefined, badness: 0},
-				{pc: 1, parent: 0, badness: 1},
-				{pc: 2, parent: 0, badness: 0}
+				{ pc: 0, parent: undefined, badness: 0 },
+				{ pc: 1, parent: 0, badness: 1 },
+				{ pc: 2, parent: 0, badness: 0 }
 			]);
 			expectOrder(generation, [
-				{pc: 0, badness: 0},
-				{pc: 2, badness: 0},
-				{pc: 1, badness: 1}
+				{ pc: 0, badness: 0 },
+				{ pc: 2, badness: 0 },
+				{ pc: 1, badness: 1 }
 			]);
 		});
 
 		it('should eventually yield all scheduled threads', () => {
 			schedule(generation, [
-				{pc: 0, parent: undefined, badness: 1},
-				{pc: 1, parent: 0, badness: 2},
-				{pc: 2, parent: 0, badness: 1}
+				{ pc: 0, parent: undefined, badness: 1 },
+				{ pc: 1, parent: 0, badness: 2 },
+				{ pc: 2, parent: 0, badness: 1 }
 			]);
-			expectOrder(generation, [
-				{pc: 0, badness: 1}
-			]);
+			expectOrder(generation, [{ pc: 0, badness: 1 }]);
 			schedule(generation, [
-				{pc: 3, parent: undefined, badness: 0},
-				{pc: 4, parent: 0, badness: 2},
-				{pc: 5, parent: 0, badness: 1}
+				{ pc: 3, parent: undefined, badness: 0 },
+				{ pc: 4, parent: 0, badness: 2 },
+				{ pc: 5, parent: 0, badness: 1 }
 			]);
 			expectOrder(generation, [
-				{pc: 3, badness: 0},
-				{pc: 2, badness: 1},
-				{pc: 5, badness: 1},
-				{pc: 1, badness: 2},
-				{pc: 4, badness: 2}
+				{ pc: 3, badness: 0 },
+				{ pc: 2, badness: 1 },
+				{ pc: 5, badness: 1 },
+				{ pc: 1, badness: 2 },
+				{ pc: 4, badness: 2 }
 			]);
 		});
 	});

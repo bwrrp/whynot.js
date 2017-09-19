@@ -6,7 +6,7 @@ import Trace from './Trace';
 export default class Result {
 	public success: boolean;
 
-	constructor (public acceptingTraces: Trace[], public failingTraces: Trace[]) {
+	constructor(public acceptingTraces: Trace[], public failingTraces: Trace[]) {
 		this.success = !!acceptingTraces.length;
 	}
 }

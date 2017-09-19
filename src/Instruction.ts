@@ -6,7 +6,7 @@ export type RecordFunc<O = void> = (data: any, inputIndex: number, options?: O) 
  * Represents a single instruction in a whynot program.
  */
 export interface Instruction<I, O = void> {
-	op: string,
-	func?: FailFunc<O> | TestFunc<I, O> | RecordFunc<O> | null,
-	data?: any
+	op: string;
+	func?: FailFunc<O> | TestFunc<I, O> | RecordFunc<O> | null;
+	data?: any;
 }

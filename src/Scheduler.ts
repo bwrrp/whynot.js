@@ -13,7 +13,7 @@ export default class Scheduler {
 	 * @param programLength  Length of the program being run
 	 * @param oldThreadList  Array used for recycling Thread objects
 	 */
-	constructor (numGenerations: number, programLength: number, oldThreadList: Thread[]) {
+	constructor(numGenerations: number, programLength: number, oldThreadList: Thread[]) {
 		// The active and scheduled generations
 		this._generations = [];
 		for (let i = 0; i < numGenerations; ++i) {
@@ -26,7 +26,7 @@ export default class Scheduler {
 	/**
 	 * Resets the Scheduler for reuse.
 	 */
-	reset () {
+	reset() {
 		// Reset each generation
 		for (let i = 0, l = this._generations.length; i < l; ++i) {
 			this._generations[i].reset(i);
@@ -34,7 +34,7 @@ export default class Scheduler {
 		this._generationsCompleted = 0;
 	}
 
-	private _getRelativeGeneration (generationOffset: number) {
+	private _getRelativeGeneration(generationOffset: number) {
 		// Determine generation to insert the new thread for
 		const numGenerations = this._generations.length;
 		if (generationOffset >= numGenerations) {
@@ -54,7 +54,12 @@ export default class Scheduler {
 	 *
 	 * @return The Thread that was added, or null if no thread was added
 	 */
-	addThread (generationOffset: number, pc: number, parentThread?: Thread, badness?: number): Thread | null {
+	addThread(
+		generationOffset: number,
+		pc: number,
+		parentThread?: Thread,
+		badness?: number
+	): Thread | null {
 		const generationForThread = this._getRelativeGeneration(generationOffset);
 
 		// Add thread to the generation
@@ -66,7 +71,7 @@ export default class Scheduler {
 	 *
 	 * @return The next Thread to run, or null if there are none left
 	 */
-	getNextThread (): Thread | null {
+	getNextThread(): Thread | null {
 		const currentGeneration = this._getRelativeGeneration(0);
 		return currentGeneration.getNextThread();
 	}
@@ -74,7 +79,7 @@ export default class Scheduler {
 	/**
 	 * Switches to the next Generation.
 	 */
-	nextGeneration () {
+	nextGeneration() {
 		// Recycle current generation and move to next
 		const currentGeneration = this._getRelativeGeneration(0);
 		currentGeneration.reset(this._generationsCompleted + this._generations.length);

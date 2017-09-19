@@ -1,6 +1,13 @@
 import Thread from './Thread';
 
-function createThread (oldThreads: Thread[], pc: number, programLength: number, parentThread: Thread | undefined, badness: number, generationNumber: number): Thread {
+function createThread(
+	oldThreads: Thread[],
+	pc: number,
+	programLength: number,
+	parentThread: Thread | undefined,
+	badness: number,
+	generationNumber: number
+): Thread {
 	if (!oldThreads.length) {
 		return new Thread(pc, programLength, parentThread, badness, generationNumber);
 	}
@@ -11,7 +18,7 @@ function createThread (oldThreads: Thread[], pc: number, programLength: number, 
 	return thread;
 }
 
-function findInsertionIndex (threadList: Thread[], nextThreadIndex: number, badness: number) {
+function findInsertionIndex(threadList: Thread[], nextThreadIndex: number, badness: number) {
 	// Perform a binary search to find the index of the first thread with lower badness
 	let low = nextThreadIndex;
 	let high = threadList.length;
@@ -22,8 +29,7 @@ function findInsertionIndex (threadList: Thread[], nextThreadIndex: number, badn
 		if (badness < threadList[mid].badness) {
 			// Thread goes in lower half
 			high = mid;
-		} 
-		else {
+		} else {
 			// Thread goes in upper half
 			low = mid + 1;
 		}
@@ -43,12 +49,12 @@ export default class Generation {
 	private _threadsByProgramCounter: (Thread | null)[];
 	private _generationNumber: number;
 
-    /**
+	/**
 	 * @param programLength    The length of the program being run
 	 * @param oldThreadList    Array used for recycling Thread objects
 	 * @param generationNumber The index of generation
 	 */
-	constructor (programLength: number, oldThreadList: Thread[], generationNumber: number) {
+	constructor(programLength: number, oldThreadList: Thread[], generationNumber: number) {
 		this._oldThreads = oldThreadList;
 		this._programLength = programLength;
 		this._threadsByProgramCounter = new Array(programLength);
@@ -58,10 +64,10 @@ export default class Generation {
 	/**
 	 * Resets the Generation for reuse.
 	 *
-	 * @param generationNumber The new index of this generation. Used to test if certain Traces have processed a given 
-	 * PC before.
+	 * @param generationNumber The new index of this generation. Used to test if certain Traces have
+	 *                         processed a given PC before.
 	 */
-	reset (generationNumber: number) {
+	reset(generationNumber: number) {
 		// Compact and recycle threads
 		let i, l;
 		for (i = 0, l = this._threadList.length; i < l; ++i) {
@@ -82,10 +88,10 @@ export default class Generation {
 
 	/**
 	 * Adds a Thread to the Generation.
-	 * 
-	 * Only a single thread can be added for each instruction, subsequent threads are joined with the previous threads. 
-	 * All traces are preserved, but only a single thread continues execution. This works, because instructions never 
-	 * depend on a thread's history.
+	 *
+	 * Only a single thread can be added for each instruction, subsequent threads are joined with
+	 * the previous threads. All traces are preserved, but only a single thread continues execution.
+	 * This works, because instructions never depend on a thread's history.
 	 *
 	 * @param pc           Program counter for the new Thread
 	 * @param parentThread Thread which spawned the new Thread
@@ -93,7 +99,7 @@ export default class Generation {
 	 *
 	 * @return The Thread that was added, or null if no thread was added
 	 */
-	addThread (pc: number, parentThread?: Thread, badness: number = 0): Thread | null {
+	addThread(pc: number, parentThread?: Thread, badness: number = 0): Thread | null {
 		// Only add threads for in-program locations
 		if (pc >= this._programLength) {
 			return null;
@@ -134,7 +140,7 @@ export default class Generation {
 	 *
 	 * @return The Thread to run, or null if there are no threads left.
 	 */
-	getNextThread (): Thread | null {
+	getNextThread(): Thread | null {
 		if (this._nextThread >= this._threadList.length) {
 			return null;
 		}
