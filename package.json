@@ -16,13 +16,13 @@
 	"main": "dist/whynot.js",
 	"module": "dist/whynot.mjs",
 	"scripts": {
-		"build:amd": "rimraf lib && tsc --module amd",
-		"build:commonjs": "rimraf lib && tsc --module commonjs",
-		"build:es": "rimraf lib && tsc --module es6",
-		"build:bundle": "rimraf dist && rimraf lib && tsc && rollup -c",
+		"build:amd": "rimraf lib && tsc -P tsconfig.build.json --module amd",
+		"build:commonjs": "rimraf lib && tsc -P tsconfig.build.json --module commonjs",
+		"build:es": "rimraf lib && tsc -P tsconfig.build.json --module es6",
+		"build:bundle": "rimraf dist && rimraf lib && tsc -P tsconfig.build.json && rollup -c",
 		"docs": "typedoc --out docs --excludePrivate --excludeNotExported src/index.ts",
 		"prepare": "npm run build:bundle",
-		"test": "rimraf test/bin && tsc -P test && mocha --recursive test/bin/test"
+		"test": "jest --coverage --verbose"
 	},
 	"files": [
 		"dist"
@@ -32,16 +32,32 @@
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.0.4",
-		"@types/mocha": "^2.2.41",
-		"chai": "^4.1.2",
-		"mocha": "^3.3.0",
+		"@types/jest": "^20.0.8",
+		"jest": "^21.1.0",
 		"prettier": "^1.7.0",
 		"rimraf": "^2.6.1",
 		"rollup": "^0.50.0",
 		"rollup-plugin-babel-minify": "^3.1.2",
+		"ts-jest": "^21.0.1",
 		"typedoc": "^0.8.0",
-		"typescript": "^2.3.2"
+		"typescript": "^2.5.2"
+	},
+	"jest": {
+		"transform": {
+			"^.+\\.(t|j)sx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+		},
+		"testRegex": "(\\.(tests))\\.(tsx?|jsx?)$",
+		"moduleFileExtensions": [
+			"ts",
+			"tsx",
+			"js",
+			"json",
+			"jsx"
+		],
+		"collectCoverageFrom": [
+			"src/**/*.ts"
+		],
+		"mapCoverage": true
 	},
 	"prettier": {
 		"printWidth": 100,

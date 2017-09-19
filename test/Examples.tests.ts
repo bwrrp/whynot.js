@@ -3,8 +3,6 @@ import { Assembler, VM, default as whynot } from '../src/index';
 
 import regexParser from './util/regexParser';
 
-import * as chai from 'chai';
-
 describe('whynot.js examples', () => {
 	// All whynot VMs expect to receive their input through a function that returns the items one by
 	// one. The function should return null to indicate the end of input. Here's a simple helper
@@ -108,7 +106,7 @@ describe('whynot.js examples', () => {
 			head: string[] = [],
 			flatRecords: string[] = []
 		) {
-			chai.expect(traces).to.be.an.instanceOf(Array);
+			expect(traces).toBeInstanceOf(Array);
 
 			// Generate combined strings for each trace in the array
 			for (let i = 0, l = traces.length; i < l; ++i) {
@@ -137,15 +135,15 @@ describe('whynot.js examples', () => {
 
 			// This regex should match the string 'abcdf'
 			const matchingResult = vm.execute(createInput('abcdf'));
-			chai.expect(matchingResult.success).to.equal(true);
-			chai.expect(matchingResult.acceptingTraces.length).to.equal(1);
+			expect(matchingResult.success).toBe(true);
+			expect(matchingResult.acceptingTraces.length).toBe(1);
 
 			// But it won't match the string 'abcf'
 			const failingResult = vm.execute(createInput('abcf'));
-			chai.expect(failingResult.success).to.equal(false);
-			chai.expect(failingResult.acceptingTraces.length).to.equal(0);
+			expect(failingResult.success).toBe(false);
+			expect(failingResult.acceptingTraces.length).toBe(0);
 			// It will, however, return the last failing traces
-			chai.expect(failingResult.failingTraces.length).to.equal(2);
+			expect(failingResult.failingTraces.length).toBe(2);
 		});
 
 		it('can complete a string based on a regex', () => {
@@ -156,22 +154,26 @@ describe('whynot.js examples', () => {
 			// There are a few branches in this regex, we get different results based on which
 			// choices we remove by adding characters to the input. For instance, 'ad' fixes the
 			// first choice but not the second, so we get two results:
-			chai
-				.expect(flattenRecordStrings(vm.execute(createInput('ad')).acceptingTraces))
-				.to.deep.equal(['ade', 'adf']);
+			expect(flattenRecordStrings(vm.execute(createInput('ad')).acceptingTraces)).toEqual([
+				'ade',
+				'adf'
+			]);
 			// Fixing both choices yields only a single result:
-			chai
-				.expect(flattenRecordStrings(vm.execute(createInput('bf')).acceptingTraces))
-				.to.deep.equal(['bcdf']);
+			expect(flattenRecordStrings(vm.execute(createInput('bf')).acceptingTraces)).toEqual([
+				'bcdf'
+			]);
 			// While leaving both open generates all strings accepted by the regex:
-			chai
-				.expect(flattenRecordStrings(vm.execute(createInput('d')).acceptingTraces))
-				.to.deep.equal(['ade', 'bcde', 'adf', 'bcdf']);
+			expect(flattenRecordStrings(vm.execute(createInput('d')).acceptingTraces)).toEqual([
+				'ade',
+				'bcde',
+				'adf',
+				'bcdf'
+			]);
 			// Finally, presenting an input which can not be made to match by adding
 			// characters yields no results:
-			chai
-				.expect(flattenRecordStrings(vm.execute(createInput('abc')).acceptingTraces))
-				.to.deep.equal([]);
+			expect(flattenRecordStrings(vm.execute(createInput('abc')).acceptingTraces)).toEqual(
+				[]
+			);
 		});
 	});
 
@@ -297,7 +299,7 @@ describe('whynot.js examples', () => {
 			head: string[] = [],
 			flatRecords: string[] = []
 		) {
-			chai.expect(traces).to.be.an.instanceOf(Array);
+			expect(traces).toBeInstanceOf(Array);
 
 			function transformRecord(record: any): string {
 				return record.isExploration ? '[' + record.input + ']' : record.input;
@@ -331,12 +333,15 @@ describe('whynot.js examples', () => {
 			// This regex should match the string 'a', and generate extensions '[a]a[a]', '[b]a[a]',
 			// '[a]a[b]', '[b]a[b]'
 			const matchingResult = vm.execute(createInput('a'));
-			chai.expect(matchingResult.success).to.equal(true);
-			chai.expect(matchingResult.acceptingTraces.length).to.equal(1);
+			expect(matchingResult.success).toBe(true);
+			expect(matchingResult.acceptingTraces.length).toBe(1);
 
-			chai
-				.expect(flattenRecordStrings(matchingResult.acceptingTraces))
-				.to.deep.equal(['[a]a[a]', '[b]a[a]', '[a]a[b]', '[b]a[b]']);
+			expect(flattenRecordStrings(matchingResult.acceptingTraces)).toEqual([
+				'[a]a[a]',
+				'[b]a[a]',
+				'[a]a[b]',
+				'[b]a[b]'
+			]);
 		});
 
 		it('can specify possible extensions to the inputted string of length 2', () => {
@@ -349,22 +354,20 @@ describe('whynot.js examples', () => {
 			// This regex should match the string 'aa', and generates all permutations of the string
 			// [a|b]a[a|b]a[a|b]
 			const matchingResult = vm.execute(createInput('aa'));
-			chai.expect(matchingResult.success).to.equal(true, 'success');
-			chai.expect(matchingResult.acceptingTraces.length).to.equal(1);
+			expect(matchingResult.success).toBe(true);
+			expect(matchingResult.acceptingTraces.length).toBe(1);
 
 			// Sort the results of the traces since the order should be undefined
-			chai
-				.expect(flattenRecordStrings(matchingResult.acceptingTraces).sort())
-				.to.deep.equal([
-					'[a]a[a]a[a]',
-					'[a]a[a]a[b]',
-					'[a]a[b]a[a]',
-					'[a]a[b]a[b]',
-					'[b]a[a]a[a]',
-					'[b]a[a]a[b]',
-					'[b]a[b]a[a]',
-					'[b]a[b]a[b]'
-				]);
+			expect(flattenRecordStrings(matchingResult.acceptingTraces).sort()).toEqual([
+				'[a]a[a]a[a]',
+				'[a]a[a]a[b]',
+				'[a]a[b]a[a]',
+				'[a]a[b]a[b]',
+				'[b]a[a]a[a]',
+				'[b]a[a]a[b]',
+				'[b]a[b]a[a]',
+				'[b]a[b]a[b]'
+			]);
 		});
 
 		it('can specify possible extensions to the inputted string of length 3, in a language with star-height 2', () => {
@@ -374,13 +377,13 @@ describe('whynot.js examples', () => {
 			// This regex should match the string 'abc', and generates all permutations of the
 			// following string
 			const matchingResult = vm.execute(createInput('abc'));
-			chai.expect(matchingResult.success).to.equal(true, 'success');
-			chai.expect(matchingResult.acceptingTraces.length).to.equal(1);
+			expect(matchingResult.success).toBe(true);
+			expect(matchingResult.acceptingTraces.length).toBe(1);
 
 			// Sort the results of the traces since the order should be undefined
-			chai
-				.expect(flattenRecordStrings(matchingResult.acceptingTraces).sort())
-				.to.deep.equal(['[a][b][c][a]a[a][b]b[b]c[a][b][c]']);
+			expect(flattenRecordStrings(matchingResult.acceptingTraces).sort()).toEqual([
+				'[a][b][c][a]a[a][b]b[b]c[a][b][c]'
+			]);
 
 			// Note that the individual explorations are not schema-valid, though the string may be
 			// completed using the previous example.
@@ -393,15 +396,13 @@ describe('whynot.js examples', () => {
 			// This regex should match the string 'abc', and generates all permutations of the
 			// following string
 			const matchingResult = vm.execute(createInput('aabbcaabbc'));
-			chai.expect(matchingResult.success).to.equal(true, 'success');
-			chai.expect(matchingResult.acceptingTraces.length).to.equal(1);
+			expect(matchingResult.success).toBe(true);
+			expect(matchingResult.acceptingTraces.length).toBe(1);
 
 			// Sort the results of the traces since the order should be undefined
-			chai
-				.expect(flattenRecordStrings(matchingResult.acceptingTraces).sort())
-				.to.deep.equal([
-					'[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c]'
-				]);
+			expect(flattenRecordStrings(matchingResult.acceptingTraces).sort()).toEqual([
+				'[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c]'
+			]);
 
 			// Note that the individual explorations may not all be schema-valid, though the string
 			// may be completed using the previous example.
@@ -414,15 +415,13 @@ describe('whynot.js examples', () => {
 			// This regex should match the string 'abc', and generates all permutations of the
 			// following string
 			const matchingResult = vm.execute(createInput('aabbcaabbcaabbc'));
-			chai.expect(matchingResult.success).to.equal(true, 'success');
-			chai.expect(matchingResult.acceptingTraces.length).to.equal(1);
+			expect(matchingResult.success).toBe(true);
+			expect(matchingResult.acceptingTraces.length).toBe(1);
 
 			// Sort the results of the traces as the order should be undefined
-			chai
-				.expect(flattenRecordStrings(matchingResult.acceptingTraces).sort())
-				.to.deep.equal([
-					'[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c]'
-				]);
+			expect(flattenRecordStrings(matchingResult.acceptingTraces).sort()).toEqual([
+				'[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c][a]a[a]a[a][b]b[b]b[b]c[a][b][c]'
+			]);
 
 			// Note that the individual explorations may not all be schema-valid, though the string
 			// may be completed using the previous example.
@@ -470,7 +469,7 @@ describe('whynot.js examples', () => {
 
 				return findFirstRecord(trace.prefixes[0]);
 			})(result.acceptingTraces[0]);
-			chai.expect(firstRecord).to.equal(3);
+			expect(firstRecord).toBe(3);
 		});
 
 		it('provides ordering on badness over joined threads, greedy to end', () => {
@@ -519,7 +518,7 @@ describe('whynot.js examples', () => {
 
 				return findFirstRecord(trace.prefixes[0]);
 			})(result.acceptingTraces[0]);
-			chai.expect(firstRecord).to.equal(3);
+			expect(firstRecord).toBe(3);
 		});
 	});
 });

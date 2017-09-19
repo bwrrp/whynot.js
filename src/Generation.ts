@@ -14,7 +14,7 @@ function createThread(
 
 	// Recycle existing thread
 	const thread = oldThreads.pop() as Thread;
-	Thread.call(thread, pc, programLength, parentThread, badness, generationNumber);
+	thread.initialize(pc, programLength, parentThread, badness, generationNumber);
 	return thread;
 }
 

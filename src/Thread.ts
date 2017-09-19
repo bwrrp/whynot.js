@@ -24,6 +24,25 @@ export default class Thread {
 		badness: number = 0,
 		generationNumber: number
 	) {
+		this.initialize(pc, programLength, parentThread, badness, generationNumber);
+	}
+
+	/**
+	 * (re)initialize the Thread object with the specified values
+	 *
+	 * @param pc               Program counter for the scheduled instruction
+	 * @param programLength    Length of the current program
+	 * @param parentThread     The thread that spawned this thread
+	 * @param badness          Increasing badness decreases thread priority
+	 * @param generationNumber The index of the genaration this Thread is running in
+	 */
+	initialize(
+		pc: number,
+		programLength: number,
+		parentThread: Thread | undefined,
+		badness: number = 0,
+		generationNumber: number
+	) {
 		this.pc = pc;
 
 		const prefixTrace = parentThread ? parentThread.trace : null;

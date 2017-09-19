@@ -1,7 +1,5 @@
 import Thread from '../src/Thread';
 
-import * as chai from 'chai';
-
 const PROGRAM_LENGTH = 10;
 
 describe('Thread', () => {
@@ -12,15 +10,15 @@ describe('Thread', () => {
 		});
 
 		it('has a program counter', () => {
-			chai.expect(thread.pc).to.equal(4);
+			expect(thread.pc).toBe(4);
 		});
 
 		it('has badness', () => {
-			chai.expect(thread.badness).to.equal(123);
+			expect(thread.badness).toBe(123);
 		});
 
 		it('has a root trace', () => {
-			chai.expect(thread.trace.prefixes.length).to.equal(0);
+			expect(thread.trace.prefixes.length).toBe(0);
 		});
 	});
 
@@ -33,15 +31,15 @@ describe('Thread', () => {
 		});
 
 		it('has a program counter', () => {
-			chai.expect(thread.pc).to.equal(4);
+			expect(thread.pc).toBe(4);
 		});
 
 		it('has badness', () => {
-			chai.expect(thread.badness).to.equal(456);
+			expect(thread.badness).toBe(456);
 		});
 
 		it('has a prefixed trace', () => {
-			chai.expect(thread.trace.prefixes.length).to.equal(1);
+			expect(thread.trace.prefixes.length).toBe(1);
 		});
 	});
 
@@ -58,15 +56,15 @@ describe('Thread', () => {
 		});
 
 		it('has a program counter', () => {
-			chai.expect(thread.pc).to.equal(4);
+			expect(thread.pc).toBe(4);
 		});
 
 		it('has maximum badness', () => {
-			chai.expect(thread.badness).to.equal(789);
+			expect(thread.badness).toBe(789);
 		});
 
 		it('has a double-prefixed trace', () => {
-			chai.expect(thread.trace.prefixes.length).to.equal(2);
+			expect(thread.trace.prefixes.length).toBe(2);
 		});
 	});
 });
