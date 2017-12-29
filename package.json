@@ -32,7 +32,7 @@
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
-		"@types/jest": "^21.1.1",
+		"@types/jest": "^22.0.0",
 		"jest": "^21.1.0",
 		"prettier": "^1.7.0",
 		"rimraf": "^2.6.1",
