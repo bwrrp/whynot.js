@@ -32,15 +32,15 @@
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
-		"@types/jest": "^21.1.1",
-		"jest": "^21.1.0",
-		"prettier": "^1.7.0",
-		"rimraf": "^2.6.1",
-		"rollup": "^0.50.0",
+		"@types/jest": "^22.0.1",
+		"jest": "^22.0.6",
+		"prettier": "^1.10.2",
+		"rimraf": "^2.6.2",
+		"rollup": "^0.54.0",
 		"rollup-plugin-babel-minify": "^3.1.2",
-		"ts-jest": "^21.0.1",
-		"typedoc": "^0.8.0",
-		"typescript": "^2.5.2"
+		"ts-jest": "^22.0.1",
+		"typedoc": "^0.9.0",
+		"typescript": "^2.6.2"
 	},
 	"jest": {
 		"transform": {
