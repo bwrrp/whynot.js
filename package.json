@@ -3,16 +3,9 @@
 	"version": "1.0.0",
 	"description": "Generic VM-based structure matching framework",
 	"author": "Stef Busking <stef.busking@gmail.com>",
-	"contributors": [
-		"Martin Middel <martinmiddel@gmail.com>"
-	],
+	"contributors": ["Martin Middel <martinmiddel@gmail.com>"],
 	"license": "MIT",
-	"keywords": [
-		"Language",
-		"Matching",
-		"Regex",
-		"Structure"
-	],
+	"keywords": ["Language", "Matching", "Regex", "Structure"],
 	"main": "dist/whynot.js",
 	"module": "dist/whynot.mjs",
 	"scripts": {
@@ -24,40 +17,29 @@
 		"prepare": "npm run build:bundle",
 		"test": "jest --coverage --verbose"
 	},
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
-		"@types/jest": "^22.0.1",
-		"jest": "^22.0.6",
+		"@types/jest": "^22.1.3",
+		"jest": "^22.4.0",
 		"prettier": "^1.10.2",
 		"rimraf": "^2.6.2",
-		"rollup": "^0.54.0",
-		"rollup-plugin-babel-minify": "^3.1.2",
-		"ts-jest": "^22.0.1",
-		"typedoc": "^0.9.0",
-		"typescript": "^2.6.2"
+		"rollup": "^0.56.2",
+		"rollup-plugin-babel-minify": "^4.0.0",
+		"ts-jest": "^22.0.4",
+		"typedoc": "^0.10.0",
+		"typescript": "^2.7.2"
 	},
 	"jest": {
 		"transform": {
 			"^.+\\.(t|j)sx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
 		},
 		"testRegex": "(\\.(tests))\\.(tsx?|jsx?)$",
-		"moduleFileExtensions": [
-			"ts",
-			"tsx",
-			"js",
-			"json",
-			"jsx"
-		],
-		"collectCoverageFrom": [
-			"src/**/*.ts"
-		],
-		"mapCoverage": true
+		"moduleFileExtensions": ["ts", "tsx", "js", "json", "jsx"],
+		"collectCoverageFrom": ["src/**/*.ts"]
 	},
 	"prettier": {
 		"printWidth": 100,

@@ -4,11 +4,11 @@ import Trace from './Trace';
  * A Thread represents scheduled execution of a specific instruction.
  */
 export default class Thread {
-	public pc: number;
-	public trace: Trace;
-	public badness: number;
+	public pc!: number;
+	public trace!: Trace;
+	public badness!: number;
 
-	private _generationNumber: number;
+	private _generationNumber!: number;
 
 	/**
 	 * @param pc               Program counter for the scheduled instruction
