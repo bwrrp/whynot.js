@@ -10,13 +10,13 @@ describe('VM', () => {
 		};
 	}
 
-	function flattenTrace(trace: Trace, head: number[] = [], flatTraces: number[][] = []) {
-		var combinedHead = trace.head.concat(head);
+	function flattenTrace(trace: Trace, records: number[] = [], flatTraces: number[][] = []) {
+		var combinedRecords = trace.records.concat(records);
 		if (!trace.prefixes.length) {
-			flatTraces.push(combinedHead);
+			flatTraces.push(combinedRecords);
 		} else {
 			for (var i = 0, l = trace.prefixes.length; i < l; ++i) {
-				flattenTrace(trace.prefixes[i], combinedHead, flatTraces);
+				flattenTrace(trace.prefixes[i], combinedRecords, flatTraces);
 			}
 		}
 		return flatTraces;
@@ -76,20 +76,20 @@ describe('VM', () => {
 				condition = true;
 				const resultWithoutInput = vm.execute(createInput([]));
 				expect(resultWithoutInput.success).toBe(false);
-				expect(resultWithoutInput.failingTraces[0].head).toEqual([0]);
+				expect(resultWithoutInput.failingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute(createInput([1]));
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces[0].head).toEqual([0]);
+				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
 				condition = false;
 				const resultWithoutInput = vm.execute(createInput([]));
 				expect(resultWithoutInput.success).toBe(true);
-				expect(resultWithoutInput.acceptingTraces[0].head).toEqual([0, 1]);
+				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute(createInput([1]));
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces[0].head).toEqual([0, 1]);
+				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 		});
 
@@ -108,19 +108,19 @@ describe('VM', () => {
 			it('ends the thread if the condition predicate returns true', () => {
 				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: true });
 				expect(resultWithoutInput.success).toBe(false);
-				expect(resultWithoutInput.failingTraces[0].head).toEqual([0]);
+				expect(resultWithoutInput.failingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute(createInput([1]), { shouldFail: true });
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces[0].head).toEqual([0]);
+				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
 				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: false });
 				expect(resultWithoutInput.success).toBe(true);
-				expect(resultWithoutInput.acceptingTraces[0].head).toEqual([0, 1]);
+				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute(createInput([1]), { shouldFail: false });
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces[0].head).toEqual([0, 1]);
+				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 		});
 	});
@@ -131,33 +131,38 @@ describe('VM', () => {
 		beforeEach(() => {
 			// Create two branches of equal length, one badness 1, the other 0
 			vmLeftBad = whynot.compileVM<void>(assembler => {
-				assembler.jump([1, 3]); // 0
+				assembler.jump([1, 4]); // 0
 				assembler.bad(100); // 1
-				assembler.jump([5]); // 2
-				assembler.bad(1); // 3
-				assembler.jump([5]); // 4
-				assembler.accept(); // 5
+				assembler.record('A'); // 2
+				assembler.jump([7]); // 3
+				assembler.bad(1); // 4
+				assembler.record('B'); // 5
+				assembler.jump([7]); // 6
+				assembler.accept(); // 7
 			});
 			vmRightBad = whynot.compileVM<void>(assembler => {
-				assembler.jump([1, 3]); // 0
+				assembler.jump([1, 4]); // 0
 				assembler.bad(1); // 1
-				assembler.jump([5]); // 2
-				assembler.bad(100); // 3
-				assembler.jump([5]); // 4
-				assembler.accept(); // 5
+				assembler.record('A'); // 2
+				assembler.jump([7]); // 3
+				assembler.bad(100); // 4
+				assembler.record('B'); // 5
+				assembler.jump([7]); // 6
+				assembler.accept(); // 7
 			});
 		});
 
 		it('lowers thread priority by its cost', () => {
+			debugger;
 			const leftResult = vmLeftBad.execute(createInput([]));
 			const rightResult = vmRightBad.execute(createInput([]));
 			expect(flattenTrace(leftResult.acceptingTraces[0])).toEqual([
-				[0, 3, 4, 5],
-				[0, 1, 2, 5]
+				['B'],
+				['A']
 			]);
 			expect(flattenTrace(rightResult.acceptingTraces[0])).toEqual([
-				[0, 1, 2, 5],
-				[0, 3, 4, 5]
+				['A'],
+				['B']
 			]);
 		});
 	});
@@ -179,7 +184,6 @@ describe('VM', () => {
 			const result = vm.execute(createInput(['meep']));
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces.length).toBe(1);
-			expect(result.acceptingTraces[0].head).toEqual([0, 1]);
 		});
 
 		it('ends the thread when the test fails', () => {
@@ -187,7 +191,6 @@ describe('VM', () => {
 			expect(result.success).toBe(false);
 			expect(result.acceptingTraces.length).toBe(0);
 			expect(result.failingTraces.length).toBe(1);
-			expect(result.failingTraces[0].head).toEqual([0]);
 		});
 
 		describe('with options', () => {
@@ -206,7 +209,6 @@ describe('VM', () => {
 				const result = vm.execute(createInput(['meep']), { shouldAccept: true });
 				expect(result.success).toBe(true);
 				expect(result.acceptingTraces.length).toBe(1);
-				expect(result.acceptingTraces[0].head).toEqual([0, 1]);
 			});
 
 			it('ends the thread when the test fails', () => {
@@ -214,7 +216,6 @@ describe('VM', () => {
 				expect(result.success).toBe(false);
 				expect(result.acceptingTraces.length).toBe(0);
 				expect(result.failingTraces.length).toBe(1);
-				expect(result.failingTraces[0].head).toEqual([0]);
 			});
 		});
 	});
@@ -227,7 +228,6 @@ describe('VM', () => {
 			});
 			const result = vm.execute(createInput([]));
 			expect(result.success).toBe(true);
-			expect(result.acceptingTraces.map(trace => flattenTrace(trace))).toEqual([[[0, 1]]]);
 		});
 
 		it('can create multiple new threads', () => {
@@ -238,10 +238,7 @@ describe('VM', () => {
 			});
 			const result = vm.execute(createInput([]));
 			expect(result.success).toBe(true);
-			expect(result.acceptingTraces.map(trace => flattenTrace(trace))).toEqual([
-				[[0, 1]],
-				[[0, 2]]
-			]);
+			expect(result.acceptingTraces.length).toBe(2);
 		});
 	});
 
