@@ -10,7 +10,7 @@ describe('Trace', () => {
 		});
 
 		it('has no records', () => {
-			expect(trace.records.length).toBe(0);
+			expect(trace.records).toBe(null);
 		});
 
 		it('has no prefixes', () => {
@@ -21,7 +21,7 @@ describe('Trace', () => {
 			it('does not change the trace', () => {
 				trace.compact();
 
-				expect(trace.records.length).toBe(0);
+				expect(trace.records).toBe(null);
 				expect(trace.prefixes.length).toBe(0);
 			});
 		});
@@ -32,9 +32,9 @@ describe('Trace', () => {
 		let trace: Trace;
 		beforeEach(() => {
 			rootTrace = new Trace(1, PROGRAM_LENGTH, null, 0);
-			rootTrace.records.push('A');
+			rootTrace.records = ['A'];
 			trace = new Trace(4, PROGRAM_LENGTH, rootTrace, 1);
-			trace.records.push('B');
+			trace.records = ['B'];
 		});
 
 		it('has only its own record', () => {
@@ -68,7 +68,7 @@ describe('Trace', () => {
 		});
 
 		it('has no records', () => {
-			expect(trace.records.length).toBe(0);
+			expect(trace.records).toBe(null);
 		});
 
 		it('has a two prefixes', () => {
@@ -78,7 +78,7 @@ describe('Trace', () => {
 		describe('.compact()', () => {
 			it('does not change the trace', () => {
 				trace.compact();
-				expect(trace.records.length).toBe(0);
+				expect(trace.records).toBe(null);
 				expect(trace.prefixes.length).toBe(2);
 			});
 		});

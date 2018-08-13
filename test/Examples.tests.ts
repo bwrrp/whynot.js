@@ -113,7 +113,7 @@ describe('whynot.js examples', () => {
 				const trace = traces[i];
 
 				// Combine the records found so far with those of this trace
-				const combinedHead = trace.records.concat(head);
+				const combinedHead = trace.records ? trace.records.concat(head) : head;
 
 				if (!trace.prefixes.length) {
 					// Beginning of trace reached, add full record string
@@ -310,7 +310,7 @@ describe('whynot.js examples', () => {
 				const trace = traces[i];
 
 				// Combine the records found so far with those of this trace
-				const combinedHead = trace.records.concat(head);
+				const combinedHead = trace.records ? trace.records.concat(head) : head;
 
 				if (!trace.prefixes.length) {
 					// Beginning of trace reached, add full record string
@@ -463,7 +463,7 @@ describe('whynot.js examples', () => {
 			//                                      0    1    2    3    4    5    6
 			//                                                     '--- Expect CG to start here
 			const firstRecord = (function findFirstRecord(trace: Trace): number {
-				if (trace.records.length) {
+				if (trace.records !== null) {
 					return trace.records[0];
 				}
 
@@ -512,7 +512,7 @@ describe('whynot.js examples', () => {
 			//                                      0    1    2    3    4    5    6
 			//                                                     '--- Expect CG to start here
 			const firstRecord = (function findFirstRecord(trace: Trace): number {
-				if (trace.records.length) {
+				if (trace.records !== null) {
 					return trace.records[0];
 				}
 

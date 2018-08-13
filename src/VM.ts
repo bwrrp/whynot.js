@@ -164,7 +164,11 @@ export default class VM<I, O = void> {
 						const func = instruction.func as RecordFunc<O>;
 						const record = func(instruction.data, inputIndex, options);
 						if (record !== null && record !== undefined) {
-							thread.trace.records.push(record);
+							if (thread.trace.records === null) {
+								thread.trace.records = [record];
+							} else {
+								thread.trace.records.push(record);
+							}
 						}
 						// Continue with next instruction
 						scheduler.addThread(0, thread.pc + 1, thread, thread.badness);

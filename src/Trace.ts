@@ -19,7 +19,7 @@ function mergeVisitedInstructions(
  * A Trace represents the execution history of a Thread
  */
 export default class Trace {
-	public records: any[] = [];
+	public records: any[]|null = null;
 	public prefixes: Trace[] = [];
 
 	private _descendants: Trace[] = [];
@@ -107,7 +107,13 @@ export default class Trace {
 			// Trace has a single prefix, combine traces
 			const prefix = trace.prefixes[0];
 			// Combine records
-			this.records.unshift.apply(this.records, prefix.records);
+			if (prefix.records != null) {
+				if (this.records !== null) {
+					this.records.unshift.apply(this.records, prefix.records);
+				} else {
+					this.records = prefix.records;
+				}
+			}
 			// Adopt prefixes
 			this.prefixes = prefix.prefixes;
 			// Continue

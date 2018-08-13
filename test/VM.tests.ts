@@ -11,7 +11,7 @@ describe('VM', () => {
 	}
 
 	function flattenTrace(trace: Trace, records: number[] = [], flatTraces: number[][] = []) {
-		var combinedRecords = trace.records.concat(records);
+		var combinedRecords = trace.records === null ? records : trace.records.concat(records);
 		if (!trace.prefixes.length) {
 			flatTraces.push(combinedRecords);
 		} else {
@@ -156,14 +156,8 @@ describe('VM', () => {
 			debugger;
 			const leftResult = vmLeftBad.execute(createInput([]));
 			const rightResult = vmRightBad.execute(createInput([]));
-			expect(flattenTrace(leftResult.acceptingTraces[0])).toEqual([
-				['B'],
-				['A']
-			]);
-			expect(flattenTrace(rightResult.acceptingTraces[0])).toEqual([
-				['A'],
-				['B']
-			]);
+			expect(flattenTrace(leftResult.acceptingTraces[0])).toEqual([['B'], ['A']]);
+			expect(flattenTrace(rightResult.acceptingTraces[0])).toEqual([['A'], ['B']]);
 		});
 	});
 
