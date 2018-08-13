@@ -9,10 +9,6 @@ describe('Trace', () => {
 			trace = new Trace(4, PROGRAM_LENGTH, null, 0);
 		});
 
-		it('has a head', () => {
-			expect(trace.head).toEqual([4]);
-		});
-
 		it('has no records', () => {
 			expect(trace.records.length).toBe(0);
 		});
@@ -25,7 +21,6 @@ describe('Trace', () => {
 			it('does not change the trace', () => {
 				trace.compact();
 
-				expect(trace.head).toEqual([4]);
 				expect(trace.records.length).toBe(0);
 				expect(trace.prefixes.length).toBe(0);
 			});
@@ -40,24 +35,18 @@ describe('Trace', () => {
 			trace = new Trace(4, PROGRAM_LENGTH, rootTrace, 1);
 		});
 
-		it('has a head', () => {
-			expect(trace.head).toEqual([4]);
-		});
-
 		it('has no records', () => {
 			expect(trace.records.length).toBe(0);
 		});
 
 		it('has a single prefix', () => {
 			expect(trace.prefixes.length).toBe(1);
-			expect(trace.prefixes[0].head).toEqual([1]);
 		});
 
 		describe('.compact()', () => {
 			it('combines the traces', () => {
 				trace.compact();
 
-				expect(trace.head).toEqual([1, 4]);
 				expect(trace.records.length).toBe(0);
 				expect(trace.prefixes.length).toBe(0);
 			});
@@ -71,7 +60,6 @@ describe('Trace', () => {
 				it('combines the traces', () => {
 					trace.compact();
 
-					expect(trace.head).toEqual([1, 4]);
 					expect(trace.records).toEqual(['bla', 'meep']);
 					expect(trace.prefixes.length).toBe(0);
 				});
@@ -91,25 +79,17 @@ describe('Trace', () => {
 			trace.prefixes.push(otherRootTrace);
 		});
 
-		it('has a head', () => {
-			expect(trace.head).toEqual([4]);
-		});
-
 		it('has no records', () => {
 			expect(trace.records.length).toBe(0);
 		});
 
 		it('has a two prefixes', () => {
 			expect(trace.prefixes.length).toBe(2);
-			expect(trace.prefixes[0].head).toEqual([1]);
-			expect(trace.prefixes[1].head).toEqual([2]);
 		});
 
 		describe('.compact()', () => {
 			it('does not change the trace', () => {
 				trace.compact();
-
-				expect(trace.head).toEqual([4]);
 				expect(trace.records.length).toBe(0);
 				expect(trace.prefixes.length).toBe(2);
 			});
