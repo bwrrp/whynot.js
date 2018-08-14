@@ -1,20 +1,21 @@
 import Thread from './Thread';
+import DisjointSet from './DisjointSet';
 
 function createThread(
 	oldThreads: Thread[],
 	pc: number,
-	programLength: number,
 	parentThread: Thread | undefined,
-	badness: number,
-	generationNumber: number
+	generationNumber: number,
+	threadId: number,
+	badness: number
 ): Thread {
 	if (!oldThreads.length) {
-		return new Thread(pc, programLength, parentThread, badness, generationNumber);
+		return new Thread(pc, parentThread, generationNumber, threadId, badness);
 	}
 
 	// Recycle existing thread
 	const thread = oldThreads.pop() as Thread;
-	thread.initialize(pc, programLength, parentThread, badness, generationNumber);
+	thread.initialize(pc, parentThread, generationNumber, threadId, badness);
 	return thread;
 }
 
@@ -48,6 +49,7 @@ export default class Generation {
 	private _programLength: number;
 	private _threadsByProgramCounter: (Thread | null)[];
 	private _generationNumber: number;
+	private _ancestries: DisjointSet
 
 	/**
 	 * @param programLength    The length of the program being run
@@ -59,6 +61,7 @@ export default class Generation {
 		this._programLength = programLength;
 		this._threadsByProgramCounter = new Array(programLength);
 		this._generationNumber = generationNumber;
+		this._ancestries = new DisjointSet(programLength);
 	}
 
 	/**
@@ -78,12 +81,10 @@ export default class Generation {
 		this._threadList.length = 0;
 		// Reset thread counter
 		this._nextThread = 0;
-		// Reset threads by program counter lookup
-		for (i = 0, l = this._programLength; i < l; ++i) {
-			this._threadsByProgramCounter[i] = null;
-		}
 
 		this._generationNumber = generationNumber;
+		this._threadsByProgramCounter.fill(null);
+		this._ancestries.makeSet();
 	}
 
 	/**
@@ -108,23 +109,41 @@ export default class Generation {
 		// If a thread for pc already exists in this generation, combine traces and return
 		const existingThreadForProgramCounter = this._threadsByProgramCounter[pc];
 		if (existingThreadForProgramCounter) {
-			// Detect repetition in the same generation, which would cause cyclic traces
-			if (!parentThread || !parentThread.trace.contains(pc, this._generationNumber)) {
-				// Non-cyclic trace, join threads
-				existingThreadForProgramCounter.join(parentThread, badness);
+			if (parentThread === null || parentThread === undefined) {
+				existingThreadForProgramCounter.updateBadness(badness);
+				return null;
 			}
+
+			if (parentThread.generationNumber !== this._generationNumber) {
+				existingThreadForProgramCounter.updateBadness(badness);
+				existingThreadForProgramCounter.trace.join(parentThread.trace);
+				return null;
+			}
+
+			const parentThreadRep = this._ancestries.find(parentThread.threadId);
+			if (parentThreadRep === existingThreadForProgramCounter.threadId) {
+				return null;
+			}
+
+			existingThreadForProgramCounter.updateBadness(badness);
+			existingThreadForProgramCounter.trace.join(parentThread.trace);
+			this._ancestries.union(parentThread.threadId, existingThreadForProgramCounter.threadId);
 
 			return null;
 		}
 
+		const threadId = this._threadList.length;
 		const thread = createThread(
 			this._oldThreads,
 			pc,
-			this._programLength,
 			parentThread,
-			badness,
-			this._generationNumber
+			this._generationNumber,
+			threadId,
+			badness
 		);
+		if (parentThread != null && parentThread.generationNumber === this._generationNumber) {
+			this._ancestries.union(parentThread.threadId, threadId);
+		}
 
 		// Schedule thread according to badness
 		const index = findInsertionIndex(this._threadList, this._nextThread, badness);

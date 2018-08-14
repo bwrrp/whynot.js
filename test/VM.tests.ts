@@ -11,11 +11,11 @@ describe('VM', () => {
 	}
 
 	function flattenTrace(trace: Trace, records: number[] = [], flatTraces: number[][] = []) {
-		var combinedRecords = trace.records.concat(records);
+		const combinedRecords = trace.records.concat(records);
 		if (!trace.prefixes.length) {
 			flatTraces.push(combinedRecords);
 		} else {
-			for (var i = 0, l = trace.prefixes.length; i < l; ++i) {
+			for (let i = 0, l = trace.prefixes.length; i < l; ++i) {
 				flattenTrace(trace.prefixes[i], combinedRecords, flatTraces);
 			}
 		}
@@ -74,23 +74,32 @@ describe('VM', () => {
 
 			it('ends the thread if the condition predicate returns true', () => {
 				condition = true;
-				const resultWithoutInput = vm.execute(createInput([]));
-				expect(resultWithoutInput.success).toBe(false);
-				expect(resultWithoutInput.failingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute(createInput([1]));
 				expect(resultWithInput.success).toBe(false);
 				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 
+			it('ends the thread if the condition predicate returns true with empty input', () => {
+				condition = true;
+				const resultWithoutInput = vm.execute(createInput([]));
+				expect(resultWithoutInput.success).toBe(false);
+				expect(resultWithoutInput.failingTraces.length).toEqual(1);
+			});
+
 			it('continues the thread if the condition predicate returns false', () => {
 				condition = false;
-				const resultWithoutInput = vm.execute(createInput([]));
-				expect(resultWithoutInput.success).toBe(true);
-				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute(createInput([1]));
 				expect(resultWithInput.success).toBe(false);
 				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
+
+			it('continues the thread if the condition predicate returns false without input', () => {
+				condition = false;
+				const resultWithoutInput = vm.execute(createInput([]));
+				expect(resultWithoutInput.success).toBe(true);
+				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
+			});
+
 		});
 
 		describe('conditional with options', () => {
@@ -153,7 +162,6 @@ describe('VM', () => {
 		});
 
 		it('lowers thread priority by its cost', () => {
-			debugger;
 			const leftResult = vmLeftBad.execute(createInput([]));
 			const rightResult = vmRightBad.execute(createInput([]));
 			expect(flattenTrace(leftResult.acceptingTraces[0])).toEqual([
@@ -277,6 +285,16 @@ describe('VM', () => {
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP-BLA']);
 		});
+
+		it('does not record anything if a record returns null', () => {
+			const vm = whynot.compileVM(assembler => {
+				assembler.record(null);
+				assembler.accept();
+			});
+			const result = vm.execute(createInput([]));
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces[0].records).toEqual([]);
+		})
 	});
 
 	describe('reentrancy', () => {
@@ -316,5 +334,30 @@ describe('VM', () => {
 			expect(result.success).toBe(true);
 			expect(computeMaxDepth(result)).toBe(4);
 		});
+	});
+
+	describe('Reuse VM', () => {
+		let vm: VM<void>;
+		let condition: boolean;
+		beforeEach(() => {
+			vm = whynot.compileVM<void>(assembler => {
+				assembler.fail(() => {
+					return condition;
+				});
+				assembler.accept();
+			});
+			condition = false;
+		});
+
+		it('ends the thread if the condition predicate returns true', () => {
+			condition = true;
+			const resultWithInput = vm.execute(createInput([1]));
+			expect(resultWithInput.success).toBe(false);
+			expect(resultWithInput.failingTraces.length).toEqual(1);
+			const resultWithoutInput = vm.execute(createInput([]));
+			expect(resultWithoutInput.success).toBe(false);
+			expect(resultWithoutInput.failingTraces.length).toEqual(1);
+		});
+
 	});
 });

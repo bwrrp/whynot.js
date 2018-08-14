@@ -329,7 +329,7 @@ describe('whynot.js examples', () => {
 			// returns any traces, these represent how the program was able to match the input. If
 			// it doesn't, the input did not match in any way.
 			const vm = compileRegexVM('(a|b)*', false);
-
+			
 			// This regex should match the string 'a', and generate extensions '[a]a[a]', '[b]a[a]',
 			// '[a]a[b]', '[b]a[b]'
 			const matchingResult = vm.execute(createInput('a'));

@@ -7,51 +7,58 @@ export default class Thread {
 	public pc!: number;
 	public trace!: Trace;
 	public badness!: number;
+	public threadId!: number;
 
 	private _generationNumber!: number;
 
 	/**
 	 * @param pc               Program counter for the scheduled instruction
-	 * @param programLength    Length of the current program
 	 * @param parentThread     The thread that spawned this thread
-	 * @param badness          Increasing badness decreases thread priority
 	 * @param generationNumber The index of the genaration this Thread is running in
+	 * @param threadId         Id of a thread
+	 * @param badness          Increasing badness decreases thread priority
 	 */
 	constructor(
 		pc: number,
-		programLength: number,
 		parentThread: Thread | undefined,
-		badness: number = 0,
-		generationNumber: number
+		generationNumber: number,
+		threadId: number,
+		badness: number = 0
 	) {
-		this.initialize(pc, programLength, parentThread, badness, generationNumber);
+		this.initialize(pc, parentThread, generationNumber, threadId, badness);
 	}
 
 	/**
 	 * (re)initialize the Thread object with the specified values
 	 *
 	 * @param pc               Program counter for the scheduled instruction
-	 * @param programLength    Length of the current program
 	 * @param parentThread     The thread that spawned this thread
-	 * @param badness          Increasing badness decreases thread priority
 	 * @param generationNumber The index of the genaration this Thread is running in
+	 * @param threadId         Id of a thread
+	 * @param badness          Increasing badness decreases thread priority
 	 */
 	initialize(
 		pc: number,
-		programLength: number,
 		parentThread: Thread | undefined,
-		badness: number = 0,
-		generationNumber: number
+		generationNumber: number,
+		threadId: number,
+		badness: number = 0
 	) {
 		this.pc = pc;
 
 		const prefixTrace = parentThread ? parentThread.trace : null;
-		this.trace = new Trace(pc, programLength, prefixTrace, generationNumber);
+		this.trace = new Trace(prefixTrace);
 
 		this.badness = badness || 0;
 
 		this._generationNumber = generationNumber;
+		this.threadId = threadId;
 	}
+
+	// Getter for generationNumber property.
+    get generationNumber(): number {
+        return this._generationNumber;
+    }
 
 	/**
 	 * Another thread joins the current, combine traces and badness.
@@ -71,5 +78,14 @@ export default class Thread {
 	 */
 	compact() {
 		this.trace.compact();
+	}
+
+	/**
+	 * Update the badness.
+	 * 
+	 * @param badness Number of badness
+	 */
+	updateBadness(badness: number) {
+		this.badness = Math.max(this.badness, badness);
 	}
 }

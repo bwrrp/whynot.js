@@ -1,12 +1,12 @@
 import Thread from '../src/Thread';
 
-const PROGRAM_LENGTH = 10;
+const expectedThreadId = 456;
 
 describe('Thread', () => {
 	describe('no preceding thread', () => {
 		let thread: Thread;
 		beforeEach(() => {
-			thread = new Thread(4, PROGRAM_LENGTH, undefined, 123, 0);
+			thread = new Thread(4, undefined, 0, expectedThreadId, 123);
 		});
 
 		it('has a program counter', () => {
@@ -26,8 +26,8 @@ describe('Thread', () => {
 		let rootThread: Thread;
 		let thread: Thread;
 		beforeEach(() => {
-			rootThread = new Thread(1, PROGRAM_LENGTH, undefined, 123, 0);
-			thread = new Thread(4, PROGRAM_LENGTH, rootThread, 456, 1);
+			rootThread = new Thread(1, undefined, 0, expectedThreadId, 123);
+			thread = new Thread(4, rootThread, 1, expectedThreadId, 456);
 		});
 
 		it('has a program counter', () => {
@@ -48,9 +48,9 @@ describe('Thread', () => {
 		let otherRootThread: Thread;
 		let thread: Thread;
 		beforeEach(() => {
-			rootThread = new Thread(1, PROGRAM_LENGTH, undefined, 123, 0);
-			otherRootThread = new Thread(2, PROGRAM_LENGTH, undefined, 234, 0);
-			thread = new Thread(4, PROGRAM_LENGTH, rootThread, 456, 1);
+			rootThread = new Thread(1, undefined, 0, expectedThreadId, 123);
+			otherRootThread = new Thread(2, undefined, 0, expectedThreadId, 234);
+			thread = new Thread(4, rootThread, 1, expectedThreadId, 456);
 
 			thread.join(otherRootThread, 789);
 		});
@@ -67,4 +67,31 @@ describe('Thread', () => {
 			expect(thread.trace.prefixes.length).toBe(2);
 		});
 	});
+
+	describe('defaults', () => {
+		let rootThread: Thread;
+		let otherRootThread: Thread;
+		let thread: Thread;
+
+		it('default badness', () => {
+			rootThread = new Thread(1, undefined, 0, expectedThreadId);
+			otherRootThread = new Thread(2, undefined, 0, expectedThreadId);
+			thread = new Thread(4, rootThread, 1, expectedThreadId);
+
+			thread.join(otherRootThread);
+			expect(thread.badness).toBe(0);
+		});
+
+		it('default join', () => {
+			thread = new Thread(4, rootThread, 1, expectedThreadId);
+			thread.join();
+			expect(thread.badness).toBe(0);
+		});
+
+		it('reinitialize thread with default badness', () => {
+			thread = new Thread(4, rootThread, 1, expectedThreadId);
+			thread.initialize(4, rootThread, 1, expectedThreadId);
+			expect(thread.badness).toBe(0);
+		}) 
+	})
 });
