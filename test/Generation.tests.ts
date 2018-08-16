@@ -29,6 +29,25 @@ describe('Generation', () => {
 				const nextThread = generation.getNextThread();
 				expect(nextThread).toBe(addedThread);
 			});
+
+			it('pc out of bounds', () => {
+				generation.addThread(217389);
+				const nextThread = generation.getNextThread();
+				expect(nextThread).toBeInstanceOf(Thread);
+			});
+
+			it('parentThread is undefined', () => {
+				generation.addThread(0, undefined);
+				const nextThread = generation.getNextThread();
+				expect(nextThread).toBeInstanceOf(Thread);
+			});
+
+			it('incorrect generation number', () => {
+				const parentThread = new Thread(0, undefined, 56756, 0, 0);
+				generation.addThread(0, parentThread);
+				const nextThread = generation.getNextThread();
+				expect(nextThread).toBeInstanceOf(Thread);
+			});
 		});
 
 		describe('duplicate', () => {

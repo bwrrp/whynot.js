@@ -1,5 +1,4 @@
 import Scheduler from '../src/Scheduler';
-import Thread from '../src/Thread';
 
 describe('Scheduler', () => {
 	let scheduler: Scheduler;
@@ -32,9 +31,13 @@ describe('Scheduler', () => {
 
 			scheduler.nextGeneration();
 
-			var nextGenThread = scheduler.getNextThread();
+			const nextGenThread = scheduler.getNextThread();
 			expect(nextGenThread).toBe(rootThread);
 			expect(scheduler.getNextThread()).toBe(null);
 		});
+
+		it('Throw an error for incorrect generationNumber', () => {
+			expect(function() {scheduler.addThread(2183, 3, undefined, 123);}).toThrow();
+		})
 	});
 });
