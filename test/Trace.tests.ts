@@ -38,7 +38,7 @@ describe('Trace', () => {
 		});
 
 		it('has only its own record', () => {
-			expect(trace.records.length).toBe(1);
+			expect(trace.records!.length).toBe(1);
 		});
 
 		it('has a single prefix', () => {
@@ -80,6 +80,32 @@ describe('Trace', () => {
 				trace.compact();
 				expect(trace.records).toBe(null);
 				expect(trace.prefixes.length).toBe(2);
+			});
+		});
+	});
+
+	describe('Compacting multiple chained traces', () => {
+		let rootTrace: Trace;
+		let parentTrace: Trace;
+		let trace: Trace;
+		beforeEach(() => {
+			rootTrace = new Trace(1, PROGRAM_LENGTH, null, 0);
+			rootTrace.records = ['A'];
+			parentTrace = new Trace(2, PROGRAM_LENGTH, rootTrace, 1);
+			parentTrace.records = ['B'];
+			trace = new Trace(4, PROGRAM_LENGTH, parentTrace, 1);
+		});
+
+		describe('.compact()', () => {
+			it('correctly combines the traces', () => {
+				trace.compact();
+				parentTrace.compact();
+
+				expect(trace.records).toEqual(['A', 'B']);
+				expect(trace.prefixes.length).toBe(0);
+
+				expect(parentTrace.records).toEqual(['A', 'B']);
+				expect(parentTrace.prefixes.length).toBe(0);
 			});
 		});
 	});

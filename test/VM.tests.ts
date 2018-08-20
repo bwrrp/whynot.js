@@ -297,7 +297,7 @@ describe('VM', () => {
 			return result.acceptingTraces.reduce(function(max: number, trace: Trace) {
 				const maxDepthForTrace =
 					1 +
-					trace.records.reduce(function(max, result) {
+					trace.records!.reduce(function(max, result) {
 						const maxDepthForRecord = computeMaxDepth(result);
 						return Math.max(maxDepthForRecord, max);
 					}, 0);
