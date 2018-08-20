@@ -5,11 +5,9 @@ const { main: MAIN_DEST_FILE, module: MODULE_DEST_FILE } = require('./package.js
 export default {
 	input: 'lib/index.js',
 	output: [
-		{ file: MAIN_DEST_FILE, format: 'umd', exports: 'named' },
-		{ file: MODULE_DEST_FILE, format: 'es' }
+		{ name: 'whynot', file: MAIN_DEST_FILE, format: 'umd', exports: 'named', sourcemap: true },
+		{ file: MODULE_DEST_FILE, format: 'es', sourcemap: true }
 	],
-	name: 'whynot',
-	sourcemap: true,
 	plugins: [
 		minify({
 			comments: false,
