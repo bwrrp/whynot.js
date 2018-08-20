@@ -32,11 +32,13 @@ describe('Trace', () => {
 		let trace: Trace;
 		beforeEach(() => {
 			rootTrace = new Trace(1, PROGRAM_LENGTH, null, 0);
+			rootTrace.records.push('A');
 			trace = new Trace(4, PROGRAM_LENGTH, rootTrace, 1);
+			trace.records.push('B');
 		});
 
-		it('has no records', () => {
-			expect(trace.records.length).toBe(0);
+		it('has only its own record', () => {
+			expect(trace.records.length).toBe(1);
 		});
 
 		it('has a single prefix', () => {
@@ -47,22 +49,8 @@ describe('Trace', () => {
 			it('combines the traces', () => {
 				trace.compact();
 
-				expect(trace.records.length).toBe(0);
+				expect(trace.records).toEqual(['A', 'B']);
 				expect(trace.prefixes.length).toBe(0);
-			});
-
-			describe('with records', () => {
-				beforeEach(() => {
-					rootTrace.records.push('bla');
-					trace.records.push('meep');
-				});
-
-				it('combines the traces', () => {
-					trace.compact();
-
-					expect(trace.records).toEqual(['bla', 'meep']);
-					expect(trace.prefixes.length).toBe(0);
-				});
 			});
 		});
 	});
