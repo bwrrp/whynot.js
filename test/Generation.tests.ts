@@ -58,7 +58,7 @@ describe('Generation', () => {
 	describe('.getNextThread()', () => {
 		type ThreadSpec = { pc: number; parent?: number; badness: number };
 		function schedule(generation: Generation, threadSpecs: ThreadSpec[]) {
-			const threads = [];
+			const threads: (Thread|null)[] = [];
 			for (let i = 0, l = threadSpecs.length; i < l; ++i) {
 				const pc = threadSpecs[i].pc;
 				const parentThread =
