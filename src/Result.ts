@@ -7,6 +7,9 @@ export default class Result {
 	public success: boolean;
 
 	constructor(public acceptingTraces: Trace[], public failingTraces: Trace[]) {
-		this.success = !!acceptingTraces.length;
+		this.success = acceptingTraces.length > 0;
+
+		this.acceptingTraces.forEach(trace => trace.compact());
+		this.failingTraces.forEach(trace => trace.compact());
 	}
 }

@@ -72,4 +72,8 @@ export default class Thread {
 	compact() {
 		this.trace.compact();
 	}
+
+	clear() {
+		(this.trace as any) = null;
+	}
 }

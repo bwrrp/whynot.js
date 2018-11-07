@@ -72,7 +72,7 @@ export default class Generation {
 		let i, l;
 		for (i = 0, l = this._threadList.length; i < l; ++i) {
 			const thread = this._threadList[i];
-			thread.compact();
+			thread.clear();
 			this._oldThreads.push(thread);
 		}
 		this._threadList.length = 0;
