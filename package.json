@@ -1,6 +1,6 @@
 {
 	"name": "whynot",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Generic VM-based structure matching framework",
 	"author": "Stef Busking <stef.busking@gmail.com>",
 	"contributors": [
@@ -32,15 +32,15 @@
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
-		"@types/jest": "^23.3.3",
+		"@types/jest": "^23.3.9",
 		"jest": "^23.6.0",
-		"prettier": "^1.14.3",
+		"prettier": "^1.15.1",
 		"rimraf": "^2.6.2",
-		"rollup": "^0.66.4",
+		"rollup": "^0.67.0",
 		"rollup-plugin-babel-minify": "^6.1.1",
 		"ts-jest": "~23.10.4",
-		"typedoc": "^0.12.0",
-		"typescript": "^3.1.1"
+		"typedoc": "^0.13.0",
+		"typescript": "^3.1.6"
 	},
 	"jest": {
 		"transform": {
