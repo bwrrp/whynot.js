@@ -1,52 +1,20 @@
 import { Instruction, FailFunc, RecordFunc, TestFunc } from './Instruction';
 import Result from './Result';
 import Scheduler from './Scheduler';
-import Thread from './Thread';
-
-const NUMBER_OF_SCHEDULED_GENERATIONS = 2;
 
 /**
  * A virtual machine to execute whynot programs.
  */
 export default class VM<TInput, TOptions = void> {
 	private _program: Instruction<TInput, TOptions>[];
-	private _schedulers: Scheduler[] = [];
-	private _nextFreeScheduler: number = 0;
-	private _oldThreadList: Thread[];
+	private _scheduler: Scheduler;
 
 	/**
 	 * @param program       The program to run, as created by the Assembler
-	 * @param oldThreadList Array used for recycling Thread objects. An existing array can be passed
-	 *                      in to share recycled threads between VMs.
 	 */
-	constructor(program: Instruction<TInput, TOptions>[], oldThreadList: Thread[] = []) {
+	constructor(program: Instruction<TInput, TOptions>[]) {
 		this._program = program;
-
-		// Use multiple schedulers to make the VM reentrant. This way, one can implement recursion
-		// by executing a VM inside a test, fail or record callback.
-		this._schedulers = [];
-		this._nextFreeScheduler = 0;
-		this._oldThreadList = oldThreadList;
-	}
-
-	private _getScheduler(): Scheduler {
-		let scheduler;
-		if (this._nextFreeScheduler < this._schedulers.length) {
-			scheduler = this._schedulers[this._nextFreeScheduler];
-		} else {
-			scheduler = new Scheduler(
-				NUMBER_OF_SCHEDULED_GENERATIONS,
-				this._program.length,
-				this._oldThreadList
-			);
-			this._schedulers.push(scheduler);
-		}
-		++this._nextFreeScheduler;
-		return scheduler;
-	}
-
-	private _releaseScheduler() {
-		--this._nextFreeScheduler;
+		this._scheduler = new Scheduler(program.length);
 	}
 
 	/**
@@ -55,48 +23,40 @@ export default class VM<TInput, TOptions = void> {
 	 * @param input   An array of input items.
 	 * @param options Optional object passed to all instruction callbacks.
 	 *
-	 * @return Result of the execution, containing all Traces that lead to acceptance of the input,
-	 *         and all traces which lead to failure in the last Generation.
+	 * @return Result of the execution, containing all Traces that lead to acceptance of the input
+	 *         (if any)
 	 */
 	execute(input: TInput[], options?: TOptions): Result {
-		const scheduler = this._getScheduler();
-		const program = this._program;
-
-		// Reset the scheduler
-		scheduler.reset();
+		// TODO: pool these to make this function reentrant?
+		const scheduler = this._scheduler;
 
 		// Add initial thread
-		scheduler.addThread(0, 0);
+		this._scheduler.reset();
 
-		const acceptingTraces = [];
-		const failingTraces = [];
 		const inputLength = input.length;
 		let inputIndex = -1;
 		let inputItem: TInput | null;
 		do {
 			// Get next thread to execute
-			let thread = scheduler.getNextThread();
-			if (!thread) {
+			let pc = scheduler.getNextThreadPc();
+			if (pc === null) {
 				break;
 			}
-
-			// We only record failing traces for the last active Generation
-			failingTraces.length = 0;
 
 			// Read next input item
 			++inputIndex;
 			inputItem = inputIndex >= inputLength ? null : input[inputIndex];
 
-			while (thread) {
-				const instruction = program[thread.pc];
+			while (pc !== null) {
+				const instruction = this._program[pc];
 
 				switch (instruction.op) {
 					case 'accept':
 						// Only accept if we reached the end of the input
-						if (inputItem === null || inputItem === undefined) {
-							acceptingTraces.push(thread.trace);
+						if (inputItem === null) {
+							scheduler.accept(pc);
 						} else {
-							failingTraces.push(thread.trace);
+							scheduler.fail(pc);
 						}
 						break;
 
@@ -106,55 +66,47 @@ export default class VM<TInput, TOptions = void> {
 						const isFailingCondition = !func || func(options);
 						if (isFailingCondition) {
 							// Branch is forbidden, end the thread
-							failingTraces.push(thread.trace);
+							scheduler.fail(pc);
 							break;
 						}
 						// Condition failed, continue at next instruction
-						scheduler.addThread(0, thread.pc + 1, thread, thread.badness);
+						scheduler.step(pc, pc + 1, 0);
 						break;
 					}
 
 					case 'bad':
 						// Continue at next pc with added badness
-						scheduler.addThread(
-							0,
-							thread.pc + 1,
-							thread,
-							thread.badness + (instruction.data as number)
-						);
+						scheduler.step(pc, pc + 1, instruction.data as number);
 						break;
 
 					case 'test': {
 						// Fail if out of input
 						if (inputItem === null || inputItem === undefined) {
-							failingTraces.push(thread.trace);
+							scheduler.fail(pc);
 							break;
 						}
 						// Fail if input does not match
 						const func = instruction.func as TestFunc<TInput, TOptions>;
 						const isInputAccepted = func(inputItem, instruction.data, options);
 						if (!isInputAccepted) {
-							failingTraces.push(thread.trace);
+							scheduler.fail(pc);
 							break;
 						}
 						// Continue in next generation, preserving badness
-						scheduler.addThread(1, thread.pc + 1, thread, thread.badness);
+						scheduler.stepToNextGeneration(pc, pc + 1);
 						break;
 					}
 
 					case 'jump': {
 						// Spawn new threads for all targets
-						for (
-							let iTarget = 0, nTargets = instruction.data.length;
-							iTarget < nTargets;
-							++iTarget
-						) {
-							scheduler.addThread(
-								0,
-								instruction.data[iTarget],
-								thread,
-								thread.badness
-							);
+						const targetPcs = instruction.data as number[];
+						const numTargets = targetPcs.length;
+						if (numTargets === 0) {
+							scheduler.fail(pc);
+							break;
+						}
+						for (let i = 0; i < numTargets; ++i) {
+							scheduler.step(pc, targetPcs[i], 0);
 						}
 						break;
 					}
@@ -164,30 +116,27 @@ export default class VM<TInput, TOptions = void> {
 						const func = instruction.func as RecordFunc<TOptions>;
 						const record = func(instruction.data, inputIndex, options);
 						if (record !== null && record !== undefined) {
-							if (thread.trace.records === null) {
-								thread.trace.records = [record];
-							} else {
-								thread.trace.records.push(record);
-							}
+							scheduler.record(pc, record);
 						}
 						// Continue with next instruction
-						scheduler.addThread(0, thread.pc + 1, thread, thread.badness);
+						scheduler.step(pc, pc + 1, 0);
 						break;
 					}
 				}
 
 				// Next thread
-				thread = scheduler.getNextThread();
+				pc = scheduler.getNextThreadPc();
 			}
 
-			// End current Generation and continue with the next. This compacts the Traces in the
-			// old Generation.
+			// End current Generation and continue with the next
 			scheduler.nextGeneration();
-		} while (inputItem !== null && inputItem !== undefined);
+		} while (inputItem !== null);
 
-		// Release the scheduler
-		this._releaseScheduler();
+		const result = new Result(scheduler.getAcceptingTraces());
 
-		return new Result(acceptingTraces, failingTraces);
+		// Clear the scheduler
+		scheduler.reset();
+
+		return result;
 	}
 }

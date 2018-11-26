@@ -1,88 +1,87 @@
 import Generation from './Generation';
-import Thread from './Thread';
+import Trace from './Trace';
+import Traces from './Traces';
 
-/**
- * Schedules Threads to run in the current or a future Generation.
- */
 export default class Scheduler {
-	private _generations: Generation[] = [];
-	private _generationsCompleted: number;
+	private _currentGeneration: Generation;
+	private _nextGeneration: Generation;
 
-	/**
-	 * @param numGenerations Number of Generations to plan ahead
-	 * @param programLength  Length of the program being run
-	 * @param oldThreadList  Array used for recycling Thread objects
-	 */
-	constructor(numGenerations: number, programLength: number, oldThreadList: Thread[]) {
-		// The active and scheduled generations
-		this._generations = [];
-		for (let i = 0; i < numGenerations; ++i) {
-			this._generations.push(new Generation(programLength, oldThreadList, i));
+	// Trace data for the current generation
+	private _traces: Traces;
+
+	// PCs of accepted threads in the current generation
+	private _acceptedPcs: number[] = [];
+
+	constructor(programLength: number) {
+		this._currentGeneration = new Generation(programLength);
+		this._nextGeneration = new Generation(programLength);
+		this._traces = new Traces(programLength);
+	}
+
+	public reset(): void {
+		this._currentGeneration.reset();
+		this._currentGeneration.add(0, 0);
+
+		this._acceptedPcs.length = 0;
+		this._traces.reset(true);
+	}
+
+	public getNextThreadPc(): number | null {
+		return this._currentGeneration.getNextPc();
+	}
+
+	public step(fromPc: number, toPc: number, badnessDelta: number) {
+		const alreadyScheduled = this._traces.has(toPc);
+		this._traces.add(fromPc, toPc);
+
+		const badness = this._currentGeneration.getBadness(fromPc) + badnessDelta;
+		if (alreadyScheduled) {
+			this._currentGeneration.reschedule(toPc, badness);
+			return;
 		}
-		// The number of generations executed so far
-		this._generationsCompleted = 0;
+
+		// Schedule the next step
+		this._currentGeneration.add(toPc, badness);
 	}
 
-	/**
-	 * Resets the Scheduler for reuse.
-	 */
-	reset() {
-		// Reset each generation
-		for (let i = 0, l = this._generations.length; i < l; ++i) {
-			this._generations[i].reset(i);
+	public stepToNextGeneration(fromPc: number, toPc: number) {
+		const alreadyScheduled = this._traces.hasSurvivor(toPc);
+		this._traces.addSurvivor(fromPc, toPc);
+
+		const badness = this._currentGeneration.getBadness(fromPc);
+		if (alreadyScheduled) {
+			this._nextGeneration.reschedule(toPc, badness);
+			return;
 		}
-		this._generationsCompleted = 0;
+
+		this._nextGeneration.add(toPc, badness);
 	}
 
-	private _getRelativeGeneration(generationOffset: number) {
-		// Determine generation to insert the new thread for
-		const numGenerations = this._generations.length;
-		if (generationOffset >= numGenerations) {
-			throw new Error('Not enough active generations to schedule that far ahead');
-		}
-		const generationNumber = this._generationsCompleted + generationOffset;
-		return this._generations[generationNumber % numGenerations];
+	public accept(pc: number): void {
+		this._acceptedPcs.push(pc);
+		this._traces.addSurvivor(pc, pc);
 	}
 
-	/**
-	 * Adds a Thread to the Generation at the given offset relative to the current one.
-	 *
-	 * @param generationOffset Offset of the target generation, relative to the current
-	 * @param pc               Program counter for the new Thread
-	 * @param parentThread     Thread which spawned the new Thread
-	 * @param badness          Increasing badness decreases thread priority
-	 *
-	 * @return The Thread that was added, or null if no thread was added
-	 */
-	addThread(
-		generationOffset: number,
-		pc: number,
-		parentThread?: Thread,
-		badness?: number
-	): Thread | null {
-		const generationForThread = this._getRelativeGeneration(generationOffset);
-
-		// Add thread to the generation
-		return generationForThread.addThread(pc, parentThread, badness);
+	public fail(_pc: number): void {
+		// TODO: track failures as the combination of input x instruction?
 	}
 
-	/**
-	 * Returns the next thread to run in the current Generation.
-	 *
-	 * @return The next Thread to run, or null if there are none left
-	 */
-	getNextThread(): Thread | null {
-		const currentGeneration = this._getRelativeGeneration(0);
-		return currentGeneration.getNextThread();
+	public record(pc: number, record: any): void {
+		this._traces.record(pc, record);
 	}
 
-	/**
-	 * Switches to the next Generation.
-	 */
-	nextGeneration() {
-		// Recycle current generation and move to next
-		const currentGeneration = this._getRelativeGeneration(0);
-		currentGeneration.reset(this._generationsCompleted + this._generations.length);
-		++this._generationsCompleted;
+	public nextGeneration(): void {
+		this._traces.buildSurvivorTraces();
+
+		this._traces.reset(false);
+
+		const gen = this._currentGeneration;
+		gen.reset();
+		this._currentGeneration = this._nextGeneration;
+		this._nextGeneration = gen;
+	}
+
+	public getAcceptingTraces(): Trace[] {
+		return this._traces.getTraces(this._acceptedPcs);
 	}
 }

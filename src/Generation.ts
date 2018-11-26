@@ -1,32 +1,12 @@
-import Thread from './Thread';
-
-function createThread(
-	oldThreads: Thread[],
-	pc: number,
-	programLength: number,
-	parentThread: Thread | undefined,
-	badness: number,
-	generationNumber: number
-): Thread {
-	if (!oldThreads.length) {
-		return new Thread(pc, programLength, parentThread, badness, generationNumber);
-	}
-
-	// Recycle existing thread
-	const thread = oldThreads.pop() as Thread;
-	thread.initialize(pc, programLength, parentThread, badness, generationNumber);
-	return thread;
-}
-
-function findInsertionIndex(threadList: Thread[], nextThreadIndex: number, badness: number) {
+function findInsertionIndex(pcs: number[], badnessByPc: number[], badness: number, first: number) {
 	// Perform a binary search to find the index of the first thread with lower badness
-	let low = nextThreadIndex;
-	let high = threadList.length;
+	let low = first;
+	let high = pcs.length;
 	while (low < high) {
 		// Use zero-filling shift as integer division
 		const mid = (low + high) >>> 1;
 		// Compare to mid point, preferring right in case of equality
-		if (badness < threadList[mid].badness) {
+		if (badness < badnessByPc[pcs[mid]]) {
 			// Thread goes in lower half
 			high = mid;
 		} else {
@@ -39,111 +19,66 @@ function findInsertionIndex(threadList: Thread[], nextThreadIndex: number, badne
 }
 
 /**
- * Represents the threads scheduled to operate on a single input item
+ * Schedules threads within a generation according to badness
  */
 export default class Generation {
-	private _threadList: Thread[] = [];
-	private _oldThreads: Thread[];
+	// Program counters of scheduled threads in order of execution
+	private _scheduledPcs: number[] = [];
+
+	// Index of the next thread to execute in the array above
 	private _nextThread: number = 0;
-	private _programLength: number;
-	private _threadsByProgramCounter: (Thread | null)[];
-	private _generationNumber: number;
 
-	/**
-	 * @param programLength    The length of the program being run
-	 * @param oldThreadList    Array used for recycling Thread objects
-	 * @param generationNumber The index of generation
-	 */
-	constructor(programLength: number, oldThreadList: Thread[], generationNumber: number) {
-		this._oldThreads = oldThreadList;
-		this._programLength = programLength;
-		this._threadsByProgramCounter = new Array(programLength);
-		this._generationNumber = generationNumber;
+	// Badness values for scheduled threads by program counter
+	private _badnessByPc: number[] = [];
+
+	constructor(programLength: number) {
+		for (let i = 0; i < programLength; ++i) {
+			this._badnessByPc.push(0);
+		}
 	}
 
-	/**
-	 * Resets the Generation for reuse.
-	 *
-	 * @param generationNumber The new index of this generation. Used to test if certain Traces have
-	 *                         processed a given PC before.
-	 */
-	reset(generationNumber: number) {
-		// Compact and recycle threads
-		let i, l;
-		for (i = 0, l = this._threadList.length; i < l; ++i) {
-			const thread = this._threadList[i];
-			thread.clear();
-			this._oldThreads.push(thread);
-		}
-		this._threadList.length = 0;
-		// Reset thread counter
-		this._nextThread = 0;
-		// Reset threads by program counter lookup
-		for (i = 0, l = this._programLength; i < l; ++i) {
-			this._threadsByProgramCounter[i] = null;
-		}
-
-		this._generationNumber = generationNumber;
+	public getBadness(pc: number): number {
+		return this._badnessByPc[pc];
 	}
 
-	/**
-	 * Adds a Thread to the Generation.
-	 *
-	 * Only a single thread can be added for each instruction, subsequent threads are joined with
-	 * the previous threads. All traces are preserved, but only a single thread continues execution.
-	 * This works, because instructions never depend on a thread's history.
-	 *
-	 * @param pc           Program counter for the new Thread
-	 * @param parentThread Thread which spawned the new Thread
-	 * @param badness      Increasing badness decreases thread priority
-	 *
-	 * @return The Thread that was added, or null if no thread was added
-	 */
-	addThread(pc: number, parentThread?: Thread, badness: number = 0): Thread | null {
-		// Only add threads for in-program locations
-		if (pc >= this._programLength) {
-			return null;
-		}
+	public add(pc: number, badness: number): void {
+		this._badnessByPc[pc] = badness;
+		const insertionIndex = findInsertionIndex(
+			this._scheduledPcs,
+			this._badnessByPc,
+			badness,
+			this._nextThread
+		);
+		this._scheduledPcs.splice(insertionIndex, 0, pc);
+	}
 
-		// If a thread for pc already exists in this generation, combine traces and return
-		const existingThreadForProgramCounter = this._threadsByProgramCounter[pc];
-		if (existingThreadForProgramCounter) {
-			// Detect repetition in the same generation, which would cause cyclic traces
-			if (!parentThread || !parentThread.trace.contains(pc, this._generationNumber)) {
-				// Non-cyclic trace, join threads
-				existingThreadForProgramCounter.join(parentThread, badness);
+	public reschedule(pc: number, badness: number): void {
+		const maxBadness = Math.max(this._badnessByPc[pc], badness);
+		if (this._badnessByPc[pc] !== maxBadness) {
+			// Remove any existing unexecuted thread in order to reschedule it
+			const existingThreadIndex = this._scheduledPcs.indexOf(pc, this._nextThread);
+			if (existingThreadIndex < 0) {
+				this._badnessByPc[pc] = maxBadness;
+				// Thread has already been executed, do not reschedule
+				return;
 			}
 
-			return null;
+			// Remove and re-schedule the thread
+			this._scheduledPcs.splice(existingThreadIndex, 1);
+			this.add(pc, maxBadness);
 		}
-
-		const thread = createThread(
-			this._oldThreads,
-			pc,
-			this._programLength,
-			parentThread,
-			badness,
-			this._generationNumber
-		);
-
-		// Schedule thread according to badness
-		const index = findInsertionIndex(this._threadList, this._nextThread, badness);
-		this._threadList.splice(index, 0, thread);
-
-		this._threadsByProgramCounter[pc] = thread;
-
-		return thread;
 	}
 
-	/**
-	 * Returns the next Thread to run for this generation.
-	 *
-	 * @return The Thread to run, or null if there are no threads left.
-	 */
-	getNextThread(): Thread | null {
-		if (this._nextThread >= this._threadList.length) {
+	public getNextPc(): number | null {
+		if (this._nextThread >= this._scheduledPcs.length) {
 			return null;
 		}
-		return this._threadList[this._nextThread++];
+		return this._scheduledPcs[this._nextThread++];
+	}
+
+	public reset(): void {
+		this._scheduledPcs.length = 0;
+		this._nextThread = 0;
+		this._badnessByPc.fill(0);
 	}
 }

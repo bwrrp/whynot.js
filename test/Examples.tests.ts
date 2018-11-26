@@ -132,8 +132,6 @@ describe('whynot.js examples', () => {
 			const failingResult = vm.execute(Array.from('abcf'));
 			expect(failingResult.success).toBe(false);
 			expect(failingResult.acceptingTraces.length).toBe(0);
-			// It will, however, return the last failing traces
-			expect(failingResult.failingTraces.length).toBe(2);
 		});
 
 		it('can complete a string based on a regex', () => {
@@ -450,6 +448,7 @@ describe('whynot.js examples', () => {
 			const result = vm.execute(['A', 'A', 'A', 'B', 'B', 'B']);
 			//                          0    1    2    3    4    5    6
 			//                                         '--- Expect CG to start here
+			expect(result.success).toBe(true);
 			const firstRecord = (function findFirstRecord(trace: Trace): number {
 				if (trace.records !== null) {
 					return trace.records[0];

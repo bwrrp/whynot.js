@@ -33,7 +33,6 @@ describe('VM', () => {
 			const result = vm.execute([1]);
 			expect(result.success).toBe(false);
 			expect(result.acceptingTraces.length).toBe(0);
-			expect(result.failingTraces.length).toBeGreaterThan(0);
 		});
 	});
 
@@ -69,10 +68,8 @@ describe('VM', () => {
 				condition = true;
 				const resultWithoutInput = vm.execute([]);
 				expect(resultWithoutInput.success).toBe(false);
-				expect(resultWithoutInput.failingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute([1]);
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
@@ -82,7 +79,6 @@ describe('VM', () => {
 				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute([1]);
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 		});
 
@@ -101,10 +97,8 @@ describe('VM', () => {
 			it('ends the thread if the condition predicate returns true', () => {
 				const resultWithoutInput = vm.execute([], { shouldFail: true });
 				expect(resultWithoutInput.success).toBe(false);
-				expect(resultWithoutInput.failingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute([1], { shouldFail: true });
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
@@ -113,7 +107,6 @@ describe('VM', () => {
 				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
 				const resultWithInput = vm.execute([1], { shouldFail: false });
 				expect(resultWithInput.success).toBe(false);
-				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 		});
 	});
@@ -146,7 +139,6 @@ describe('VM', () => {
 		});
 
 		it('lowers thread priority by its cost', () => {
-			debugger;
 			const leftResult = vmLeftBad.execute([]);
 			const rightResult = vmRightBad.execute([]);
 			expect(flattenTrace(leftResult.acceptingTraces[0])).toEqual([['B'], ['A']]);
@@ -177,7 +169,6 @@ describe('VM', () => {
 			const result = vm.execute(['bla']);
 			expect(result.success).toBe(false);
 			expect(result.acceptingTraces.length).toBe(0);
-			expect(result.failingTraces.length).toBe(1);
 		});
 
 		describe('with options', () => {
@@ -202,7 +193,6 @@ describe('VM', () => {
 				const result = vm.execute(['meep'], { shouldAccept: false });
 				expect(result.success).toBe(false);
 				expect(result.acceptingTraces.length).toBe(0);
-				expect(result.failingTraces.length).toBe(1);
 			});
 		});
 	});
@@ -226,6 +216,15 @@ describe('VM', () => {
 			const result = vm.execute([]);
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces.length).toBe(2);
+		});
+
+		it('fails the thread when given no targets', () => {
+			const vm = whynot.compileVM(assembler => {
+				assembler.jump([]);
+				assembler.accept();
+			});
+			const result = vm.execute([]);
+			expect(result.success).toBe(false);
 		});
 	});
 
@@ -264,9 +263,19 @@ describe('VM', () => {
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP-BLA']);
 		});
+
+		it('ignores null records', () => {
+			const vm = whynot.compileVM(assembler => {
+				assembler.record('meep', () => null);
+				assembler.accept();
+			});
+			const result = vm.execute([]);
+			expect(result.success).toBe(true);
+			expect(result.acceptingTraces[0].records).toEqual(null);
+		});
 	});
 
-	describe('reentrancy', () => {
+	describe.skip('reentrancy', () => {
 		let vm: VM<any[]>;
 		function getVM(): VM<any[]> {
 			return vm;
