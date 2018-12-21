@@ -8,8 +8,8 @@ const NUMBER_OF_SCHEDULED_GENERATIONS = 2;
 /**
  * A virtual machine to execute whynot programs.
  */
-export default class VM<I, O = void> {
-	private _program: Instruction<I, O>[];
+export default class VM<TInput, TOptions = void> {
+	private _program: Instruction<TInput, TOptions>[];
 	private _schedulers: Scheduler[] = [];
 	private _nextFreeScheduler: number = 0;
 	private _oldThreadList: Thread[];
@@ -19,7 +19,7 @@ export default class VM<I, O = void> {
 	 * @param oldThreadList Array used for recycling Thread objects. An existing array can be passed
 	 *                      in to share recycled threads between VMs.
 	 */
-	constructor(program: Instruction<I, O>[], oldThreadList: Thread[] = []) {
+	constructor(program: Instruction<TInput, TOptions>[], oldThreadList: Thread[] = []) {
 		this._program = program;
 
 		// Use multiple schedulers to make the VM reentrant. This way, one can implement recursion
@@ -59,7 +59,7 @@ export default class VM<I, O = void> {
 	 * @return Result of the execution, containing all Traces that lead to acceptance of the input,
 	 *         and all traces which lead to failure in the last Generation.
 	 */
-	execute(input: () => I | null, options?: O) {
+	execute(input: () => TInput | null, options?: TOptions) {
 		const scheduler = this._getScheduler();
 		const program = this._program;
 
@@ -72,7 +72,7 @@ export default class VM<I, O = void> {
 		const acceptingTraces = [];
 		const failingTraces = [];
 		let inputIndex = -1;
-		let inputItem: I | null;
+		let inputItem: TInput | null;
 		do {
 			// Get next thread to execute
 			let thread = scheduler.getNextThread();
@@ -102,7 +102,7 @@ export default class VM<I, O = void> {
 
 					case 'fail': {
 						// Is the failure conditional?
-						const func = instruction.func as FailFunc<O>;
+						const func = instruction.func as FailFunc<TOptions>;
 						const isFailingCondition = !func || func(options);
 						if (isFailingCondition) {
 							// Branch is forbidden, end the thread
@@ -131,7 +131,7 @@ export default class VM<I, O = void> {
 							break;
 						}
 						// Fail if input does not match
-						const func = instruction.func as TestFunc<I, O>;
+						const func = instruction.func as TestFunc<TInput, TOptions>;
 						const isInputAccepted = func(inputItem, instruction.data, options);
 						if (!isInputAccepted) {
 							failingTraces.push(thread.trace);
@@ -161,7 +161,7 @@ export default class VM<I, O = void> {
 
 					case 'record': {
 						// Invoke record callback
-						const func = instruction.func as RecordFunc<O>;
+						const func = instruction.func as RecordFunc<TOptions>;
 						const record = func(instruction.data, inputIndex, options);
 						if (record !== null && record !== undefined) {
 							if (thread.trace.records === null) {

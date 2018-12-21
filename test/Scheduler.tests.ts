@@ -1,5 +1,4 @@
 import Scheduler from '../src/Scheduler';
-import Thread from '../src/Thread';
 
 describe('Scheduler', () => {
 	let scheduler: Scheduler;

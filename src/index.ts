@@ -15,13 +15,13 @@ export { default as VM } from './VM';
  *
  * @return VM running the compiled program
  */
-export function compileVM<I, O = void>(
-	compile: (assembler: Assembler<I, O>) => void,
+export function compileVM<TInput, TOptions = void>(
+	compile: (assembler: Assembler<TInput, TOptions>) => void,
 	oldThreadList?: Thread[]
-): VM<I, O> {
-	const assembler = new Assembler<I, O>();
+): VM<TInput, TOptions> {
+	const assembler = new Assembler<TInput, TOptions>();
 	compile(assembler);
-	return new VM<I, O>(assembler.program, oldThreadList);
+	return new VM<TInput, TOptions>(assembler.program, oldThreadList);
 }
 
 export default { Assembler, VM, compileVM };

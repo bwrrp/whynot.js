@@ -1,6 +1,6 @@
 import Result from '../src/Result';
 import Trace from '../src/Trace';
-import { Assembler, VM, default as whynot } from '../src/index';
+import { VM, default as whynot } from '../src/index';
 
 describe('VM', () => {
 	function createInput(array: any[]): () => any | null {
