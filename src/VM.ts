@@ -52,14 +52,13 @@ export default class VM<TInput, TOptions = void> {
 	/**
 	 * Executes the program in the VM with the given input stream.
 	 *
-	 * @param input   Should return the next input item when called, or null when no further input
-	 *                is available.
+	 * @param input   An array of input items.
 	 * @param options Optional object passed to all instruction callbacks.
 	 *
 	 * @return Result of the execution, containing all Traces that lead to acceptance of the input,
 	 *         and all traces which lead to failure in the last Generation.
 	 */
-	execute(input: () => TInput | null, options?: TOptions) {
+	execute(input: TInput[], options?: TOptions): Result {
 		const scheduler = this._getScheduler();
 		const program = this._program;
 
@@ -71,6 +70,7 @@ export default class VM<TInput, TOptions = void> {
 
 		const acceptingTraces = [];
 		const failingTraces = [];
+		const inputLength = input.length;
 		let inputIndex = -1;
 		let inputItem: TInput | null;
 		do {
@@ -85,7 +85,7 @@ export default class VM<TInput, TOptions = void> {
 
 			// Read next input item
 			++inputIndex;
-			inputItem = input();
+			inputItem = inputIndex >= inputLength ? null : input[inputIndex];
 
 			while (thread) {
 				const instruction = program[thread.pc];

@@ -4,16 +4,6 @@ import { Assembler, VM, default as whynot } from '../src/index';
 import regexParser from './util/regexParser';
 
 describe('whynot.js examples', () => {
-	// All whynot VMs expect to receive their input through a function that returns the items one by
-	// one. The function should return null to indicate the end of input. Here's a simple helper
-	// which creates this iterator based on a string or array:
-	function createInput(input: { [key: number]: string }): () => string | null {
-		let i = 0;
-		return () => {
-			return input[i++] || null;
-		};
-	}
-
 	// whynot.js was designed to answer the question of *why* a given input does not match a given
 	// grammar. It can sometimes even tell you how to extend the input so that it will match. To
 	// illustrate this, consider a simple subset of regular expressions.
@@ -134,12 +124,12 @@ describe('whynot.js examples', () => {
 			const vm = compileRegexVM('abc(d|e)f', false);
 
 			// This regex should match the string 'abcdf'
-			const matchingResult = vm.execute(createInput('abcdf'));
+			const matchingResult = vm.execute(Array.from('abcdf'));
 			expect(matchingResult.success).toBe(true);
 			expect(matchingResult.acceptingTraces.length).toBe(1);
 
 			// But it won't match the string 'abcf'
-			const failingResult = vm.execute(createInput('abcf'));
+			const failingResult = vm.execute(Array.from('abcf'));
 			expect(failingResult.success).toBe(false);
 			expect(failingResult.acceptingTraces.length).toBe(0);
 			// It will, however, return the last failing traces
@@ -154,16 +144,16 @@ describe('whynot.js examples', () => {
 			// There are a few branches in this regex, we get different results based on which
 			// choices we remove by adding characters to the input. For instance, 'ad' fixes the
 			// first choice but not the second, so we get two results:
-			expect(flattenRecordStrings(vm.execute(createInput('ad')).acceptingTraces)).toEqual([
+			expect(flattenRecordStrings(vm.execute(Array.from('ad')).acceptingTraces)).toEqual([
 				'ade',
 				'adf'
 			]);
 			// Fixing both choices yields only a single result:
-			expect(flattenRecordStrings(vm.execute(createInput('bf')).acceptingTraces)).toEqual([
+			expect(flattenRecordStrings(vm.execute(Array.from('bf')).acceptingTraces)).toEqual([
 				'bcdf'
 			]);
 			// While leaving both open generates all strings accepted by the regex:
-			expect(flattenRecordStrings(vm.execute(createInput('d')).acceptingTraces)).toEqual([
+			expect(flattenRecordStrings(vm.execute(Array.from('d')).acceptingTraces)).toEqual([
 				'ade',
 				'bcde',
 				'adf',
@@ -171,9 +161,7 @@ describe('whynot.js examples', () => {
 			]);
 			// Finally, presenting an input which can not be made to match by adding
 			// characters yields no results:
-			expect(flattenRecordStrings(vm.execute(createInput('abc')).acceptingTraces)).toEqual(
-				[]
-			);
+			expect(flattenRecordStrings(vm.execute(Array.from('abc')).acceptingTraces)).toEqual([]);
 		});
 	});
 
@@ -332,7 +320,7 @@ describe('whynot.js examples', () => {
 
 			// This regex should match the string 'a', and generate extensions '[a]a[a]', '[b]a[a]',
 			// '[a]a[b]', '[b]a[b]'
-			const matchingResult = vm.execute(createInput('a'));
+			const matchingResult = vm.execute(Array.from('a'));
 			expect(matchingResult.success).toBe(true);
 			expect(matchingResult.acceptingTraces.length).toBe(1);
 
@@ -353,7 +341,7 @@ describe('whynot.js examples', () => {
 
 			// This regex should match the string 'aa', and generates all permutations of the string
 			// [a|b]a[a|b]a[a|b]
-			const matchingResult = vm.execute(createInput('aa'));
+			const matchingResult = vm.execute(Array.from('aa'));
 			expect(matchingResult.success).toBe(true);
 			expect(matchingResult.acceptingTraces.length).toBe(1);
 
@@ -376,7 +364,7 @@ describe('whynot.js examples', () => {
 
 			// This regex should match the string 'abc', and generates all permutations of the
 			// following string
-			const matchingResult = vm.execute(createInput('abc'));
+			const matchingResult = vm.execute(Array.from('abc'));
 			expect(matchingResult.success).toBe(true);
 			expect(matchingResult.acceptingTraces.length).toBe(1);
 
@@ -395,7 +383,7 @@ describe('whynot.js examples', () => {
 
 			// This regex should match the string 'abc', and generates all permutations of the
 			// following string
-			const matchingResult = vm.execute(createInput('aabbcaabbc'));
+			const matchingResult = vm.execute(Array.from('aabbcaabbc'));
 			expect(matchingResult.success).toBe(true);
 			expect(matchingResult.acceptingTraces.length).toBe(1);
 
@@ -414,7 +402,7 @@ describe('whynot.js examples', () => {
 
 			// This regex should match the string 'abc', and generates all permutations of the
 			// following string
-			const matchingResult = vm.execute(createInput('aabbcaabbcaabbc'));
+			const matchingResult = vm.execute(Array.from('aabbcaabbcaabbc'));
 			expect(matchingResult.success).toBe(true);
 			expect(matchingResult.acceptingTraces.length).toBe(1);
 
@@ -459,9 +447,9 @@ describe('whynot.js examples', () => {
 				assembler.accept();
 			});
 
-			const result = vm.execute(createInput(['A', 'A', 'A', 'B', 'B', 'B']));
-			//                                      0    1    2    3    4    5    6
-			//                                                     '--- Expect CG to start here
+			const result = vm.execute(['A', 'A', 'A', 'B', 'B', 'B']);
+			//                          0    1    2    3    4    5    6
+			//                                         '--- Expect CG to start here
 			const firstRecord = (function findFirstRecord(trace: Trace): number {
 				if (trace.records !== null) {
 					return trace.records[0];
@@ -508,9 +496,9 @@ describe('whynot.js examples', () => {
 				assembler.accept();
 			});
 
-			const result = vm.execute(createInput(['B', 'B', 'B', 'A', 'A', 'A']));
-			//                                      0    1    2    3    4    5    6
-			//                                                     '--- Expect CG to start here
+			const result = vm.execute(['B', 'B', 'B', 'A', 'A', 'A']);
+			//                          0    1    2    3    4    5    6
+			//                                         '--- Expect CG to start here
 			const firstRecord = (function findFirstRecord(trace: Trace): number {
 				if (trace.records !== null) {
 					return trace.records[0];

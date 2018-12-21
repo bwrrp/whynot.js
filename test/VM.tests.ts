@@ -3,19 +3,12 @@ import Trace from '../src/Trace';
 import { VM, default as whynot } from '../src/index';
 
 describe('VM', () => {
-	function createInput(array: any[]): () => any | null {
-		let i = 0;
-		return () => {
-			return array[i++] || null;
-		};
-	}
-
 	function flattenTrace(trace: Trace, records: number[] = [], flatTraces: number[][] = []) {
-		var combinedRecords = trace.records === null ? records : trace.records.concat(records);
+		const combinedRecords = trace.records === null ? records : trace.records.concat(records);
 		if (!trace.prefixes.length) {
 			flatTraces.push(combinedRecords);
 		} else {
-			for (var i = 0, l = trace.prefixes.length; i < l; ++i) {
+			for (let i = 0, l = trace.prefixes.length; i < l; ++i) {
 				flattenTrace(trace.prefixes[i], combinedRecords, flatTraces);
 			}
 		}
@@ -23,21 +16,21 @@ describe('VM', () => {
 	}
 
 	describe('accept', () => {
-		let vm: VM<void>;
+		let vm: VM<number>;
 		beforeEach(() => {
-			vm = whynot.compileVM<void>(assembler => {
+			vm = whynot.compileVM(assembler => {
 				assembler.accept();
 			});
 		});
 
 		it('generates an accepting trace at the end of input', () => {
-			const result = vm.execute(createInput([]));
+			const result = vm.execute([]);
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces.length).toBe(1);
 		});
 
 		it('fails when invoked with current input', () => {
-			const result = vm.execute(createInput([1]));
+			const result = vm.execute([1]);
 			expect(result.success).toBe(false);
 			expect(result.acceptingTraces.length).toBe(0);
 			expect(result.failingTraces.length).toBeGreaterThan(0);
@@ -46,24 +39,24 @@ describe('VM', () => {
 
 	describe('fail', () => {
 		describe('unconditional', () => {
-			let vm: VM<void>;
+			let vm: VM<number>;
 			beforeEach(() => {
-				vm = whynot.compileVM<void>(assembler => {
+				vm = whynot.compileVM(assembler => {
 					assembler.fail();
 				});
 			});
 
 			it('ends the thread', () => {
-				expect(vm.execute(createInput([])).success).toBe(false);
-				expect(vm.execute(createInput([1])).success).toBe(false);
+				expect(vm.execute([]).success).toBe(false);
+				expect(vm.execute([1]).success).toBe(false);
 			});
 		});
 
 		describe('conditional', () => {
-			let vm: VM<void>;
+			let vm: VM<number>;
 			let condition: boolean;
 			beforeEach(() => {
-				vm = whynot.compileVM<void>(assembler => {
+				vm = whynot.compileVM(assembler => {
 					assembler.fail(() => {
 						return condition;
 					});
@@ -74,20 +67,20 @@ describe('VM', () => {
 
 			it('ends the thread if the condition predicate returns true', () => {
 				condition = true;
-				const resultWithoutInput = vm.execute(createInput([]));
+				const resultWithoutInput = vm.execute([]);
 				expect(resultWithoutInput.success).toBe(false);
 				expect(resultWithoutInput.failingTraces.length).toEqual(1);
-				const resultWithInput = vm.execute(createInput([1]));
+				const resultWithInput = vm.execute([1]);
 				expect(resultWithInput.success).toBe(false);
 				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
 				condition = false;
-				const resultWithoutInput = vm.execute(createInput([]));
+				const resultWithoutInput = vm.execute([]);
 				expect(resultWithoutInput.success).toBe(true);
 				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
-				const resultWithInput = vm.execute(createInput([1]));
+				const resultWithInput = vm.execute([1]);
 				expect(resultWithInput.success).toBe(false);
 				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
@@ -97,7 +90,7 @@ describe('VM', () => {
 			type Options = { shouldFail: boolean };
 			let vm: VM<number, Options>;
 			beforeEach(() => {
-				vm = whynot.compileVM<number, Options>(assembler => {
+				vm = whynot.compileVM(assembler => {
 					assembler.fail(function(options) {
 						return !!options && options.shouldFail;
 					});
@@ -106,19 +99,19 @@ describe('VM', () => {
 			});
 
 			it('ends the thread if the condition predicate returns true', () => {
-				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: true });
+				const resultWithoutInput = vm.execute([], { shouldFail: true });
 				expect(resultWithoutInput.success).toBe(false);
 				expect(resultWithoutInput.failingTraces.length).toEqual(1);
-				const resultWithInput = vm.execute(createInput([1]), { shouldFail: true });
+				const resultWithInput = vm.execute([1], { shouldFail: true });
 				expect(resultWithInput.success).toBe(false);
 				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
 
 			it('continues the thread if the condition predicate returns false', () => {
-				const resultWithoutInput = vm.execute(createInput([]), { shouldFail: false });
+				const resultWithoutInput = vm.execute([], { shouldFail: false });
 				expect(resultWithoutInput.success).toBe(true);
 				expect(resultWithoutInput.acceptingTraces.length).toEqual(1);
-				const resultWithInput = vm.execute(createInput([1]), { shouldFail: false });
+				const resultWithInput = vm.execute([1], { shouldFail: false });
 				expect(resultWithInput.success).toBe(false);
 				expect(resultWithInput.failingTraces.length).toEqual(1);
 			});
@@ -130,7 +123,7 @@ describe('VM', () => {
 		let vmRightBad: VM<void>;
 		beforeEach(() => {
 			// Create two branches of equal length, one badness 1, the other 0
-			vmLeftBad = whynot.compileVM<void>(assembler => {
+			vmLeftBad = whynot.compileVM(assembler => {
 				assembler.jump([1, 4]); // 0
 				assembler.bad(100); // 1
 				assembler.record('A'); // 2
@@ -140,7 +133,7 @@ describe('VM', () => {
 				assembler.jump([7]); // 6
 				assembler.accept(); // 7
 			});
-			vmRightBad = whynot.compileVM<void>(assembler => {
+			vmRightBad = whynot.compileVM(assembler => {
 				assembler.jump([1, 4]); // 0
 				assembler.bad(1); // 1
 				assembler.record('A'); // 2
@@ -154,8 +147,8 @@ describe('VM', () => {
 
 		it('lowers thread priority by its cost', () => {
 			debugger;
-			const leftResult = vmLeftBad.execute(createInput([]));
-			const rightResult = vmRightBad.execute(createInput([]));
+			const leftResult = vmLeftBad.execute([]);
+			const rightResult = vmRightBad.execute([]);
 			expect(flattenTrace(leftResult.acceptingTraces[0])).toEqual([['B'], ['A']]);
 			expect(flattenTrace(rightResult.acceptingTraces[0])).toEqual([['A'], ['B']]);
 		});
@@ -168,20 +161,20 @@ describe('VM', () => {
 
 		let vm: VM<string>;
 		beforeEach(() => {
-			vm = whynot.compileVM<string>(assembler => {
+			vm = whynot.compileVM(assembler => {
 				assembler.test(isMeep);
 				assembler.accept();
 			});
 		});
 
 		it('moves a thread to the next generation when the test succeeds', () => {
-			const result = vm.execute(createInput(['meep']));
+			const result = vm.execute(['meep']);
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces.length).toBe(1);
 		});
 
 		it('ends the thread when the test fails', () => {
-			const result = vm.execute(createInput(['bla']));
+			const result = vm.execute(['bla']);
 			expect(result.success).toBe(false);
 			expect(result.acceptingTraces.length).toBe(0);
 			expect(result.failingTraces.length).toBe(1);
@@ -191,7 +184,7 @@ describe('VM', () => {
 			type Options = { shouldAccept: boolean };
 			let vm: VM<string, Options>;
 			beforeEach(() => {
-				vm = whynot.compileVM<string, Options>(assembler => {
+				vm = whynot.compileVM(assembler => {
 					assembler.test(function(_item: string, _data: any, options: any) {
 						return options.shouldAccept;
 					});
@@ -200,13 +193,13 @@ describe('VM', () => {
 			});
 
 			it('moves a thread to the next generation when the test succeeds', () => {
-				const result = vm.execute(createInput(['meep']), { shouldAccept: true });
+				const result = vm.execute(['meep'], { shouldAccept: true });
 				expect(result.success).toBe(true);
 				expect(result.acceptingTraces.length).toBe(1);
 			});
 
 			it('ends the thread when the test fails', () => {
-				const result = vm.execute(createInput(['meep']), { shouldAccept: false });
+				const result = vm.execute(['meep'], { shouldAccept: false });
 				expect(result.success).toBe(false);
 				expect(result.acceptingTraces.length).toBe(0);
 				expect(result.failingTraces.length).toBe(1);
@@ -220,7 +213,7 @@ describe('VM', () => {
 				assembler.jump([1]);
 				assembler.accept();
 			});
-			const result = vm.execute(createInput([]));
+			const result = vm.execute([]);
 			expect(result.success).toBe(true);
 		});
 
@@ -230,7 +223,7 @@ describe('VM', () => {
 				assembler.accept();
 				assembler.accept();
 			});
-			const result = vm.execute(createInput([]));
+			const result = vm.execute([]);
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces.length).toBe(2);
 		});
@@ -242,7 +235,7 @@ describe('VM', () => {
 				assembler.record('meep');
 				assembler.accept();
 			});
-			const result = vm.execute(createInput([]));
+			const result = vm.execute([]);
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces[0].records).toEqual(['meep']);
 		});
@@ -254,7 +247,7 @@ describe('VM', () => {
 				});
 				assembler.accept();
 			});
-			const result = vm.execute(createInput([]));
+			const result = vm.execute([]);
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP']);
 		});
@@ -267,7 +260,7 @@ describe('VM', () => {
 				});
 				assembler.accept();
 			});
-			const result = vm.execute(createInput([]), { suffix: 'BLA' });
+			const result = vm.execute([], { suffix: 'BLA' });
 			expect(result.success).toBe(true);
 			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP-BLA']);
 		});
@@ -279,10 +272,10 @@ describe('VM', () => {
 			return vm;
 		}
 		beforeEach(() => {
-			vm = whynot.compileVM<any[]>(assembler => {
+			vm = whynot.compileVM(assembler => {
 				const stackFrame: { info?: Result } = {};
 				assembler.test(item => {
-					stackFrame.info = getVM().execute(createInput(item));
+					stackFrame.info = getVM().execute(item);
 					return true;
 				});
 				assembler.record(null, () => {
@@ -306,7 +299,7 @@ describe('VM', () => {
 		}
 
 		it('invoking a VM while executing does not disturb the outer execution', () => {
-			const result = vm.execute(createInput([[[], []], [], [[[[]]], []]]));
+			const result = vm.execute([[[], []], [], [[[[]]], []]]);
 			expect(result.success).toBe(true);
 			expect(computeMaxDepth(result)).toBe(4);
 		});
