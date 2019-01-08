@@ -316,16 +316,13 @@ describe('VM', () => {
 		});
 	});
 
-	describe.skip('reentrancy', () => {
+	describe('reentrancy', () => {
 		let vm: VM<any[]>;
-		function getVM(): VM<any[]> {
-			return vm;
-		}
 		beforeEach(() => {
 			vm = whynot.compileVM(assembler => {
 				const stackFrame: { info?: Result } = {};
 				assembler.test(item => {
-					stackFrame.info = getVM().execute(item);
+					stackFrame.info = vm.execute(item);
 					return true;
 				});
 				assembler.record(null, () => {
@@ -336,11 +333,24 @@ describe('VM', () => {
 			});
 		});
 
+		function* getRecordsForTrace(trace: Trace): IterableIterator<Result> {
+			if (trace.records !== null) {
+				for (const record of trace.records) {
+					yield record;
+				}
+			}
+			for (const prefix of trace.prefixes) {
+				for (const record of getRecordsForTrace(prefix)) {
+					yield record;
+				}
+			}
+		}
+
 		function computeMaxDepth(result: Result): number {
 			return result.acceptingTraces.reduce(function(max: number, trace: Trace) {
 				const maxDepthForTrace =
 					1 +
-					trace.records!.reduce(function(max, result) {
+					[...getRecordsForTrace(trace)].reduce(function(max, result) {
 						const maxDepthForRecord = computeMaxDepth(result);
 						return Math.max(maxDepthForRecord, max);
 					}, 0);

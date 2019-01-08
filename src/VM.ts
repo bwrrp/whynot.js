@@ -7,14 +7,13 @@ import Scheduler from './Scheduler';
  */
 export default class VM<TInput, TOptions = void> {
 	private _program: Instruction<TInput, TOptions>[];
-	private _scheduler: Scheduler;
+	private _schedulers: Scheduler[] = [];
 
 	/**
 	 * @param program       The program to run, as created by the Assembler
 	 */
 	constructor(program: Instruction<TInput, TOptions>[]) {
 		this._program = program;
-		this._scheduler = new Scheduler(program.length);
 	}
 
 	/**
@@ -27,11 +26,10 @@ export default class VM<TInput, TOptions = void> {
 	 *         (if any)
 	 */
 	execute(input: TInput[], options?: TOptions): Result {
-		// TODO: pool these to make this function reentrant?
-		const scheduler = this._scheduler;
+		const scheduler = this._schedulers.pop() || new Scheduler(this._program.length);
 
 		// Add initial thread
-		this._scheduler.reset();
+		scheduler.reset();
 
 		const inputLength = input.length;
 		let inputIndex = -1;
@@ -81,7 +79,7 @@ export default class VM<TInput, TOptions = void> {
 
 					case 'test': {
 						// Fail if out of input
-						if (inputItem === null || inputItem === undefined) {
+						if (inputItem === null) {
 							scheduler.fail(pc);
 							break;
 						}
@@ -134,8 +132,9 @@ export default class VM<TInput, TOptions = void> {
 
 		const result = new Result(scheduler.getAcceptingTraces());
 
-		// Clear the scheduler
+		// Clear and recycle the scheduler
 		scheduler.reset();
+		this._schedulers.push(scheduler);
 
 		return result;
 	}
