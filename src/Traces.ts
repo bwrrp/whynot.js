@@ -1,5 +1,7 @@
 import Trace from './Trace';
 
+const EMPTY_SET: Set<Trace> = new Set();
+
 export default class Traces {
 	// Incoming steps (origin pc) by pc
 	private _fromByPc: number[][] = [];
@@ -62,17 +64,23 @@ export default class Traces {
 
 	public buildSurvivorTraces(): void {
 		const previousTraceBySurvivorPc = this._traceBySurvivorPc;
-		const prefixesByPc = new Map<number, Set<Trace>>();
+		const prefixesByPc = new Map<number, { isDone: boolean; prefixes: Set<Trace> }>();
 		const fromByPc = this._fromByPc;
 		const recordByPc = this._recordByPc;
 		function trace(pc: number): Set<Trace> {
-			let prefix = prefixesByPc.get(pc);
-			if (prefix !== undefined) {
-				return prefix;
+			const existingPrefixes = prefixesByPc.get(pc);
+			if (existingPrefixes !== undefined) {
+				if (!existingPrefixes.isDone) {
+					// Trace is a cycle, ignore this path
+					return EMPTY_SET;
+				}
+				return existingPrefixes.prefixes;
 			}
 
-			const prefixes: Set<Trace> = new Set();
-			prefixesByPc.set(pc, prefixes);
+			// Create new cache entry, marked as not done to detect cycles
+			const prefixes = new Set();
+			prefixesByPc.set(pc, { isDone: false, prefixes });
+
 			const startingTrace = previousTraceBySurvivorPc.get(pc);
 			if (startingTrace !== undefined) {
 				prefixes.add(startingTrace);
@@ -83,22 +91,26 @@ export default class Traces {
 				trace(fromPc).forEach(prefix => prefixes.add(prefix));
 			});
 
-			const record = recordByPc[pc];
-			if (record !== null) {
-				const prefixesArray = Array.from(prefixes);
-				prefixes.clear();
-				prefixes.add(
-					// TODO: merge record arrays over non-forking / non-joining edges
-					new Trace(
-						prefixesArray.length === 0 ||
-						(prefixesArray.length === 1 && prefixesArray[0] === Trace.EMPTY)
-							? []
-							: prefixesArray,
-						[record]
-					)
-				);
+			if (prefixes.size > 0) {
+				// Valid prefixes found, check for records
+				const record = recordByPc[pc];
+				if (record !== null) {
+					const prefixesArray = Array.from(prefixes);
+					prefixes.clear();
+					prefixes.add(
+						// TODO: merge record arrays over non-forking / non-joining edges
+						new Trace(
+							prefixesArray.length === 1 && prefixesArray[0] === Trace.EMPTY
+								? []
+								: prefixesArray,
+							[record]
+						)
+					);
+				}
 			}
 
+			// Mark cached entry as complete
+			prefixesByPc.get(pc)!.isDone = true;
 			return prefixes;
 		}
 

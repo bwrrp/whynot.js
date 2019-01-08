@@ -275,6 +275,47 @@ describe('VM', () => {
 		});
 	});
 
+	describe('repetition', () => {
+		function* enumeratePaths(trace: Trace): IterableIterator<string[]> {
+			if (trace.prefixes.length === 0) {
+				yield trace.records === null ? [] : (trace.records as string[]);
+				return;
+			}
+			for (const prefix of trace.prefixes) {
+				for (const path of enumeratePaths(prefix)) {
+					yield trace.records === null ? path : path.concat(trace.records as string[]);
+				}
+			}
+		}
+
+		it('can return unique traces for a program with repetition', () => {
+			// Run the following program with three input items:
+			// ,--------------------------------------------------------.
+			// `-> 0:jump -> 1:jump -> 2:test -> 3:rec. -> 4:jump -,-> 6:jump
+			//      \         `----> 5:rec. ----------------------'
+			//       `-> 7:accept
+			const vm = whynot.compileVM<number>(assembler => {
+				assembler.jump([1, 7]);
+				assembler.jump([2, 5]);
+				assembler.test(() => true);
+				assembler.record('T');
+				assembler.jump([6]);
+				assembler.record('M');
+				assembler.jump([0]);
+				assembler.accept();
+			});
+			const result = vm.execute([1, 2, 3]);
+			expect(result.success).toBe(true);
+			expect(
+				result.acceptingTraces.reduce(
+					(paths: string[][], trace: Trace) =>
+						paths.concat(Array.from(enumeratePaths(trace))),
+					[]
+				)
+			).toEqual([['T', 'T', 'T']]);
+		});
+	});
+
 	describe.skip('reentrancy', () => {
 		let vm: VM<any[]>;
 		function getVM(): VM<any[]> {
