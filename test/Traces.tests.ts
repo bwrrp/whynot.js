@@ -1,9 +1,10 @@
+import ProgramInfo from '../src/ProgramInfo';
 import Traces from '../src/Traces';
 
 describe('Traces', () => {
 	let traces: Traces;
 	beforeEach(() => {
-		traces = new Traces(10);
+		traces = new Traces(ProgramInfo.createStub(10));
 	});
 
 	describe('.reset()', () => {

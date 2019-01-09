@@ -1,4 +1,5 @@
 import { Instruction, FailFunc, RecordFunc, TestFunc } from './Instruction';
+import ProgramInfo from './ProgramInfo';
 import Result from './Result';
 import Scheduler from './Scheduler';
 
@@ -7,6 +8,7 @@ import Scheduler from './Scheduler';
  */
 export default class VM<TInput, TOptions = void> {
 	private _program: Instruction<TInput, TOptions>[];
+	private _programInfo: ProgramInfo;
 	private _schedulers: Scheduler[] = [];
 
 	/**
@@ -14,6 +16,7 @@ export default class VM<TInput, TOptions = void> {
 	 */
 	constructor(program: Instruction<TInput, TOptions>[]) {
 		this._program = program;
+		this._programInfo = ProgramInfo.fromProgram(program);
 	}
 
 	/**
@@ -26,7 +29,7 @@ export default class VM<TInput, TOptions = void> {
 	 *         (if any)
 	 */
 	execute(input: TInput[], options?: TOptions): Result {
-		const scheduler = this._schedulers.pop() || new Scheduler(this._program.length);
+		const scheduler = this._schedulers.pop() || new Scheduler(this._programInfo);
 
 		// Add initial thread
 		scheduler.reset();
@@ -60,8 +63,8 @@ export default class VM<TInput, TOptions = void> {
 
 					case 'fail': {
 						// Is the failure conditional?
-						const func = instruction.func as FailFunc<TOptions>;
-						const isFailingCondition = !func || func(options);
+						const func = instruction.func as FailFunc<TOptions> | null;
+						const isFailingCondition = func === null || func(options);
 						if (isFailingCondition) {
 							// Branch is forbidden, end the thread
 							scheduler.fail(pc);

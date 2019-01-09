@@ -1,10 +1,11 @@
+import ProgramInfo from '../src/ProgramInfo';
 import Scheduler from '../src/Scheduler';
 import Trace from '../src/Trace';
 
 describe('Scheduler', () => {
 	let scheduler: Scheduler;
 	beforeEach(() => {
-		scheduler = new Scheduler(10);
+		scheduler = new Scheduler(ProgramInfo.createStub(10));
 		scheduler.reset();
 	});
 

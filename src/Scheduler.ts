@@ -1,4 +1,5 @@
 import Generation from './Generation';
+import ProgramInfo from './ProgramInfo';
 import Trace from './Trace';
 import Traces from './Traces';
 
@@ -12,10 +13,10 @@ export default class Scheduler {
 	// PCs of accepted threads in the current generation
 	private _acceptedPcs: number[] = [];
 
-	constructor(programLength: number) {
-		this._currentGeneration = new Generation(programLength);
-		this._nextGeneration = new Generation(programLength);
-		this._traces = new Traces(programLength);
+	constructor(programInfo: ProgramInfo) {
+		this._currentGeneration = new Generation(programInfo.programLength);
+		this._nextGeneration = new Generation(programInfo.programLength);
+		this._traces = new Traces(programInfo);
 	}
 
 	public reset(): void {
