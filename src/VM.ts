@@ -17,6 +17,7 @@ export default class VM<TInput, TOptions = void> {
 	constructor(program: Instruction<TInput, TOptions>[]) {
 		this._program = program;
 		this._programInfo = ProgramInfo.fromProgram(program);
+		this._schedulers.push(new Scheduler(this._programInfo));
 	}
 
 	/**
