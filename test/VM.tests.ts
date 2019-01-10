@@ -314,6 +314,56 @@ describe('VM', () => {
 				)
 			).toEqual([['T', 'T', 'T']]);
 		});
+
+		it('can return unique traces for a program with multiple paths and badness', () => {
+			// Run the following program with one to three input items:
+			// With N being the following:
+			// 0:jump -> 1:test -> 2:record -> 3:jump -,->
+			//  `----> 4:record -> 5:bad -------------'
+			// The program is:
+			// 0:N -> 6:N -> 12:jump -> 13:N -,-> 19:accept
+			//                 `-------------'
+			const vm = whynot.compileVM<number>(assembler => {
+				// 0:N
+				assembler.jump([1, 4]);
+				assembler.test(() => true);
+				assembler.record('T1');
+				assembler.jump([6]);
+				assembler.record('M1');
+				assembler.bad(1);
+
+				// 6:N
+				assembler.jump([7, 10]);
+				assembler.test(() => true);
+				assembler.record('T2');
+				assembler.jump([12]);
+				assembler.record('M2');
+				assembler.bad(1);
+
+				// 12:jump
+				assembler.jump([13, 19]);
+
+				// 13:N
+				assembler.jump([14, 17]);
+				assembler.test(() => true);
+				assembler.record('T3');
+				assembler.jump([19]);
+				assembler.record('M3');
+				assembler.bad(1);
+
+				// 19:accept
+				assembler.accept();
+			});
+			const result = vm.execute([1, 2]);
+			expect(result.success).toBe(true);
+			expect(
+				result.acceptingTraces.reduce(
+					(paths: string[][], trace: Trace) =>
+						paths.concat(Array.from(enumeratePaths(trace))),
+					[]
+				)
+			).toEqual([['T1', 'T2'], ['T1', 'T2', 'M3'], ['T1', 'M2', 'T3'], ['M1', 'T2', 'T3']]);
+		});
 	});
 
 	describe('reentrancy', () => {

@@ -66,7 +66,7 @@ export default class Generation {
 		if (this._badnessByPc[pc] !== maxBadness) {
 			// Remove any existing unexecuted thread in order to reschedule it
 			const existingThreadIndex = this._scheduledPcs.indexOf(pc, this._nextThread);
-			if (existingThreadIndex < 0) {
+			if (existingThreadIndex < 0 || existingThreadIndex >= this._numScheduledPcs) {
 				this._badnessByPc[pc] = maxBadness;
 				// Thread has already been executed, do not reschedule
 				return;
