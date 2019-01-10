@@ -1,6 +1,6 @@
 function findInsertionIndex(
 	pcs: Uint16Array,
-	badnessByPc: number[],
+	badnessByPc: Uint8Array,
 	badness: number,
 	first: number,
 	length: number
@@ -36,13 +36,11 @@ export default class Generation {
 	private _nextThread: number = 0;
 
 	// Badness values for scheduled threads by program counter
-	private _badnessByPc: number[] = [];
+	private _badnessByPc: Uint8Array;
 
 	constructor(programLength: number) {
 		this._scheduledPcs = new Uint16Array(programLength);
-		for (let i = 0; i < programLength; ++i) {
-			this._badnessByPc.push(0);
-		}
+		this._badnessByPc = new Uint8Array(programLength);
 	}
 
 	public getBadness(pc: number): number {
