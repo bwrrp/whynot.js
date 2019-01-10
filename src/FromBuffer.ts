@@ -17,7 +17,7 @@ export default class FromBuffer {
 		this._buffer.fill(0, 0, this._mapping.length);
 	}
 
-	public push(fromPc: number, toPc: number): void {
+	public add(fromPc: number, toPc: number): void {
 		const length = this._buffer[toPc];
 		const offset = this._mapping[toPc];
 		this._buffer[toPc] += 1;

@@ -48,7 +48,7 @@ export default class Traces {
 	}
 
 	public add(fromPc: number, toPc: number): void {
-		this._fromByPc.push(fromPc, toPc);
+		this._fromByPc.add(fromPc, toPc);
 	}
 
 	public hasSurvivor(pc: number): boolean {
@@ -56,7 +56,7 @@ export default class Traces {
 	}
 
 	public addSurvivor(fromPc: number, toPc: number): void {
-		this._fromBySurvivorPc.push(fromPc, toPc);
+		this._fromBySurvivorPc.add(fromPc, toPc);
 		this._survivors.add(toPc);
 	}
 
