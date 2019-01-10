@@ -1,7 +1,13 @@
-function findInsertionIndex(pcs: number[], badnessByPc: number[], badness: number, first: number) {
+function findInsertionIndex(
+	pcs: Uint16Array,
+	badnessByPc: number[],
+	badness: number,
+	first: number,
+	length: number
+) {
 	// Perform a binary search to find the index of the first thread with lower badness
 	let low = first;
-	let high = pcs.length;
+	let high = length;
 	while (low < high) {
 		// Use zero-filling shift as integer division
 		const mid = (low + high) >>> 1;
@@ -23,7 +29,8 @@ function findInsertionIndex(pcs: number[], badnessByPc: number[], badness: numbe
  */
 export default class Generation {
 	// Program counters of scheduled threads in order of execution
-	private _scheduledPcs: number[] = [];
+	private _scheduledPcs: Uint16Array;
+	private _numScheduledPcs: number = 0;
 
 	// Index of the next thread to execute in the array above
 	private _nextThread: number = 0;
@@ -32,6 +39,7 @@ export default class Generation {
 	private _badnessByPc: number[] = [];
 
 	constructor(programLength: number) {
+		this._scheduledPcs = new Uint16Array(programLength);
 		for (let i = 0; i < programLength; ++i) {
 			this._badnessByPc.push(0);
 		}
@@ -47,9 +55,12 @@ export default class Generation {
 			this._scheduledPcs,
 			this._badnessByPc,
 			badness,
-			this._nextThread
+			this._nextThread,
+			this._numScheduledPcs
 		);
-		this._scheduledPcs.splice(insertionIndex, 0, pc);
+		this._scheduledPcs.copyWithin(insertionIndex + 1, insertionIndex, this._numScheduledPcs);
+		this._scheduledPcs[insertionIndex] = pc;
+		this._numScheduledPcs += 1;
 	}
 
 	public reschedule(pc: number, badness: number): void {
@@ -64,20 +75,26 @@ export default class Generation {
 			}
 
 			// Remove and re-schedule the thread
-			this._scheduledPcs.splice(existingThreadIndex, 1);
+			// TODO: use a single copyWithin call instead of two
+			this._scheduledPcs.copyWithin(
+				existingThreadIndex,
+				existingThreadIndex + 1,
+				this._numScheduledPcs
+			);
+			this._numScheduledPcs -= 1;
 			this.add(pc, maxBadness);
 		}
 	}
 
 	public getNextPc(): number | null {
-		if (this._nextThread >= this._scheduledPcs.length) {
+		if (this._nextThread >= this._numScheduledPcs) {
 			return null;
 		}
 		return this._scheduledPcs[this._nextThread++];
 	}
 
 	public reset(): void {
-		this._scheduledPcs.length = 0;
+		this._numScheduledPcs = 0;
 		this._nextThread = 0;
 		this._badnessByPc.fill(0);
 	}
