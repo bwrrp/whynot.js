@@ -38,6 +38,23 @@ export default class Tracer {
 		}
 	}
 
+	private mergeTraces(
+		prefixes: LazySet<Trace>,
+		pc: number,
+		startingFromBuffer: FromBuffer,
+		previousTraceBySurvivorPc: (Trace | null)[],
+		fromByPc: FromBuffer,
+		recordByPc: any[]
+	): LazySet<Trace> {
+		let isPrefixesReused = false;
+		startingFromBuffer.forEach(pc, fromPc => {
+			const traces = this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc);
+			prefixes = mergeLazySets(prefixes, traces, isPrefixesReused);
+			isPrefixesReused = prefixes === traces;
+		});
+		return prefixes;
+	}
+
 	private trace(
 		pc: number,
 		previousTraceBySurvivorPc: (Trace | null)[],
@@ -64,12 +81,14 @@ export default class Tracer {
 		} else if (!fromByPc.has(pc)) {
 			throw new Error(`Trace without source at pc ${pc}`);
 		}
-		fromByPc.forEach(pc, fromPc => {
-			prefixes = mergeLazySets(
-				prefixes,
-				this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc)
-			);
-		});
+		prefixes = this.mergeTraces(
+			prefixes,
+			pc,
+			fromByPc,
+			previousTraceBySurvivorPc,
+			fromByPc,
+			recordByPc
+		);
 
 		if (prefixes !== null) {
 			// Valid prefixes found, check for records
@@ -104,13 +123,14 @@ export default class Tracer {
 				continue;
 			}
 
-			let prefixes: LazySet<Trace> = null;
-			fromBySurvivorPc.forEach(pc, fromPc => {
-				prefixes = mergeLazySets(
-					prefixes,
-					this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc)
-				);
-			});
+			const prefixes: LazySet<Trace> = this.mergeTraces(
+				null,
+				pc,
+				fromBySurvivorPc,
+				previousTraceBySurvivorPc,
+				fromByPc,
+				recordByPc
+			);
 			newTraceBySurvivorPc[pc] = createOrReuseTrace(prefixes!, null);
 		}
 		// Free prefix sets for GC
