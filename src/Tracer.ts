@@ -1,10 +1,24 @@
 import FromBuffer from './FromBuffer';
+import { LazySet, mergeLazySets } from './LazySet';
 import Trace from './Trace';
 
-const EMPTY_SET: Set<Trace> = new Set();
+function createOrReuseTrace(prefixes: Exclude<LazySet<Trace>, null>, records: any[] | null): Trace {
+	let prefixesArray: Trace[];
+	if (records === null) {
+		if (!Array.isArray(prefixes)) {
+			return prefixes;
+		}
+		prefixesArray = prefixes;
+	} else if (prefixes === Trace.EMPTY) {
+		// No need to include empty prefixes on the new trace with a record
+		prefixesArray = [];
+	} else if (Array.isArray(prefixes)) {
+		prefixesArray = prefixes;
+	} else {
+		prefixesArray = [prefixes];
+	}
 
-function createOrReuseTrace(prefixes: Trace[]) {
-	return prefixes.length === 1 ? prefixes[0] : new Trace(prefixes, null);
+	return new Trace(prefixesArray, records);
 }
 
 enum TracingState {
@@ -15,7 +29,7 @@ enum TracingState {
 
 export default class Tracer {
 	private _stateByPc: TracingState[] = [];
-	private _prefixesByPc: (Set<Trace> | null)[] = [];
+	private _prefixesByPc: LazySet<Trace>[] = [];
 
 	constructor(programLength: number) {
 		for (let i = 0; i < programLength; ++i) {
@@ -29,53 +43,44 @@ export default class Tracer {
 		previousTraceBySurvivorPc: (Trace | null)[],
 		fromByPc: FromBuffer,
 		recordByPc: any[]
-	): Set<Trace> {
+	): LazySet<Trace> {
 		const state = this._stateByPc[pc];
 		switch (state) {
 			case TracingState.DONE:
-				return this._prefixesByPc[pc]!;
+				return this._prefixesByPc[pc];
 
 			case TracingState.IN_CURRENT_PATH:
 				// Trace is a cycle, ignore this path
-				return EMPTY_SET;
+				return null;
 		}
 
-		// Create new cache entry and mark its state to detect cycles
-		const prefixes = new Set();
-		this._prefixesByPc[pc] = prefixes;
+		// Mark state to detect cycles
 		this._stateByPc[pc] = TracingState.IN_CURRENT_PATH;
 
+		let prefixes: LazySet<Trace> = null;
 		const startingTrace = previousTraceBySurvivorPc[pc];
 		if (startingTrace !== null) {
-			prefixes.add(startingTrace);
+			prefixes = startingTrace;
 		} else if (!fromByPc.has(pc)) {
 			throw new Error(`Trace without source at pc ${pc}`);
 		}
 		fromByPc.forEach(pc, fromPc => {
-			this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc).forEach(prefix =>
-				prefixes.add(prefix)
+			prefixes = mergeLazySets(
+				prefixes,
+				this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc)
 			);
 		});
 
-		if (prefixes.size > 0) {
+		if (prefixes !== null) {
 			// Valid prefixes found, check for records
 			const record = recordByPc[pc];
 			if (record !== null) {
-				const prefixesArray = Array.from(prefixes);
-				prefixes.clear();
-				prefixes.add(
-					// TODO: merge record arrays over non-forking / non-joining edges
-					new Trace(
-						prefixesArray.length === 1 && prefixesArray[0] === Trace.EMPTY
-							? []
-							: prefixesArray,
-						[record]
-					)
-				);
+				prefixes = createOrReuseTrace(prefixes, [record]);
 			}
 		}
 
-		// Mark cached entry as complete
+		// Add to cache and mark as complete
+		this._prefixesByPc[pc] = prefixes;
 		this._stateByPc[pc] = TracingState.DONE;
 		return prefixes;
 	}
@@ -99,13 +104,14 @@ export default class Tracer {
 				continue;
 			}
 
-			const prefixes: Set<Trace> = new Set();
+			let prefixes: LazySet<Trace> = null;
 			fromBySurvivorPc.forEach(pc, fromPc => {
-				this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc).forEach(trace =>
-					prefixes.add(trace)
+				prefixes = mergeLazySets(
+					prefixes,
+					this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc)
 				);
 			});
-			newTraceBySurvivorPc[pc] = createOrReuseTrace(Array.from(prefixes));
+			newTraceBySurvivorPc[pc] = createOrReuseTrace(prefixes!, null);
 		}
 		// Free prefix sets for GC
 		this._prefixesByPc.fill(null);
