@@ -1,5 +1,5 @@
 import Assembler from '../src/Assembler';
-import { RecordFunc } from '../src/Instruction';
+import { RecordFunc, Operation } from '../src/Instruction';
 
 describe('Assembler', () => {
 	let assembler: Assembler<void>;
@@ -14,13 +14,13 @@ describe('Assembler', () => {
 	describe('.test()', () => {
 		it('generates a test instruction', () => {
 			const instruction = assembler.test(truth);
-			expect(instruction.op).toBe('test');
+			expect(instruction.op).toBe(Operation.TEST);
 			expect(instruction.func).toBe(truth);
 		});
 
 		it('generates a test instruction with data', () => {
 			const instruction = assembler.test(truth, 'meep');
-			expect(instruction.op).toBe('test');
+			expect(instruction.op).toBe(Operation.TEST);
 			expect(instruction.func).toBe(truth);
 			expect(instruction.data).toBe('meep');
 		});
@@ -34,7 +34,7 @@ describe('Assembler', () => {
 	describe('.jump()', () => {
 		it('generates a jump instruction', () => {
 			const instruction = assembler.jump([1, 2, 3]);
-			expect(instruction.op).toBe('jump');
+			expect(instruction.op).toBe(Operation.JUMP);
 			expect(instruction.data).toEqual([1, 2, 3]);
 		});
 
@@ -50,7 +50,7 @@ describe('Assembler', () => {
 		describe('without recorder', () => {
 			it('generates a record instruction', () => {
 				const instruction = assembler.record(data);
-				expect(instruction.op).toBe('record');
+				expect(instruction.op).toBe(Operation.RECORD);
 				expect((instruction.func as RecordFunc)(instruction.data, 0)).toBe(data);
 			});
 
@@ -66,7 +66,7 @@ describe('Assembler', () => {
 
 			it('generates a record instruction', () => {
 				const instruction = assembler.record(data, recorder);
-				expect(instruction.op).toBe('record');
+				expect(instruction.op).toBe(Operation.RECORD);
 				expect((instruction.func as RecordFunc)(instruction.data, 0)).toBe('meep');
 			});
 
@@ -80,7 +80,7 @@ describe('Assembler', () => {
 	describe('.bad()', () => {
 		it('generates a bad instruction', () => {
 			const instruction = assembler.bad();
-			expect(instruction.op).toBe('bad');
+			expect(instruction.op).toBe(Operation.BAD);
 		});
 
 		it('appends the instruction to the program', () => {
@@ -92,7 +92,7 @@ describe('Assembler', () => {
 	describe('.accept()', () => {
 		it('generates an accept instruction', () => {
 			const instruction = assembler.accept();
-			expect(instruction.op).toBe('accept');
+			expect(instruction.op).toBe(Operation.ACCEPT);
 		});
 
 		it('appends the instruction to the program', () => {
@@ -105,7 +105,7 @@ describe('Assembler', () => {
 		describe('unconditional', () => {
 			it('generates a fail instruction', () => {
 				const instruction = assembler.fail();
-				expect(instruction.op).toBe('fail');
+				expect(instruction.op).toBe(Operation.FAIL);
 				expect(instruction.func).toBe(null);
 			});
 
@@ -121,7 +121,7 @@ describe('Assembler', () => {
 
 			it('generates a fail instruction', () => {
 				const instruction = assembler.fail(conditional);
-				expect(instruction.op).toBe('fail');
+				expect(instruction.op).toBe(Operation.FAIL);
 				expect(instruction.func).toBe(conditional);
 			});
 

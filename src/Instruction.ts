@@ -10,11 +10,20 @@ export type RecordFunc<TOptions = void> = (
 	options?: TOptions
 ) => any | null;
 
+export enum Operation {
+	ACCEPT,
+	BAD,
+	FAIL,
+	JUMP,
+	RECORD,
+	TEST
+}
+
 /**
  * Represents a single instruction in a whynot program.
  */
 export interface Instruction<TInput, TOptions = void> {
-	op: string;
+	op: Operation;
 	func?: FailFunc<TOptions> | TestFunc<TInput, TOptions> | RecordFunc<TOptions> | null;
 	data?: any;
 }

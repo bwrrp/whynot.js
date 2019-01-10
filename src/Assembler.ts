@@ -1,8 +1,8 @@
-import { Instruction, FailFunc, TestFunc, RecordFunc } from './Instruction';
+import { Instruction, FailFunc, TestFunc, RecordFunc, Operation } from './Instruction';
 
 function addInstruction<TInput, TOptions>(
 	program: Instruction<TInput, TOptions>[],
-	op: string,
+	op: Operation,
 	func: FailFunc<TOptions> | TestFunc<TInput, TOptions> | RecordFunc<TOptions> | null,
 	data: any
 ): Instruction<TInput, TOptions> {
@@ -34,7 +34,12 @@ export default class Assembler<TInput, TOptions = void> {
 	 * @return The new instruction
 	 */
 	test(matcher: TestFunc<TInput, TOptions>, data?: any): Instruction<TInput, TOptions> {
-		return addInstruction(this.program, 'test', matcher, data === undefined ? null : data);
+		return addInstruction(
+			this.program,
+			Operation.TEST,
+			matcher,
+			data === undefined ? null : data
+		);
 	}
 
 	/**
@@ -46,7 +51,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 * @return The new instruction
 	 */
 	jump(targets: number[]): Instruction<TInput, TOptions> {
-		return addInstruction(this.program, 'jump', null, targets);
+		return addInstruction(this.program, Operation.JUMP, null, targets);
 	}
 
 	/**
@@ -63,7 +68,7 @@ export default class Assembler<TInput, TOptions = void> {
 		data: any,
 		recorder: RecordFunc<TOptions> = defaultRecorder
 	): Instruction<TInput, TOptions> {
-		return addInstruction(this.program, 'record', recorder, data);
+		return addInstruction(this.program, Operation.RECORD, recorder, data);
 	}
 
 	/**
@@ -75,7 +80,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 * @return The new instruction
 	 */
 	bad(cost: number = 1): Instruction<TInput, TOptions> {
-		return addInstruction(this.program, 'bad', null, cost);
+		return addInstruction(this.program, Operation.BAD, null, cost);
 	}
 
 	/**
@@ -85,7 +90,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 * @return The new instruction
 	 */
 	accept(): Instruction<TInput, TOptions> {
-		return addInstruction(this.program, 'accept', null, null);
+		return addInstruction(this.program, Operation.ACCEPT, null, null);
 	}
 
 	/**
@@ -97,6 +102,11 @@ export default class Assembler<TInput, TOptions = void> {
 	 * @return The new instruction
 	 */
 	fail(predicate?: FailFunc<TOptions>): Instruction<TInput, TOptions> {
-		return addInstruction<TInput, TOptions>(this.program, 'fail', predicate || null, null);
+		return addInstruction<TInput, TOptions>(
+			this.program,
+			Operation.FAIL,
+			predicate || null,
+			null
+		);
 	}
 }

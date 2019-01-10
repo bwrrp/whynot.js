@@ -1,4 +1,4 @@
-import { Instruction } from './Instruction';
+import { Instruction, Operation } from './Instruction';
 
 export default class ProgramInfo {
 	private constructor(
@@ -21,7 +21,7 @@ export default class ProgramInfo {
 		});
 		program.forEach((instruction, pc) => {
 			switch (instruction.op) {
-				case 'fail':
+				case Operation.FAIL:
 					if (instruction.func === null) {
 						// Unconditional fail, threads will never continue past this instruction
 						return;
@@ -32,15 +32,15 @@ export default class ProgramInfo {
 					maxFromByPc[pc + 1] += 1;
 					break;
 
-				case 'bad':
-				case 'record':
+				case Operation.BAD:
+				case Operation.RECORD:
 					if (pc + 1 >= programLength) {
 						throw new Error('Invalid program: program could run past end');
 					}
 					maxFromByPc[pc + 1] += 1;
 					break;
 
-				case 'jump':
+				case Operation.JUMP:
 					const targets = instruction.data as number[];
 					targets.forEach(targetPc => {
 						if (targetPc < 0 || targetPc >= programLength) {
@@ -50,14 +50,14 @@ export default class ProgramInfo {
 					});
 					break;
 
-				case 'test':
+				case Operation.TEST:
 					if (pc + 1 >= programLength) {
 						throw new Error('Invalid program: program could run past end');
 					}
 					maxSurvivorFromByPc[pc + 1] += 1;
 					break;
 
-				case 'accept':
+				case Operation.ACCEPT:
 					maxSurvivorFromByPc[pc] += 1;
 					break;
 			}

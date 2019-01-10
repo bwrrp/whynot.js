@@ -1,4 +1,4 @@
-import { Instruction, FailFunc, RecordFunc, TestFunc } from './Instruction';
+import { Instruction, FailFunc, RecordFunc, TestFunc, Operation } from './Instruction';
 import ProgramInfo from './ProgramInfo';
 import Result from './Result';
 import Scheduler from './Scheduler';
@@ -53,7 +53,7 @@ export default class VM<TInput, TOptions = void> {
 				const instruction = this._program[pc];
 
 				switch (instruction.op) {
-					case 'accept':
+					case Operation.ACCEPT:
 						// Only accept if we reached the end of the input
 						if (inputItem === null) {
 							scheduler.accept(pc);
@@ -62,7 +62,7 @@ export default class VM<TInput, TOptions = void> {
 						}
 						break;
 
-					case 'fail': {
+					case Operation.FAIL: {
 						// Is the failure conditional?
 						const func = instruction.func as FailFunc<TOptions> | null;
 						const isFailingCondition = func === null || func(options);
@@ -76,12 +76,12 @@ export default class VM<TInput, TOptions = void> {
 						break;
 					}
 
-					case 'bad':
+					case Operation.BAD:
 						// Continue at next pc with added badness
 						scheduler.step(pc, pc + 1, instruction.data as number);
 						break;
 
-					case 'test': {
+					case Operation.TEST: {
 						// Fail if out of input
 						if (inputItem === null) {
 							scheduler.fail(pc);
@@ -99,7 +99,7 @@ export default class VM<TInput, TOptions = void> {
 						break;
 					}
 
-					case 'jump': {
+					case Operation.JUMP: {
 						// Spawn new threads for all targets
 						const targetPcs = instruction.data as number[];
 						const numTargets = targetPcs.length;
@@ -113,7 +113,7 @@ export default class VM<TInput, TOptions = void> {
 						break;
 					}
 
-					case 'record': {
+					case Operation.RECORD: {
 						// Invoke record callback
 						const func = instruction.func as RecordFunc<TOptions>;
 						const record = func(instruction.data, inputIndex, options);
