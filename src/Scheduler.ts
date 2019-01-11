@@ -3,12 +3,12 @@ import ProgramInfo from './ProgramInfo';
 import Trace from './Trace';
 import Traces from './Traces';
 
-export default class Scheduler {
+export default class Scheduler<TRecord> {
 	private _currentGeneration: Generation;
 	private _nextGeneration: Generation;
 
 	// Trace data for the current generation
-	private _traces: Traces;
+	private _traces: Traces<TRecord>;
 
 	// PCs of accepted threads in the current generation
 	private _acceptedPcs: number[] = [];
@@ -82,7 +82,7 @@ export default class Scheduler {
 		this._nextGeneration = gen;
 	}
 
-	public getAcceptingTraces(): Trace[] {
+	public getAcceptingTraces(): Trace<TRecord>[] {
 		return this._traces.getTraces(this._acceptedPcs);
 	}
 }

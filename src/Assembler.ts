@@ -1,25 +1,25 @@
 import { Instruction, FailFunc, TestFunc, RecordFunc, Operation } from './Instruction';
 
-function addInstruction<TInput, TOptions>(
-	program: Instruction<TInput, TOptions>[],
+function addInstruction<TInput, TRecord, TOptions>(
+	program: Instruction<TInput, TRecord, TOptions>[],
 	op: Operation,
-	func: FailFunc<TOptions> | TestFunc<TInput, TOptions> | RecordFunc<TOptions> | null,
+	func: FailFunc<TOptions> | TestFunc<TInput, TOptions> | RecordFunc<TRecord, TOptions> | null,
 	data: any
-): Instruction<TInput, TOptions> {
+): Instruction<TInput, TRecord, TOptions> {
 	const instruction = { op, func, data };
 	program.push(instruction);
 	return instruction;
 }
 
-function defaultRecorder(data: any, _inputIndex: number) {
+function defaultRecorder<TRecord>(data: TRecord, _inputIndex: number): TRecord {
 	return data;
 }
 
 /**
  * The Assembler is used to generate a whynot program by appending instructions.
  */
-export default class Assembler<TInput, TOptions = void> {
-	program: Instruction<TInput, TOptions>[] = [];
+export default class Assembler<TInput, TRecord, TOptions = void> {
+	program: Instruction<TInput, TRecord, TOptions>[] = [];
 
 	/**
 	 * The 'test' instruction validates and consumes an input item.
@@ -33,7 +33,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 *
 	 * @return The new instruction
 	 */
-	test(matcher: TestFunc<TInput, TOptions>, data?: any): Instruction<TInput, TOptions> {
+	test(matcher: TestFunc<TInput, TOptions>, data?: any): Instruction<TInput, TRecord, TOptions> {
 		return addInstruction(
 			this.program,
 			Operation.TEST,
@@ -50,7 +50,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 *
 	 * @return The new instruction
 	 */
-	jump(targets: number[]): Instruction<TInput, TOptions> {
+	jump(targets: number[]): Instruction<TInput, TRecord, TOptions> {
 		return addInstruction(this.program, Operation.JUMP, null, targets);
 	}
 
@@ -64,11 +64,16 @@ export default class Assembler<TInput, TOptions = void> {
 	 *
 	 * @return The new instruction
 	 */
-	record(
-		data: any,
-		recorder: RecordFunc<TOptions> = defaultRecorder
-	): Instruction<TInput, TOptions> {
-		return addInstruction(this.program, Operation.RECORD, recorder, data);
+	record<TRecorder>(
+		data: TRecorder extends undefined ? TRecord : any,
+		recorder?: RecordFunc<TRecord, TOptions>
+	): Instruction<TInput, TRecord, TOptions> {
+		return addInstruction(
+			this.program,
+			Operation.RECORD,
+			recorder === undefined ? defaultRecorder : recorder,
+			data
+		);
 	}
 
 	/**
@@ -79,7 +84,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 *
 	 * @return The new instruction
 	 */
-	bad(cost: number = 1): Instruction<TInput, TOptions> {
+	bad(cost: number = 1): Instruction<TInput, TRecord, TOptions> {
 		return addInstruction(this.program, Operation.BAD, null, cost);
 	}
 
@@ -89,7 +94,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 *
 	 * @return The new instruction
 	 */
-	accept(): Instruction<TInput, TOptions> {
+	accept(): Instruction<TInput, TRecord, TOptions> {
 		return addInstruction(this.program, Operation.ACCEPT, null, null);
 	}
 
@@ -101,12 +106,7 @@ export default class Assembler<TInput, TOptions = void> {
 	 *
 	 * @return The new instruction
 	 */
-	fail(predicate?: FailFunc<TOptions>): Instruction<TInput, TOptions> {
-		return addInstruction<TInput, TOptions>(
-			this.program,
-			Operation.FAIL,
-			predicate || null,
-			null
-		);
+	fail(predicate?: FailFunc<TOptions>): Instruction<TInput, TRecord, TOptions> {
+		return addInstruction(this.program, Operation.FAIL, predicate || null, null);
 	}
 }

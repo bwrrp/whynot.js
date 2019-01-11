@@ -2,9 +2,9 @@ import Assembler from '../src/Assembler';
 import { RecordFunc, Operation } from '../src/Instruction';
 
 describe('Assembler', () => {
-	let assembler: Assembler<void>;
+	let assembler: Assembler<void, object | string>;
 	beforeEach(() => {
-		assembler = new Assembler<void>();
+		assembler = new Assembler();
 	});
 
 	function truth() {
@@ -51,7 +51,7 @@ describe('Assembler', () => {
 			it('generates a record instruction', () => {
 				const instruction = assembler.record(data);
 				expect(instruction.op).toBe(Operation.RECORD);
-				expect((instruction.func as RecordFunc)(instruction.data, 0)).toBe(data);
+				expect((instruction.func as RecordFunc<object>)(instruction.data, 0)).toBe(data);
 			});
 
 			it('appends the instruction to the program', () => {
@@ -60,14 +60,14 @@ describe('Assembler', () => {
 			});
 		});
 		describe('with recorder', () => {
-			function recorder(_data: any, _index: number) {
+			function recorder(_data: object, _index: number) {
 				return 'meep';
 			}
 
 			it('generates a record instruction', () => {
 				const instruction = assembler.record(data, recorder);
 				expect(instruction.op).toBe(Operation.RECORD);
-				expect((instruction.func as RecordFunc)(instruction.data, 0)).toBe('meep');
+				expect((instruction.func as RecordFunc<any>)(instruction.data, 0)).toBe('meep');
 			});
 
 			it('appends the instruction to the program', () => {

@@ -12,12 +12,12 @@ export { default as VM } from './VM';
  *
  * @return VM running the compiled program
  */
-export function compileVM<TInput, TOptions = void>(
-	compile: (assembler: Assembler<TInput, TOptions>) => void
-): VM<TInput, TOptions> {
-	const assembler = new Assembler<TInput, TOptions>();
+export function compileVM<TInput, TRecord = void, TOptions = void>(
+	compile: (assembler: Assembler<TInput, TRecord, TOptions>) => void
+): VM<TInput, TRecord, TOptions> {
+	const assembler = new Assembler<TInput, TRecord, TOptions>();
 	compile(assembler);
-	return new VM<TInput, TOptions>(assembler.program);
+	return new VM<TInput, TRecord, TOptions>(assembler.program);
 }
 
 export default { Assembler, VM, compileVM };

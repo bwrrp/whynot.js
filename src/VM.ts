@@ -6,15 +6,15 @@ import Scheduler from './Scheduler';
 /**
  * A virtual machine to execute whynot programs.
  */
-export default class VM<TInput, TOptions = void> {
-	private _program: Instruction<TInput, TOptions>[];
+export default class VM<TInput, TRecord, TOptions = void> {
+	private _program: Instruction<TInput, TRecord, TOptions>[];
 	private _programInfo: ProgramInfo;
-	private _schedulers: Scheduler[] = [];
+	private _schedulers: Scheduler<TRecord>[] = [];
 
 	/**
 	 * @param program       The program to run, as created by the Assembler
 	 */
-	constructor(program: Instruction<TInput, TOptions>[]) {
+	constructor(program: Instruction<TInput, TRecord, TOptions>[]) {
 		this._program = program;
 		this._programInfo = ProgramInfo.fromProgram(program);
 		this._schedulers.push(new Scheduler(this._programInfo));
@@ -29,7 +29,7 @@ export default class VM<TInput, TOptions = void> {
 	 * @return Result of the execution, containing all Traces that lead to acceptance of the input
 	 *         (if any)
 	 */
-	execute(input: TInput[], options?: TOptions): Result {
+	execute(input: TInput[], options?: TOptions): Result<TRecord> {
 		const scheduler = this._schedulers.pop() || new Scheduler(this._programInfo);
 
 		// Add initial thread
@@ -115,7 +115,7 @@ export default class VM<TInput, TOptions = void> {
 
 					case Operation.RECORD: {
 						// Invoke record callback
-						const func = instruction.func as RecordFunc<TOptions>;
+						const func = instruction.func as RecordFunc<TRecord, TOptions>;
 						const record = func(instruction.data, inputIndex, options);
 						if (record !== null && record !== undefined) {
 							scheduler.record(pc, record);

@@ -1,8 +1,8 @@
 /**
  * A Trace represents the execution history of a Thread
  */
-export default class Trace {
-	constructor(public prefixes: Trace[], public records: any[] | null) {}
+export default class Trace<TRecord> {
+	constructor(public prefixes: Trace<TRecord>[], public record: TRecord | null) {}
 
-	static EMPTY = new Trace([], null);
+	static EMPTY = new Trace<any>([], null);
 }

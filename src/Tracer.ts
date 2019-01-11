@@ -2,9 +2,12 @@ import FromBuffer from './FromBuffer';
 import { LazySet, mergeLazySets } from './LazySet';
 import Trace from './Trace';
 
-function createOrReuseTrace(prefixes: Exclude<LazySet<Trace>, null>, records: any[] | null): Trace {
-	let prefixesArray: Trace[];
-	if (records === null) {
+function createOrReuseTrace<TRecord>(
+	prefixes: Exclude<LazySet<Trace<TRecord>>, null>,
+	record: TRecord | null
+): Trace<TRecord> {
+	let prefixesArray: Trace<TRecord>[];
+	if (record === null) {
 		if (!Array.isArray(prefixes)) {
 			return prefixes;
 		}
@@ -18,7 +21,7 @@ function createOrReuseTrace(prefixes: Exclude<LazySet<Trace>, null>, records: an
 		prefixesArray = [prefixes];
 	}
 
-	return new Trace(prefixesArray, records);
+	return new Trace(prefixesArray, record);
 }
 
 enum TracingState {
@@ -27,9 +30,9 @@ enum TracingState {
 	DONE
 }
 
-export default class Tracer {
+export default class Tracer<TRecord> {
 	private _stateByPc: TracingState[] = [];
-	private _prefixesByPc: LazySet<Trace>[] = [];
+	private _prefixesByPc: LazySet<Trace<TRecord>>[] = [];
 
 	constructor(programLength: number) {
 		for (let i = 0; i < programLength; ++i) {
@@ -39,13 +42,13 @@ export default class Tracer {
 	}
 
 	private mergeTraces(
-		prefixes: LazySet<Trace>,
+		prefixes: LazySet<Trace<TRecord>>,
 		pc: number,
 		startingFromBuffer: FromBuffer,
-		previousTraceBySurvivorPc: (Trace | null)[],
+		previousTraceBySurvivorPc: (Trace<TRecord> | null)[],
 		fromByPc: FromBuffer,
-		recordByPc: any[]
-	): LazySet<Trace> {
+		recordByPc: (TRecord | null)[]
+	): LazySet<Trace<TRecord>> {
 		let isPrefixesReused = false;
 		startingFromBuffer.forEach(pc, fromPc => {
 			const traces = this.trace(fromPc, previousTraceBySurvivorPc, fromByPc, recordByPc);
@@ -57,10 +60,10 @@ export default class Tracer {
 
 	private trace(
 		pc: number,
-		previousTraceBySurvivorPc: (Trace | null)[],
+		previousTraceBySurvivorPc: (Trace<TRecord> | null)[],
 		fromByPc: FromBuffer,
-		recordByPc: any[]
-	): LazySet<Trace> {
+		recordByPc: (TRecord | null)[]
+	): LazySet<Trace<TRecord>> {
 		const state = this._stateByPc[pc];
 		switch (state) {
 			case TracingState.DONE:
@@ -74,7 +77,7 @@ export default class Tracer {
 		// Mark state to detect cycles
 		this._stateByPc[pc] = TracingState.IN_CURRENT_PATH;
 
-		let prefixes: LazySet<Trace> = null;
+		let prefixes: LazySet<Trace<TRecord>> = null;
 		const startingTrace = previousTraceBySurvivorPc[pc];
 		if (startingTrace !== null) {
 			prefixes = startingTrace;
@@ -94,7 +97,7 @@ export default class Tracer {
 			// Valid prefixes found, check for records
 			const record = recordByPc[pc];
 			if (record !== null) {
-				prefixes = createOrReuseTrace(prefixes, [record]);
+				prefixes = createOrReuseTrace(prefixes, record);
 			}
 		}
 
@@ -105,11 +108,11 @@ export default class Tracer {
 	}
 
 	public buildSurvivorTraces(
-		previousTraceBySurvivorPc: (Trace | null)[],
-		newTraceBySurvivorPc: (Trace | null)[],
+		previousTraceBySurvivorPc: (Trace<TRecord> | null)[],
+		newTraceBySurvivorPc: (Trace<TRecord> | null)[],
 		fromBySurvivorPc: FromBuffer,
 		fromByPc: FromBuffer,
-		recordByPc: any[]
+		recordByPc: (TRecord | null)[]
 	): void {
 		this._prefixesByPc.fill(null);
 		this._stateByPc.fill(TracingState.NOT_VISITED);
@@ -123,7 +126,7 @@ export default class Tracer {
 				continue;
 			}
 
-			const prefixes: LazySet<Trace> = this.mergeTraces(
+			const prefixes: LazySet<Trace<TRecord>> = this.mergeTraces(
 				null,
 				pc,
 				fromBySurvivorPc,

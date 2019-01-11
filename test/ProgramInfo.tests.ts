@@ -2,7 +2,7 @@ import Assembler from '../src/Assembler';
 import ProgramInfo from '../src/ProgramInfo';
 
 describe('ProgramInfo', () => {
-	let assembler: Assembler<void>;
+	let assembler: Assembler<void, string>;
 	beforeEach(() => {
 		assembler = new Assembler();
 	});

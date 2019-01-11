@@ -2,7 +2,7 @@ import ProgramInfo from '../src/ProgramInfo';
 import Traces from '../src/Traces';
 
 describe('Traces', () => {
-	let traces: Traces;
+	let traces: Traces<number>;
 	beforeEach(() => {
 		traces = new Traces(ProgramInfo.createStub(10));
 	});
@@ -18,7 +18,9 @@ describe('Traces', () => {
 	describe('.record()', () => {
 		it('adds a record to be included in traces that include the corresponding pc', () => {
 			traces.record(0, 123);
-			// TODO: check traces
+			traces.addSurvivor(0, 1);
+			traces.buildSurvivorTraces();
+			expect(traces.getTraces([1])[0].record).toBe(123);
 		});
 	});
 

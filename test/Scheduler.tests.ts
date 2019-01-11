@@ -3,7 +3,7 @@ import Scheduler from '../src/Scheduler';
 import Trace from '../src/Trace';
 
 describe('Scheduler', () => {
-	let scheduler: Scheduler;
+	let scheduler: Scheduler<string>;
 	beforeEach(() => {
 		scheduler = new Scheduler(ProgramInfo.createStub(10));
 		scheduler.reset();
@@ -89,11 +89,12 @@ describe('Scheduler', () => {
 
 	describe('.record()', () => {
 		it('marks a recorded value for a pc, to be included in accepted traces past that pc', () => {
-			scheduler.record(0, 123);
+			scheduler.record(0, '123');
 			scheduler.accept(0);
+			scheduler.nextGeneration();
 			const traces = scheduler.getAcceptingTraces();
 			expect(traces.length).toBe(1);
-			// TODO: expect(traces[0].records).toEqual([123]);
+			expect(traces[0].record).toEqual('123');
 		});
 	});
 
@@ -117,14 +118,14 @@ describe('Scheduler', () => {
 	});
 
 	describe('.getAcceptingTraces()', () => {
-		function* enumeratePaths(trace: Trace): IterableIterator<string[]> {
+		function* enumeratePaths(trace: Trace<string>): IterableIterator<string[]> {
 			if (trace.prefixes.length === 0) {
-				yield trace.records === null ? [] : (trace.records as string[]);
+				yield trace.record === null ? [] : [trace.record];
 				return;
 			}
 			for (const prefix of trace.prefixes) {
 				for (const path of enumeratePaths(prefix)) {
-					yield trace.records === null ? path : path.concat(trace.records as string[]);
+					yield trace.record === null ? path : path.concat([trace.record]);
 				}
 			}
 		}
@@ -161,7 +162,7 @@ describe('Scheduler', () => {
 			const traces = scheduler.getAcceptingTraces();
 			expect(
 				traces.reduce(
-					(paths: string[][], trace: Trace) =>
+					(paths: string[][], trace: Trace<string>) =>
 						paths.concat(Array.from(enumeratePaths(trace))),
 					[]
 				)
@@ -209,7 +210,7 @@ describe('Scheduler', () => {
 			expect(traces[0]).toBe(Trace.EMPTY);
 			expect(
 				traces.reduce(
-					(paths: string[][], trace: Trace) =>
+					(paths: string[][], trace: Trace<string>) =>
 						paths.concat(Array.from(enumeratePaths(trace))),
 					[]
 				)

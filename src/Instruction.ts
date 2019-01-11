@@ -4,11 +4,11 @@ export type TestFunc<TInput, TOptions = void> = (
 	data: any,
 	options?: TOptions
 ) => boolean;
-export type RecordFunc<TOptions = void> = (
+export type RecordFunc<TRecord, TOptions = void> = (
 	data: any,
 	inputIndex: number,
 	options?: TOptions
-) => any | null;
+) => TRecord | null | undefined;
 
 export enum Operation {
 	ACCEPT,
@@ -22,8 +22,8 @@ export enum Operation {
 /**
  * Represents a single instruction in a whynot program.
  */
-export interface Instruction<TInput, TOptions = void> {
+export interface Instruction<TInput, TRecord, TOptions = void> {
 	op: Operation;
-	func?: FailFunc<TOptions> | TestFunc<TInput, TOptions> | RecordFunc<TOptions> | null;
+	func?: FailFunc<TOptions> | TestFunc<TInput, TOptions> | RecordFunc<TRecord, TOptions> | null;
 	data?: any;
 }

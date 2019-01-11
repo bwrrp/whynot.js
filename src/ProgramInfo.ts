@@ -7,8 +7,8 @@ export default class ProgramInfo {
 		public maxSurvivorFromByPc: number[]
 	) {}
 
-	public static fromProgram<TInput, TOptions>(
-		program: Instruction<TInput, TOptions>[]
+	public static fromProgram<TInput, TRecord, TOptions>(
+		program: Instruction<TInput, TRecord, TOptions>[]
 	): ProgramInfo {
 		const programLength = program.length;
 

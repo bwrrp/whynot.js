@@ -3,8 +3,12 @@ import Trace from '../src/Trace';
 import { VM, default as whynot } from '../src/index';
 
 describe('VM', () => {
-	function flattenTrace(trace: Trace, records: number[] = [], flatTraces: number[][] = []) {
-		const combinedRecords = trace.records === null ? records : trace.records.concat(records);
+	function flattenTrace<TRecord>(
+		trace: Trace<TRecord>,
+		records: TRecord[] = [],
+		flatTraces: TRecord[][] = []
+	) {
+		const combinedRecords = trace.record === null ? records : [trace.record].concat(records);
 		if (!trace.prefixes.length) {
 			flatTraces.push(combinedRecords);
 		} else {
@@ -16,7 +20,7 @@ describe('VM', () => {
 	}
 
 	describe('accept', () => {
-		let vm: VM<number>;
+		let vm: VM<number, void>;
 		beforeEach(() => {
 			vm = whynot.compileVM(assembler => {
 				assembler.accept();
@@ -38,7 +42,7 @@ describe('VM', () => {
 
 	describe('fail', () => {
 		describe('unconditional', () => {
-			let vm: VM<number>;
+			let vm: VM<number, void>;
 			beforeEach(() => {
 				vm = whynot.compileVM(assembler => {
 					assembler.fail();
@@ -52,7 +56,7 @@ describe('VM', () => {
 		});
 
 		describe('conditional', () => {
-			let vm: VM<number>;
+			let vm: VM<number, void>;
 			let condition: boolean;
 			beforeEach(() => {
 				vm = whynot.compileVM(assembler => {
@@ -84,7 +88,7 @@ describe('VM', () => {
 
 		describe('conditional with options', () => {
 			type Options = { shouldFail: boolean };
-			let vm: VM<number, Options>;
+			let vm: VM<number, void, Options>;
 			beforeEach(() => {
 				vm = whynot.compileVM(assembler => {
 					assembler.fail(function(options) {
@@ -112,8 +116,8 @@ describe('VM', () => {
 	});
 
 	describe('bad', () => {
-		let vmLeftBad: VM<void>;
-		let vmRightBad: VM<void>;
+		let vmLeftBad: VM<void, string>;
+		let vmRightBad: VM<void, string>;
 		beforeEach(() => {
 			// Create two branches of equal length, one badness 1, the other 0
 			vmLeftBad = whynot.compileVM(assembler => {
@@ -151,7 +155,7 @@ describe('VM', () => {
 			return item === 'meep';
 		}
 
-		let vm: VM<string>;
+		let vm: VM<string, void>;
 		beforeEach(() => {
 			vm = whynot.compileVM(assembler => {
 				assembler.test(isMeep);
@@ -173,7 +177,7 @@ describe('VM', () => {
 
 		describe('with options', () => {
 			type Options = { shouldAccept: boolean };
-			let vm: VM<string, Options>;
+			let vm: VM<string, void, Options>;
 			beforeEach(() => {
 				vm = whynot.compileVM(assembler => {
 					assembler.test(function(_item: string, _data: any, options: any) {
@@ -236,11 +240,11 @@ describe('VM', () => {
 			});
 			const result = vm.execute([]);
 			expect(result.success).toBe(true);
-			expect(result.acceptingTraces[0].records).toEqual(['meep']);
+			expect(result.acceptingTraces[0].record).toEqual('meep');
 		});
 
 		it('can use a recorder callback', () => {
-			const vm = whynot.compileVM(assembler => {
+			const vm = whynot.compileVM<void, string>(assembler => {
 				assembler.record('meep', function(data: string, index: number) {
 					return index + '-' + data.toUpperCase();
 				});
@@ -248,12 +252,12 @@ describe('VM', () => {
 			});
 			const result = vm.execute([]);
 			expect(result.success).toBe(true);
-			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP']);
+			expect(result.acceptingTraces[0].record).toEqual('0-MEEP');
 		});
 
 		it('can use options in the recorder callback', () => {
 			type Options = { suffix: string };
-			const vm = whynot.compileVM<void, Options>(assembler => {
+			const vm = whynot.compileVM<void, string, Options>(assembler => {
 				assembler.record('meep', function(data: string, index: number, options: any) {
 					return index + '-' + data.toUpperCase() + '-' + options.suffix;
 				});
@@ -261,29 +265,29 @@ describe('VM', () => {
 			});
 			const result = vm.execute([], { suffix: 'BLA' });
 			expect(result.success).toBe(true);
-			expect(result.acceptingTraces[0].records).toEqual(['0-MEEP-BLA']);
+			expect(result.acceptingTraces[0].record).toEqual('0-MEEP-BLA');
 		});
 
 		it('ignores null records', () => {
-			const vm = whynot.compileVM(assembler => {
+			const vm = whynot.compileVM<void, any>(assembler => {
 				assembler.record('meep', () => null);
 				assembler.accept();
 			});
 			const result = vm.execute([]);
 			expect(result.success).toBe(true);
-			expect(result.acceptingTraces[0].records).toEqual(null);
+			expect(result.acceptingTraces[0].record).toEqual(null);
 		});
 	});
 
 	describe('repetition', () => {
-		function* enumeratePaths(trace: Trace): IterableIterator<string[]> {
+		function* enumeratePaths<TRecord>(trace: Trace<TRecord>): IterableIterator<TRecord[]> {
 			if (trace.prefixes.length === 0) {
-				yield trace.records === null ? [] : (trace.records as string[]);
+				yield trace.record === null ? [] : [trace.record];
 				return;
 			}
 			for (const prefix of trace.prefixes) {
 				for (const path of enumeratePaths(prefix)) {
-					yield trace.records === null ? path : path.concat(trace.records as string[]);
+					yield trace.record === null ? path : path.concat([trace.record]);
 				}
 			}
 		}
@@ -294,7 +298,7 @@ describe('VM', () => {
 			// `-> 0:jump -> 1:jump -> 2:test -> 3:rec. -> 4:jump -,-> 6:jump
 			//      \         `----> 5:rec. ----------------------'
 			//       `-> 7:accept
-			const vm = whynot.compileVM<number>(assembler => {
+			const vm = whynot.compileVM<number, string>(assembler => {
 				assembler.jump([1, 7]);
 				assembler.jump([2, 5]);
 				assembler.test(() => true);
@@ -308,7 +312,7 @@ describe('VM', () => {
 			expect(result.success).toBe(true);
 			expect(
 				result.acceptingTraces.reduce(
-					(paths: string[][], trace: Trace) =>
+					(paths: string[][], trace: Trace<string>) =>
 						paths.concat(Array.from(enumeratePaths(trace))),
 					[]
 				)
@@ -323,7 +327,7 @@ describe('VM', () => {
 			// The program is:
 			// 0:N -> 6:N -> 12:jump -> 13:N -,-> 19:accept
 			//                 `-------------'
-			const vm = whynot.compileVM<number>(assembler => {
+			const vm = whynot.compileVM<number, string>(assembler => {
 				// 0:N
 				assembler.jump([1, 4]);
 				assembler.test(() => true);
@@ -358,7 +362,7 @@ describe('VM', () => {
 			expect(result.success).toBe(true);
 			expect(
 				result.acceptingTraces.reduce(
-					(paths: string[][], trace: Trace) =>
+					(paths: string[][], trace: Trace<string>) =>
 						paths.concat(Array.from(enumeratePaths(trace))),
 					[]
 				)
@@ -367,10 +371,10 @@ describe('VM', () => {
 	});
 
 	describe('reentrancy', () => {
-		let vm: VM<any[]>;
+		let vm: VM<any[], Result<any>>;
 		beforeEach(() => {
 			vm = whynot.compileVM(assembler => {
-				const stackFrame: { info?: Result } = {};
+				const stackFrame: { info?: Result<any> } = {};
 				assembler.test(item => {
 					stackFrame.info = vm.execute(item);
 					return true;
@@ -383,11 +387,9 @@ describe('VM', () => {
 			});
 		});
 
-		function* getRecordsForTrace(trace: Trace): IterableIterator<Result> {
-			if (trace.records !== null) {
-				for (const record of trace.records) {
-					yield record;
-				}
+		function* getRecordsForTrace(trace: Trace<Result<any>>): IterableIterator<Result<any>> {
+			if (trace.record !== null) {
+				yield trace.record;
 			}
 			for (const prefix of trace.prefixes) {
 				for (const record of getRecordsForTrace(prefix)) {
@@ -396,8 +398,8 @@ describe('VM', () => {
 			}
 		}
 
-		function computeMaxDepth(result: Result): number {
-			return result.acceptingTraces.reduce(function(max: number, trace: Trace) {
+		function computeMaxDepth(result: Result<Result<any>>): number {
+			return result.acceptingTraces.reduce(function(max: number, trace: Trace<Result<any>>) {
 				const maxDepthForTrace =
 					1 +
 					[...getRecordsForTrace(trace)].reduce(function(max, result) {
