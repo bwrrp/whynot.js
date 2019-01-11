@@ -1,6 +1,6 @@
 export default class FromBuffer {
-	private _buffer: Uint16Array;
-	private _mapping: number[] = [];
+	private readonly _buffer: Uint16Array;
+	private readonly _mapping: number[] = [];
 
 	constructor(maxFromByPc: number[]) {
 		let offset = maxFromByPc.length;

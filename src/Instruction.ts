@@ -10,7 +10,7 @@ export type RecordFunc<TRecord, TOptions = void> = (
 	options?: TOptions
 ) => TRecord | null | undefined;
 
-export enum Operation {
+export const enum Operation {
 	ACCEPT,
 	BAD,
 	FAIL,

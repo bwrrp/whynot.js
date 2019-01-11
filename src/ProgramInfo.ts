@@ -2,9 +2,9 @@ import { Instruction, Operation } from './Instruction';
 
 export default class ProgramInfo {
 	private constructor(
-		public programLength: number,
-		public maxFromByPc: number[],
-		public maxSurvivorFromByPc: number[]
+		public readonly programLength: number,
+		public readonly maxFromByPc: number[],
+		public readonly maxSurvivorFromByPc: number[]
 	) {}
 
 	public static fromProgram<TInput, TRecord, TOptions>(

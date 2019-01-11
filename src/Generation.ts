@@ -29,14 +29,14 @@ function findInsertionIndex(
  */
 export default class Generation {
 	// Program counters of scheduled threads in order of execution
-	private _scheduledPcs: Uint16Array;
+	private readonly _scheduledPcs: Uint16Array;
 	private _numScheduledPcs: number = 0;
 
 	// Index of the next thread to execute in the array above
 	private _nextThread: number = 0;
 
 	// Badness values for scheduled threads by program counter
-	private _badnessByPc: Uint8Array;
+	private readonly _badnessByPc: Uint8Array;
 
 	constructor(programLength: number) {
 		this._scheduledPcs = new Uint16Array(programLength);

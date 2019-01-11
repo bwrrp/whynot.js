@@ -19,7 +19,7 @@ function defaultRecorder<TRecord>(data: TRecord, _inputIndex: number): TRecord {
  * The Assembler is used to generate a whynot program by appending instructions.
  */
 export default class Assembler<TInput, TRecord, TOptions = void> {
-	program: Instruction<TInput, TRecord, TOptions>[] = [];
+	readonly program: Instruction<TInput, TRecord, TOptions>[] = [];
 
 	/**
 	 * The 'test' instruction validates and consumes an input item.

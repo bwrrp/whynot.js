@@ -7,9 +7,9 @@ import Scheduler from './Scheduler';
  * A virtual machine to execute whynot programs.
  */
 export default class VM<TInput, TRecord, TOptions = void> {
-	private _program: Instruction<TInput, TRecord, TOptions>[];
-	private _programInfo: ProgramInfo;
-	private _schedulers: Scheduler<TRecord>[] = [];
+	private readonly _program: Instruction<TInput, TRecord, TOptions>[];
+	private readonly _programInfo: ProgramInfo;
+	private readonly _schedulers: Scheduler<TRecord>[] = [];
 
 	/**
 	 * @param program       The program to run, as created by the Assembler

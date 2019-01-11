@@ -24,15 +24,15 @@ function createOrReuseTrace<TRecord>(
 	return new Trace(prefixesArray, record);
 }
 
-enum TracingState {
+const enum TracingState {
 	NOT_VISITED,
 	IN_CURRENT_PATH,
 	DONE
 }
 
 export default class Tracer<TRecord> {
-	private _stateByPc: TracingState[] = [];
-	private _prefixesByPc: LazySet<Trace<TRecord>>[] = [];
+	private readonly _stateByPc: TracingState[] = [];
+	private readonly _prefixesByPc: LazySet<Trace<TRecord>>[] = [];
 
 	constructor(programLength: number) {
 		for (let i = 0; i < programLength; ++i) {

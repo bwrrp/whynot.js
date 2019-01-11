@@ -8,10 +8,10 @@ export default class Scheduler<TRecord> {
 	private _nextGeneration: Generation;
 
 	// Trace data for the current generation
-	private _traces: Traces<TRecord>;
+	private readonly _traces: Traces<TRecord>;
 
 	// PCs of accepted threads in the current generation
-	private _acceptedPcs: number[] = [];
+	private readonly _acceptedPcs: number[] = [];
 
 	constructor(programInfo: ProgramInfo) {
 		this._currentGeneration = new Generation(programInfo.programLength);
