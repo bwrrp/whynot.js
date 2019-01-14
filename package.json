@@ -17,10 +17,11 @@
 	"module": "dist/whynot.mjs",
 	"types": "dist/whynot.d.ts",
 	"scripts": {
-		"build": "npm-run-all build:tsc build:bundle build:api",
+		"build": "npm-run-all build:tsc build:bundle build:api build:docs",
 		"build:tsc": "rimraf dist && rimraf lib && tsc -P tsconfig.build.json",
 		"build:bundle": "rollup -c",
 		"build:api": "api-extractor run; copyfiles --flat temp/* api",
+		"build:docs": "api-documenter markdown -i dist -o docs",
 		"prepare": "npm run build",
 		"test": "jest --coverage --verbose"
 	},
@@ -32,6 +33,7 @@
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
+		"@microsoft/api-documenter": "^1.5.59",
 		"@microsoft/api-extractor": "^6.3.0",
 		"@types/jest": "^23.3.12",
 		"copyfiles": "^2.1.0",
