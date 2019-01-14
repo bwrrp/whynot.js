@@ -5,6 +5,8 @@ import Scheduler from './Scheduler';
 
 /**
  * A virtual machine to execute whynot programs.
+ *
+ * @public
  */
 export default class VM<TInput, TRecord, TOptions = void> {
 	private readonly _program: Instruction<TInput, TRecord, TOptions>[];
@@ -12,7 +14,7 @@ export default class VM<TInput, TRecord, TOptions = void> {
 	private readonly _schedulers: Scheduler<TRecord>[] = [];
 
 	/**
-	 * @param program       The program to run, as created by the Assembler
+	 * @param program - The program to run, as created by the Assembler
 	 */
 	constructor(program: Instruction<TInput, TRecord, TOptions>[]) {
 		this._program = program;
@@ -23,11 +25,11 @@ export default class VM<TInput, TRecord, TOptions = void> {
 	/**
 	 * Executes the program in the VM with the given input stream.
 	 *
-	 * @param input   An array of input items.
-	 * @param options Optional object passed to all instruction callbacks.
+	 * @param input   - An array of input items.
+	 * @param options - Optional object passed to all instruction callbacks.
 	 *
-	 * @return Result of the execution, containing all Traces that lead to acceptance of the input
-	 *         (if any)
+	 * @returns Result of the execution, containing all Traces that lead to acceptance of the input
+	 *          (if any)
 	 */
 	execute(input: TInput[], options?: TOptions): Result<TRecord> {
 		const scheduler = this._schedulers.pop() || new Scheduler(this._programInfo);

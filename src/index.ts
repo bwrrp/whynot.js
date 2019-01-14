@@ -7,10 +7,12 @@ export { default as VM } from './VM';
 /**
  * Convenience helper function that creates a new VM using the specified callback for compilation.
  *
- * @param compile       Function used to compile the program, invoked with an Assembler as the only
- *                      parameter.
+ * @public
  *
- * @return VM running the compiled program
+ * @param compile - Function used to compile the program, invoked with an Assembler as the only
+ *                  parameter.
+ *
+ * @returns VM running the compiled program
  */
 export function compileVM<TInput, TRecord = void, TOptions = void>(
 	compile: (assembler: Assembler<TInput, TRecord, TOptions>) => void
