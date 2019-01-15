@@ -1,6 +1,6 @@
 {
 	"name": "whynot",
-	"version": "2.0.1",
+	"version": "3.0.0",
 	"description": "Generic VM-based structure matching framework",
 	"author": "Stef Busking <stef.busking@gmail.com>",
 	"contributors": [
