@@ -31,6 +31,11 @@ describe('Generation', () => {
 			expect(generation.getNextPc()).toBe(1);
 			expect(generation.getNextPc()).toBe(null);
 		});
+
+		it('clamps badness to the max value', () => {
+			generation.add(5, 1000);
+			expect(generation.getBadness(5)).toBe(255);
+		});
 	});
 
 	describe('.reschedule()', () => {
@@ -59,6 +64,12 @@ describe('Generation', () => {
 			expect(generation.getBadness(1)).toBe(3);
 			expect(generation.getNextPc()).toBe(2);
 			expect(generation.getNextPc()).toBe(null);
+		});
+
+		it('clamps badness to the max value', () => {
+			generation.add(5, 1);
+			generation.reschedule(5, 1000);
+			expect(generation.getBadness(5)).toBe(255);
 		});
 	});
 

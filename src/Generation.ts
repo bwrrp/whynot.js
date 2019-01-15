@@ -24,6 +24,8 @@ function findInsertionIndex(
 	return low;
 }
 
+const MAX_BADNESS = 255;
+
 /**
  * Schedules threads within a generation according to badness
  */
@@ -48,7 +50,7 @@ export default class Generation {
 	}
 
 	public add(pc: number, badness: number): void {
-		this._badnessByPc[pc] = badness;
+		this._badnessByPc[pc] = badness > MAX_BADNESS ? MAX_BADNESS : badness;
 		const insertionIndex = findInsertionIndex(
 			this._scheduledPcs,
 			this._badnessByPc,
@@ -62,7 +64,10 @@ export default class Generation {
 	}
 
 	public reschedule(pc: number, badness: number): void {
-		const maxBadness = Math.max(this._badnessByPc[pc], badness);
+		const maxBadness = Math.max(
+			this._badnessByPc[pc],
+			badness > MAX_BADNESS ? MAX_BADNESS : badness
+		);
 		if (this._badnessByPc[pc] !== maxBadness) {
 			// Remove any existing unexecuted thread in order to reschedule it
 			const existingThreadIndex = this._scheduledPcs.indexOf(pc, this._nextThread);
