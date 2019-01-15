@@ -3,6 +3,5 @@
 /docs/
 /lib/
 /temp/
-/test/bin/
 node_modules/
 package-lock.json
