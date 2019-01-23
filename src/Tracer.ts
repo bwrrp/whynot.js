@@ -114,8 +114,6 @@ export default class Tracer<TRecord> {
 		fromByPc: FromBuffer,
 		recordByPc: (TRecord | null)[]
 	): void {
-		this._prefixesByPc.fill(null);
-		this._stateByPc.fill(TracingState.NOT_VISITED);
 		for (
 			let pc = 0, programLength = previousTraceBySurvivorPc.length;
 			pc < programLength;
@@ -126,6 +124,8 @@ export default class Tracer<TRecord> {
 				continue;
 			}
 
+			this._prefixesByPc.fill(null);
+			this._stateByPc.fill(TracingState.NOT_VISITED);
 			const prefixes: LazySet<Trace<TRecord>> = this.mergeTraces(
 				null,
 				pc,

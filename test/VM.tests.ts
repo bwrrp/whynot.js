@@ -1,6 +1,6 @@
 import Result from '../src/Result';
 import Trace from '../src/Trace';
-import { VM, default as whynot } from '../src/index';
+import { VM, default as whynot, compileVM, Assembler } from '../src/index';
 
 describe('VM', () => {
 	function flattenTrace<TRecord>(
@@ -369,6 +369,21 @@ describe('VM', () => {
 					[]
 				)
 			).toEqual([['T1', 'T2'], ['T1', 'T2', 'M3'], ['T1', 'M2', 'T3'], ['M1', 'T2', 'T3']]);
+		});
+
+		it('can handle multiple survivors sharing a cycle', () => {
+			const vm = whynot.compileVM<number>(assembler => {
+				assembler.jump([1, 3]);
+				assembler.test(() => true);
+				assembler.accept();
+				assembler.jump([4, 0]);
+				assembler.test(() => true);
+				assembler.accept();
+			});
+			const result = vm.execute([1]);
+			expect(result.success).toBe(true);
+			// Equivalent traces, so this should still only return one (the empty trace)
+			expect(result.acceptingTraces).toHaveLength(1);
 		});
 	});
 
