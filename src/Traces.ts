@@ -1,4 +1,5 @@
 import FromBuffer from './FromBuffer';
+import { addToLazySet, LazySet } from './LazySet';
 import ProgramInfo from './ProgramInfo';
 import Trace from './Trace';
 import Tracer from './Tracer';
@@ -79,6 +80,14 @@ export default class Traces<TRecord> {
 	}
 
 	public getTraces(acceptedPcs: number[]): Trace<TRecord>[] {
-		return acceptedPcs.map(pc => this._traceBySurvivorPc[pc]!);
+		const traces = acceptedPcs.reduce(
+			(traces: LazySet<Trace<TRecord>>, pc: number) =>
+				addToLazySet(traces, this._traceBySurvivorPc[pc]!),
+			null
+		);
+		if (traces === null) {
+			return [];
+		}
+		return Array.isArray(traces) ? traces : [traces];
 	}
 }

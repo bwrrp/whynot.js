@@ -215,6 +215,8 @@ describe('VM', () => {
 			const vm = whynot.compileVM(assembler => {
 				assembler.jump([1, 2]);
 				assembler.accept();
+				// Force the second trace to be different
+				assembler.record({});
 				assembler.accept();
 			});
 			const result = vm.execute([]);
