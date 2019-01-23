@@ -134,7 +134,10 @@ export default class Tracer<TRecord> {
 				fromByPc,
 				recordByPc
 			);
-			newTraceBySurvivorPc[pc] = createOrReuseTrace(prefixes!, null);
+			if (prefixes === null) {
+				throw new Error(`No non-cyclic paths found to survivor ${pc}`);
+			}
+			newTraceBySurvivorPc[pc] = createOrReuseTrace(prefixes, null);
 		}
 		// Free prefix sets for GC
 		this._prefixesByPc.fill(null);

@@ -107,13 +107,26 @@ describe('Scheduler', () => {
 			expect(scheduler.getNextThreadPc()).toBe(null);
 		});
 
-		it('throws if a path can not be traced back to the initial instruction', () => {
+		it('throws if a path has neither incoming steps nor traces from the previous generation', () => {
 			expect(scheduler.getNextThreadPc()).toBe(0);
 			scheduler.step(1, 2, 0);
 			expect(scheduler.getNextThreadPc()).toBe(2);
 			scheduler.accept(2);
 			expect(scheduler.getNextThreadPc()).toBe(null);
 			expect(() => scheduler.nextGeneration()).toThrow('Trace without source at pc 1');
+		});
+
+		it('throws if a path has only cyclic incoming steps', () => {
+			expect(scheduler.getNextThreadPc()).toBe(0);
+			scheduler.step(1, 2, 0);
+			expect(scheduler.getNextThreadPc()).toBe(2);
+			scheduler.step(2, 1, 0);
+			expect(scheduler.getNextThreadPc()).toBe(1);
+			scheduler.accept(1);
+			expect(scheduler.getNextThreadPc()).toBe(null);
+			expect(() => scheduler.nextGeneration()).toThrow(
+				'No non-cyclic paths found to survivor 1'
+			);
 		});
 	});
 
