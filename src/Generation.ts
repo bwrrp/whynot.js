@@ -1,11 +1,24 @@
+/**
+ * Perform a binary search to find the index of the first thread with lower badness, within the
+ * given bounds.
+ *
+ * This can then be the index at which to insert a new pc while preserving ordering according to
+ * badness.
+ *
+ * @param pcs         - The array of scheduled pcs to search.
+ * @param badnessByPc - Provides the current badness value for each pc in the array.
+ * @param badness     - The badness to compare to (i.e., the value for the pc to be inserted).
+ * @param first       - First index in pcs to consider.
+ * @param length      - The length of the sub-array of pcs to consider. Also the highest index that
+ *                      can be returned by this function.
+ */
 function findInsertionIndex(
 	pcs: Uint16Array,
 	badnessByPc: Uint8Array,
 	badness: number,
 	first: number,
 	length: number
-) {
-	// Perform a binary search to find the index of the first thread with lower badness
+): number {
 	let low = first;
 	let high = length;
 	while (low < high) {
@@ -24,10 +37,14 @@ function findInsertionIndex(
 	return low;
 }
 
+/**
+ * The highest supported badness value. Attempts to set badness higher than this are clamped to this
+ * value.
+ */
 const MAX_BADNESS = 255;
 
 /**
- * Schedules threads within a generation according to badness
+ * Schedules threads within a Generation according to their associated badness.
  */
 export default class Generation {
 	// Program counters of scheduled threads in order of execution
@@ -49,6 +66,14 @@ export default class Generation {
 		return this._badnessByPc[pc];
 	}
 
+	/**
+	 * Adds a new entry for pc to the scheduled pcs.
+	 *
+	 * The caller should ensure that pc is not already scheduled.
+	 *
+	 * @param pc      The pc to add
+	 * @param badness The badness to associate with pc
+	 */
 	public add(pc: number, badness: number): void {
 		this._badnessByPc[pc] = badness > MAX_BADNESS ? MAX_BADNESS : badness;
 		const insertionIndex = findInsertionIndex(
@@ -63,6 +88,14 @@ export default class Generation {
 		this._numScheduledPcs += 1;
 	}
 
+	/**
+	 * Reschedule an already scheduled pc according to a new badness value.
+	 *
+	 * The caller should ensure this is only called for pcs that have already been scheduled.
+	 *
+	 * @param pc      The pc to reschedule
+	 * @param badness The new badness to associate with pc
+	 */
 	public reschedule(pc: number, badness: number): void {
 		const maxBadness = Math.max(
 			this._badnessByPc[pc],
@@ -89,6 +122,13 @@ export default class Generation {
 		}
 	}
 
+	/**
+	 * Get the next scheduled pc.
+	 *
+	 * This pc will have the lowest badness among all currently scheduled pcs.
+	 *
+	 * Returns null if there are no more scheduled pcs in this Generation.
+	 */
 	public getNextPc(): number | null {
 		if (this._nextThread >= this._numScheduledPcs) {
 			return null;
@@ -96,6 +136,9 @@ export default class Generation {
 		return this._scheduledPcs[this._nextThread++];
 	}
 
+	/**
+	 * Clear all scheduled pcs and badness values so the Generation can be reused.
+	 */
 	public reset(): void {
 		this._numScheduledPcs = 0;
 		this._nextThread = 0;

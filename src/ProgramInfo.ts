@@ -1,5 +1,9 @@
 import { Instruction, Operation } from './Instruction';
 
+/**
+ * Computes information about a given program, used to allocate enough space in the data structures
+ * required to run that program.
+ */
 export default class ProgramInfo {
 	private constructor(
 		public readonly programLength: number,
@@ -7,6 +11,11 @@ export default class ProgramInfo {
 		public readonly maxSurvivorFromByPc: number[]
 	) {}
 
+	/**
+	 * Creates an instance with information for the given program.
+	 *
+	 * @param program - The program for which to construct the instance.
+	 */
 	public static fromProgram<TInput, TRecord, TOptions>(
 		program: Instruction<TInput, TRecord, TOptions>[]
 	): ProgramInfo {
@@ -68,7 +77,7 @@ export default class ProgramInfo {
 
 	/**
 	 * Creates a stub ProgramInfo with incoming info maxed out to ensure enough space is allocated
-	 * in FromBuffers for simulating any program.
+	 * in FromBuffers for simulating any program of the given length.
 	 *
 	 * For testing only.
 	 *

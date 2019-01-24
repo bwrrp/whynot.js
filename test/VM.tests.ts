@@ -372,6 +372,9 @@ describe('VM', () => {
 		});
 
 		it('can handle multiple survivors sharing a cycle', () => {
+			// This program contains a cycle between 0 -> 3 -> 0, but the accept instructions each
+			// fork off from it at different points. We should still be able to compute traces for
+			// each of these, and end up with a deduplicated set of them (i.e., the empty trace).
 			const vm = whynot.compileVM<number>(assembler => {
 				assembler.jump([1, 3]);
 				assembler.test(() => true);
