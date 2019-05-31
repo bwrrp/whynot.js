@@ -33,18 +33,18 @@
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
-		"@microsoft/api-documenter": "^7.2.0",
-		"@microsoft/api-extractor": "^7.1.5",
+		"@microsoft/api-documenter": "^7.2.1",
+		"@microsoft/api-extractor": "^7.1.6",
 		"@types/jest": "^24.0.13",
 		"copyfiles": "^2.1.0",
 		"jest": "^24.8.0",
 		"npm-run-all": "^4.1.5",
 		"prettier": "^1.17.1",
 		"rimraf": "^2.6.3",
-		"rollup": "^1.12.3",
-		"rollup-plugin-terser": "^4.0.4",
+		"rollup": "^1.13.0",
+		"rollup-plugin-terser": "^5.0.0",
 		"ts-jest": "~24.0.2",
-		"typescript": "^3.4.5"
+		"typescript": "^3.5.1"
 	},
 	"jest": {
 		"transform": {
