@@ -4,9 +4,9 @@
 		"inlineSourceMap": true,
 		"strict": true,
 		"module": "commonjs",
-		"target": "es6",
+		"target": "es2017",
 		"allowJs": true,
-		"lib": ["es2015"],
+		"lib": ["es2017"],
 		"types": ["node", "jest"],
 		"moduleResolution": "node"
 	},
