@@ -1,79 +1,55 @@
 {
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
-    "toolVersion": "7.1.8",
-    "schemaVersion": 1000
+    "toolVersion": "7.4.4",
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "whynot",
+  "canonicalReference": "whynot!",
   "docComment": "",
   "name": "whynot",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "whynot!",
       "name": "",
       "members": [
         {
           "kind": "Variable",
-          "canonicalReference": "_default",
+          "canonicalReference": "whynot!_default:var",
           "docComment": "",
           "excerptTokens": [
             {
-              "kind": "Reference",
-              "text": "_default"
+              "kind": "Content",
+              "text": "_default: "
             },
             {
               "kind": "Content",
-              "text": ": "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    "
+              "text": "{\n    Assembler: typeof "
             },
             {
               "kind": "Reference",
-              "text": "Assembler"
+              "text": "Assembler",
+              "canonicalReference": "whynot!default:class"
             },
             {
               "kind": "Content",
-              "text": ": typeof "
+              "text": ";\n    VM: typeof "
             },
             {
               "kind": "Reference",
-              "text": "Assembler"
+              "text": "VM",
+              "canonicalReference": "whynot!default:class"
             },
             {
               "kind": "Content",
-              "text": ";\n    "
+              "text": ";\n    compileVM: typeof "
             },
             {
               "kind": "Reference",
-              "text": "VM"
-            },
-            {
-              "kind": "Content",
-              "text": ": typeof "
-            },
-            {
-              "kind": "Reference",
-              "text": "VM"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    "
-            },
-            {
-              "kind": "Reference",
-              "text": "compileVM"
-            },
-            {
-              "kind": "Content",
-              "text": ": typeof "
-            },
-            {
-              "kind": "Reference",
-              "text": "compileVM"
+              "text": "compileVM",
+              "canonicalReference": "whynot!compileVM:function"
             },
             {
               "kind": "Content",
@@ -83,99 +59,83 @@
           "releaseTag": "Public",
           "name": "_default",
           "variableTypeTokenRange": {
-            "startIndex": 2,
-            "endIndex": 15
+            "startIndex": 1,
+            "endIndex": 8
           }
         },
         {
           "kind": "Class",
-          "canonicalReference": "(Assembler:class)",
+          "canonicalReference": "whynot!Assembler:class",
           "docComment": "/**\n * The Assembler is used to generate a whynot program by appending instructions.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export default class "
-            },
-            {
-              "kind": "Reference",
-              "text": "Assembler"
+              "text": "export default class Assembler<TInput, TRecord, TOptions = "
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "TInput"
+              "text": "void"
             },
             {
               "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TRecord"
-            },
-            {
-              "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TOptions"
-            },
-            {
-              "kind": "Content",
-              "text": " = void> "
+              "text": "> "
             }
           ],
           "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "typeParameterName": "TInput",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TRecord",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TOptions",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
           "name": "Assembler",
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(accept:instance,0)",
+              "canonicalReference": "whynot!Assembler#accept:member(1)",
               "docComment": "/**\n * The 'accept' instruction causes the VM to yield the current Thread's Trace upon completion, provided all input has been consumed. Otherwise, the Thread ends.\n *\n * @returns The new instruction\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "accept"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "accept(): "
                 },
                 {
                   "kind": "Reference",
-                  "text": "Instruction"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TInput, TRecord, TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -184,34 +144,22 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 10
+                "startIndex": 1,
+                "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "accept"
             },
             {
               "kind": "Method",
-              "canonicalReference": "(bad:instance,0)",
+              "canonicalReference": "whynot!Assembler#bad:member(1)",
               "docComment": "/**\n * The 'bad' instruction permanently lowers the priority of all threads originating in the current one.\n *\n * @param cost - Amount to increase badness with. Defaults to 1.\n *\n * @returns The new instruction\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "bad"
-                },
-                {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "cost"
-                },
-                {
-                  "kind": "Content",
-                  "text": "?: "
+                  "text": "bad(cost?: "
                 },
                 {
                   "kind": "Content",
@@ -223,35 +171,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Instruction"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TInput, TRecord, TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -260,17 +185,17 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 6,
-                "endIndex": 14
+                "startIndex": 3,
+                "endIndex": 5
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "cost",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 5
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ],
@@ -278,40 +203,21 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(fail:instance,0)",
+              "canonicalReference": "whynot!Assembler#fail:member(1)",
               "docComment": "/**\n * The 'fail' instruction ends the current Thread.\n *\n * @param predicate - Optional callback to make the fail conditional, if this returns true the thread will end, otherwise it will continue.\n *\n * @returns The new instruction\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "fail"
-                },
-                {
                   "kind": "Content",
-                  "text": "("
+                  "text": "fail(predicate?: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "predicate"
+                  "text": "FailFunc",
+                  "canonicalReference": "whynot!FailFunc:type"
                 },
                 {
                   "kind": "Content",
-                  "text": "?: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "FailFunc"
-                },
-                {
-                  "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -319,35 +225,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Instruction"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TInput, TRecord, TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -356,17 +239,17 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 9,
-                "endIndex": 17
+                "startIndex": 4,
+                "endIndex": 6
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "predicate",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 8
+                    "startIndex": 1,
+                    "endIndex": 3
                   }
                 }
               ],
@@ -374,24 +257,12 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(jump:instance,0)",
+              "canonicalReference": "whynot!Assembler#jump:member(1)",
               "docComment": "/**\n * The 'jump' instruction continues execution in the current Generation at any number of other locations. A new Thread will be spawned for each target.\n *\n * @param targets - Program counters at which to continue execution\n *\n * @returns The new instruction\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "jump"
-                },
-                {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "targets"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "jump(targets: "
                 },
                 {
                   "kind": "Content",
@@ -403,35 +274,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Instruction"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TInput, TRecord, TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -440,17 +288,17 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 6,
-                "endIndex": 14
+                "startIndex": 3,
+                "endIndex": 5
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "targets",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 5
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ],
@@ -458,52 +306,21 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "(program:instance)",
+              "canonicalReference": "whynot!Assembler#program:member",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "readonly "
+                  "text": "readonly program: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "program"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "Instruction"
-                },
-                {
-                  "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">[]"
+                  "text": "<TInput, TRecord, TOptions>[]"
                 },
                 {
                   "kind": "Content",
@@ -513,91 +330,36 @@
               "releaseTag": "Public",
               "name": "program",
               "propertyTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 11
+                "startIndex": 1,
+                "endIndex": 3
               },
               "isStatic": false
             },
             {
               "kind": "Method",
-              "canonicalReference": "(record:instance,0)",
+              "canonicalReference": "whynot!Assembler#record:member(1)",
               "docComment": "/**\n * The 'record' instruction adds a custom record to the current Thread's trace and resumes execution at the next instruction in the same Generation.\n *\n * @param data - Data to record\n *\n * @param recorder - Callback to generate the record based on data and the current input position. Defaults to recording data.\n *\n * @returns The new instruction\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "record"
+                  "kind": "Content",
+                  "text": "record<TRecorder>(data: "
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecorder"
+                  "text": "TRecorder extends undefined ? TRecord : any"
                 },
                 {
                   "kind": "Content",
-                  "text": ">("
+                  "text": ", recorder?: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "data"
+                  "text": "RecordFunc",
+                  "canonicalReference": "whynot!RecordFunc:type"
                 },
                 {
                   "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecorder"
-                },
-                {
-                  "kind": "Content",
-                  "text": " extends undefined ? "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": " : any"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "recorder"
-                },
-                {
-                  "kind": "Content",
-                  "text": "?: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "RecordFunc"
-                },
-                {
-                  "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TRecord, TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -605,35 +367,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Instruction"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TInput, TRecord, TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -642,24 +381,37 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 20,
-                "endIndex": 28
+                "startIndex": 6,
+                "endIndex": 8
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "data",
                   "parameterTypeTokenRange": {
-                    "startIndex": 6,
-                    "endIndex": 10
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 },
                 {
                   "parameterName": "recorder",
                   "parameterTypeTokenRange": {
-                    "startIndex": 13,
-                    "endIndex": 19
+                    "startIndex": 3,
+                    "endIndex": 5
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "TRecorder",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
                   }
                 }
               ],
@@ -667,60 +419,25 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(test:instance,0)",
+              "canonicalReference": "whynot!Assembler#test:member(1)",
               "docComment": "/**\n * The 'test' instruction validates and consumes an input item.\n *\n * If the matcher returns true, execution continues in the next Generation, otherwise execution of the current Thread ends.\n *\n * @param matcher - Callback to invoke for the input, should return true to accept, false to reject.\n *\n * @param data - Data to be passed to the matcher callback. Defaults to null.\n *\n * @returns The new instruction\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "test"
-                },
-                {
                   "kind": "Content",
-                  "text": "("
+                  "text": "test(matcher: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "matcher"
+                  "text": "TestFunc",
+                  "canonicalReference": "whynot!TestFunc:type"
                 },
                 {
                   "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TestFunc"
+                  "text": "<TInput, TOptions>"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "data"
-                },
-                {
-                  "kind": "Content",
-                  "text": "?: "
+                  "text": ", data?: "
                 },
                 {
                   "kind": "Content",
@@ -732,35 +449,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Instruction"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TInput, TRecord, TOptions>"
                 },
                 {
                   "kind": "Content",
@@ -769,24 +463,24 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 15,
-                "endIndex": 23
+                "startIndex": 6,
+                "endIndex": 8
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "matcher",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 10
+                    "startIndex": 1,
+                    "endIndex": 3
                   }
                 },
                 {
                   "parameterName": "data",
                   "parameterTypeTokenRange": {
-                    "startIndex": 13,
-                    "endIndex": 14
+                    "startIndex": 4,
+                    "endIndex": 5
                   }
                 }
               ],
@@ -797,96 +491,41 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(compileVM:0)",
+          "canonicalReference": "whynot!compileVM:function(1)",
           "docComment": "/**\n * Convenience helper function that creates a new VM using the specified callback for compilation.\n *\n * @param compile - Function used to compile the program, invoked with an Assembler as the only parameter.\n *\n * @returns VM running the compiled program\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
+              "text": "export declare function compileVM<TInput, TRecord = "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ", TOptions = "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ">(compile: "
+            },
+            {
+              "kind": "Content",
+              "text": "(assembler: "
             },
             {
               "kind": "Reference",
-              "text": "compileVM"
+              "text": "Assembler",
+              "canonicalReference": "whynot!default:class"
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "TInput"
-            },
-            {
-              "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TRecord"
-            },
-            {
-              "kind": "Content",
-              "text": " = void, "
-            },
-            {
-              "kind": "Reference",
-              "text": "TOptions"
-            },
-            {
-              "kind": "Content",
-              "text": " = void>("
-            },
-            {
-              "kind": "Reference",
-              "text": "compile"
-            },
-            {
-              "kind": "Content",
-              "text": ": "
-            },
-            {
-              "kind": "Content",
-              "text": "("
-            },
-            {
-              "kind": "Reference",
-              "text": "assembler"
-            },
-            {
-              "kind": "Content",
-              "text": ": "
-            },
-            {
-              "kind": "Reference",
-              "text": "Assembler"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "TInput"
-            },
-            {
-              "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TRecord"
-            },
-            {
-              "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TOptions"
-            },
-            {
-              "kind": "Content",
-              "text": ">) => void"
+              "text": "<TInput, TRecord, TOptions>) => void"
             },
             {
               "kind": "Content",
@@ -894,35 +533,12 @@
             },
             {
               "kind": "Reference",
-              "text": "VM"
+              "text": "VM",
+              "canonicalReference": "whynot!default:class"
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "TInput"
-            },
-            {
-              "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TRecord"
-            },
-            {
-              "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TOptions"
-            },
-            {
-              "kind": "Content",
-              "text": ">"
+              "text": "<TInput, TRecord, TOptions>"
             },
             {
               "kind": "Content",
@@ -930,17 +546,52 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 23,
-            "endIndex": 31
+            "startIndex": 9,
+            "endIndex": 11
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [
             {
               "parameterName": "compile",
               "parameterTypeTokenRange": {
-                "startIndex": 11,
-                "endIndex": 22
+                "startIndex": 5,
+                "endIndex": 8
+              }
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TInput",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TRecord",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "typeParameterName": "TOptions",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
               }
             }
           ],
@@ -948,97 +599,77 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(VM:class)",
+          "canonicalReference": "whynot!VM:class",
           "docComment": "/**\n * A virtual machine to execute whynot programs.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export default class "
-            },
-            {
-              "kind": "Reference",
-              "text": "VM"
+              "text": "export default class VM<TInput, TRecord, TOptions = "
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "TInput"
+              "text": "void"
             },
             {
               "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TRecord"
-            },
-            {
-              "kind": "Content",
-              "text": ", "
-            },
-            {
-              "kind": "Reference",
-              "text": "TOptions"
-            },
-            {
-              "kind": "Content",
-              "text": " = void> "
+              "text": "> "
             }
           ],
           "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "typeParameterName": "TInput",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TRecord",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TOptions",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
           "name": "VM",
           "members": [
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,0)",
+              "canonicalReference": "whynot!VM:constructor(1)",
               "docComment": "/**\n * Constructs a new instance of the `VM` class\n *\n * @param program - The program to run, as created by the Assembler\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "constructor("
+                  "text": "constructor(program: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "program"
+                  "text": "Instruction",
+                  "canonicalReference": "whynot!Instruction:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "Instruction"
-                },
-                {
-                  "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TOptions"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">[]"
+                  "text": "<TInput, TRecord, TOptions>[]"
                 },
                 {
                   "kind": "Content",
@@ -1046,60 +677,36 @@
                 }
               ],
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "program",
                   "parameterTypeTokenRange": {
-                    "startIndex": 3,
-                    "endIndex": 11
+                    "startIndex": 1,
+                    "endIndex": 3
                   }
                 }
               ]
             },
             {
               "kind": "Method",
-              "canonicalReference": "(execute:instance,0)",
+              "canonicalReference": "whynot!VM#execute:member(1)",
               "docComment": "/**\n * Executes the program in the VM with the given input stream.\n *\n * @param input - An array of input items.\n *\n * @param options - Optional object passed to all instruction callbacks.\n *\n * @returns Result of the execution, containing all Traces that lead to acceptance of the input (if any)\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "execute"
+                  "kind": "Content",
+                  "text": "execute(input: "
                 },
                 {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "input"
+                  "text": "TInput[]"
                 },
                 {
                   "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TInput"
+                  "text": ", options?: "
                 },
                 {
                   "kind": "Content",
-                  "text": "[]"
-                },
-                {
-                  "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "options"
-                },
-                {
-                  "kind": "Content",
-                  "text": "?: "
-                },
-                {
-                  "kind": "Reference",
                   "text": "TOptions"
                 },
                 {
@@ -1108,19 +715,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Result"
+                  "text": "Result",
+                  "canonicalReference": "whynot!default:class"
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TRecord"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">"
+                  "text": "<TRecord>"
                 },
                 {
                   "kind": "Content",
@@ -1129,24 +729,24 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 11,
-                "endIndex": 15
+                "startIndex": 5,
+                "endIndex": 7
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "input",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 6
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 },
                 {
                   "parameterName": "options",
                   "parameterTypeTokenRange": {
-                    "startIndex": 9,
-                    "endIndex": 10
+                    "startIndex": 3,
+                    "endIndex": 4
                   }
                 }
               ],
