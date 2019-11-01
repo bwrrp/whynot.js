@@ -1,78 +1,92 @@
+import { Assembler, compileVM, VM } from '../src/index';
 import Trace from '../src/Trace';
-import { Assembler, VM, default as whynot } from '../src/index';
-
-import regexParser from './util/regexParser';
+import * as regexParser from './util/regexParser';
 
 describe('whynot.js examples', () => {
 	// whynot.js was designed to answer the question of *why* a given input does not match a given
 	// grammar. It can sometimes even tell you how to extend the input so that it will match. To
 	// illustrate this, consider a simple subset of regular expressions.
 	describe('regular expressions', () => {
-		// We have generated a very simple parser using PEG.js for the subset of regular expressions
+		// We have generated a very simple parser using prsc for the subset of regular expressions
 		// consisting of character matches (a-z, lower case), sequences, choices ("|") and grouping
-		// using parentheses ("(" and ")"). This will create an AST as a set of nested arrays,
-		// starting with the type of AST node, followed by its children. The compile function
-		// traverses the AST recursively and generates a whynot program using the provided
-		// assembler.
-		function compile(assembler: Assembler<string, string>, ast: any[], recordMissing: boolean) {
-			let i: number;
-			const l = ast.length;
-			switch (ast[0]) {
-				case 'test':
-					// A test represents an expected character, e.g., /a/
-					if (!recordMissing) {
-						// Normally, it is simply represented by a test instruction which fails if
-						// the input character is not the expected character.
-						assembler.test(function(input: string): boolean {
-							return input == ast[1];
-						});
-					} else {
-						// To record missing characters, we add a branch for each allowing the VM to
-						// skip the character. In both cases, we use a record instruction to
-						// remember the character when it is processed.
-						assembler.record(ast[1]);
-						const skipTest = assembler.jump([]);
-						// Branch for existing character
-						skipTest.data.push(assembler.program.length);
-						assembler.test(function(input: string): boolean {
-							return input == ast[1];
-						});
-						const skipBad = assembler.jump([]);
-						// Branch for missing character
-						skipTest.data.push(assembler.program.length);
-						// Prefer the branch where the character exists
-						assembler.bad();
-						// Join both branches to continue execution
-						skipBad.data.push(assembler.program.length);
-					}
-					return;
-
-				case 'seq':
-					// A sequence of characters and/or groups, e.g., /abc/
-					// This is represented in the program by simply executing its parts in the
-					// specified order.
-					for (i = 1; i < l; ++i) {
-						compile(assembler, ast[i], recordMissing);
-					}
-					return;
-
-				case 'choice': {
-					// Alternatives, e.g., /a|b|c/
-					// These are represented in the VM by forking execution to all options in
-					// parallel and merging the surviving threads afterwards.
-					const fork = assembler.jump([]);
-					const joins = [];
-					for (i = 1; i < l; ++i) {
-						fork.data.push(assembler.program.length);
-						compile(assembler, ast[i], recordMissing);
-						joins.push(assembler.jump([]));
-					}
-					joins.forEach(join => {
-						join.data.push(assembler.program.length);
+		// using parentheses ("(" and ")"). This will create a simple AST. These functions traverse
+		// the AST recursively and generate a whynot program using the provided assembler.
+		function compile(
+			assembler: Assembler<string, string>,
+			ast: regexParser.RegEx,
+			recordMissing: boolean
+		) {
+			function compileTest(ast: regexParser.Test) {
+				// A test represents an expected character, e.g., /a/
+				if (!recordMissing) {
+					// Normally, it is simply represented by a test instruction which fails if
+					// the input character is not the expected character.
+					assembler.test(function(input: string): boolean {
+						return input == ast.value;
 					});
 					return;
 				}
+
+				// To record missing characters, we add a branch for each allowing the VM to
+				// skip the character. In both cases, we use a record instruction to
+				// remember the character when it is processed.
+				assembler.record(ast.value);
+				const skipTest = assembler.jump([]);
+				// Branch for existing character
+				skipTest.data.push(assembler.program.length);
+				assembler.test(function(input: string): boolean {
+					return input == ast.value;
+				});
+				const skipBad = assembler.jump([]);
+				// Branch for missing character
+				skipTest.data.push(assembler.program.length);
+				// Prefer the branch where the character exists
+				assembler.bad();
+				// Join both branches to continue execution
+				skipBad.data.push(assembler.program.length);
 			}
+			function compileAtom(ast: regexParser.Atom) {
+				switch (ast.type) {
+					case 'choice':
+						return compileRegex(ast);
+
+					case 'test':
+						return compileTest(ast);
+				}
+			}
+			function compileQuantified(ast: regexParser.Quantified) {
+				if (ast.type !== 'repetition') {
+					return compileAtom(ast);
+				}
+
+				// Not implemented for this example
+				throw new Error('Not implemented');
+			}
+			function compileSeq(ast: regexParser.Seq) {
+				// A sequence of characters and/or groups, e.g., /abc/
+				// This is represented in the program by simply executing its parts in the
+				// specified order.
+				ast.forEach(ast => {
+					compileQuantified(ast);
+				});
+			}
+			function compileRegex(ast: regexParser.RegEx) {
+				// Alternatives, e.g., /a|b|c/
+				// These are represented in the VM by forking execution to all options in
+				// parallel and merging the surviving threads afterwards.
+				const fork = assembler.jump([]);
+				type Instruction = typeof fork;
+				const joins: Instruction[] = [];
+				ast.value.forEach(seq => {
+					fork.data.push(assembler.program.length);
+					compileSeq(seq);
+					joins.push(assembler.jump([]));
+				});
+				joins.forEach(join => {
+					join.data.push(assembler.program.length);
+				});
+			}
+			compileRegex(ast);
 		}
 
 		// We can now define a simple helper to glue everything together
@@ -81,7 +95,7 @@ describe('whynot.js examples', () => {
 			const ast = regexParser.parse(regex);
 
 			// Compile the AST into a whynot VM
-			return whynot.compileVM(assembler => {
+			return compileVM(assembler => {
 				compile(assembler, ast, recordMissing);
 				// Any threads that made it to the end of the program have successfully matched the
 				// complete input and can be accepted.
@@ -175,98 +189,107 @@ describe('whynot.js examples', () => {
 		type ExplorationRecord = { isExploration: boolean; input: string };
 		function compile(
 			assembler: Assembler<string, ExplorationRecord>,
-			ast: any[],
+			ast: regexParser.RegEx,
 			recordingMode: boolean
 		) {
-			let i: number;
-			const l = ast.length;
-			switch (ast[0]) {
-				case 'test':
-					// A test represents an expected character, e.g., /a/
-					if (!recordingMode) {
-						// Normally, it is simply represented by a test instruction which fails if
-						// the input character is not the expected character.
-						assembler.test(function(input) {
-							return input == ast[1];
-						});
-						assembler.record(null, () => {
-							return {
-								isExploration: false,
-								input: ast[1]
-							};
-						});
-					} else {
-						assembler.record(null, () => {
-							return {
-								isExploration: true,
-								input: ast[1]
-							};
-						});
-					}
-					return;
-
-				case 'seq':
-					// A sequence of characters and/or groups, e.g., /abc/
-					// This is represented in the program by simply executing its parts in the
-					// specified order.
-					for (i = 1; i < l; ++i) {
-						compile(assembler, ast[i], recordingMode);
-					}
-					return;
-
-				case 'choice': {
-					// Alternatives, e.g., /a|b|c/
-					// These are represented in the VM by forking execution to all options in
-					// parallel and merging the surviving threads afterwards.
-					const fork = assembler.jump([]);
-					const joins = [];
-					for (i = 1; i < l; ++i) {
-						fork.data.push(assembler.program.length);
-						compile(assembler, ast[i], recordingMode);
-						joins.push(assembler.jump([]));
-					}
-					joins.forEach(join => {
-						join.data.push(assembler.program.length);
+			function compileTest(ast: regexParser.Test, recordingMode: boolean) {
+				// A test represents an expected character, e.g., /a/
+				if (!recordingMode) {
+					// Normally, it is simply represented by a test instruction which fails if
+					// the input character is not the expected character.
+					assembler.test(function(input) {
+						return input == ast.value;
+					});
+					assembler.record(null, () => {
+						return {
+							isExploration: false,
+							input: ast.value
+						};
 					});
 					return;
 				}
 
-				case 'repetition':
-					// Kleene star: Unbounded Repetition, e.g., /a*/
-					// These are represented in the VM by looping over them.
-
-					if (!recordingMode) {
-						// For exploration, they are:
-						//  - a recording part
-						//  - a testing part, providing a return
-						//  - another recording part.
-						//  - A jump back to the first testing part
-
-						// Record the possible insertion of this character at 0
-						compile(assembler, ast[1], true);
-
-						const start = assembler.program.length;
-						const join = assembler.jump([]);
-						join.data.push(assembler.program.length);
-
-						// Test for the existing character at n
-						compile(assembler, ast[1], recordingMode);
-
-						// Record the possible insertion at n + 1
-						compile(assembler, ast[1], true);
-
-						assembler.jump([start]);
-
-						join.data.push(assembler.program.length);
-
-						return;
-					}
-
-					// In recording mode, the recording of a* is the same as the recording of a
-					// single a. this optimizes the program length of a language with star height >
-					// 1 significantly.
-					compile(assembler, ast[1], true);
+				assembler.record(null, () => {
+					return {
+						isExploration: true,
+						input: ast.value
+					};
+				});
 			}
+			function compileAtom(ast: regexParser.Atom, recordingMode: boolean) {
+				switch (ast.type) {
+					case 'choice':
+						return compileRegex(ast, recordingMode);
+
+					case 'test':
+						return compileTest(ast, recordingMode);
+				}
+			}
+			function compileQuantified(ast: regexParser.Quantified, recordingMode: boolean) {
+				if (ast.type !== 'repetition') {
+					return compileAtom(ast, recordingMode);
+				}
+
+				// Kleene star: Unbounded Repetition, e.g., /a*/
+				// These are represented in the VM by looping over them.
+
+				if (!recordingMode) {
+					// For exploration, they are:
+					//  - a recording part
+					//  - a testing part, providing a return
+					//  - another recording part.
+					//  - A jump back to the first testing part
+
+					// Record the possible insertion of this character at 0
+					compileAtom(ast.value, true);
+
+					const start = assembler.program.length;
+					const join = assembler.jump([]);
+					join.data.push(assembler.program.length);
+
+					// Test for the existing character at n
+					compileAtom(ast.value, recordingMode);
+
+					// Record the possible insertion at n + 1
+					compileAtom(ast.value, true);
+
+					assembler.jump([start]);
+
+					join.data.push(assembler.program.length);
+
+					return;
+				}
+
+				// In recording mode, the recording of a* is the same as the recording of a
+				// single a. this optimizes the program length of a language with star height >
+				// 1 significantly.
+				compileAtom(ast.value, true);
+			}
+			function compileSeq(ast: regexParser.Seq, recordingMode: boolean) {
+				// A sequence of characters and/or groups, e.g., /abc/
+				// This is represented in the program by simply executing its parts in the
+				// specified order.
+				ast.forEach(ast => {
+					compileQuantified(ast, recordingMode);
+				});
+			}
+			function compileRegex(ast: regexParser.RegEx, recordingMode: boolean) {
+				// Alternatives, e.g., /a|b|c/
+				// These are represented in the VM by forking execution to all options in
+				// parallel and merging the surviving threads afterwards.
+				const fork = assembler.jump([]);
+				type Instruction = typeof fork;
+				const joins: Instruction[] = [];
+				ast.value.forEach(seq => {
+					fork.data.push(assembler.program.length);
+					compileSeq(seq, recordingMode);
+					joins.push(assembler.jump([]));
+				});
+				joins.forEach(join => {
+					join.data.push(assembler.program.length);
+				});
+			}
+			compileRegex(ast, recordingMode);
 		}
 
 		// We can now define a simple helper to glue everything together
@@ -278,7 +301,7 @@ describe('whynot.js examples', () => {
 			const ast = regexParser.parse(regex);
 
 			// Compile the AST into a whynot VM
-			return whynot.compileVM(assembler => {
+			return compileVM(assembler => {
 				compile(assembler, ast, recordMissing);
 				// Any threads that made it to the end of the program have successfully matched the
 				// complete input and can be accepted.
@@ -425,7 +448,7 @@ describe('whynot.js examples', () => {
 
 	describe('greediness using badness', () => {
 		it('provides ordering on badness over joined threads: greedy to start', () => {
-			const vm = whynot.compileVM<string, number>(assembler => {
+			const vm = compileVM<string, number>(assembler => {
 				// As a regex: roughly A*(.*), with the latter group in non-greedy capturing mode
 				// Aims to match AAABBB to AAA(BBB) as opposed to either (AAABBB), A(AABBB),
 				// AA(ABBB), AAA(BBB)
@@ -469,7 +492,7 @@ describe('whynot.js examples', () => {
 		});
 
 		it('provides ordering on badness over joined threads, greedy to end', () => {
-			const vm = whynot.compileVM<string, number>(assembler => {
+			const vm = compileVM<string, number>(assembler => {
 				// As a regex: roughly .*(A*), with the latter group in non-greedy capturing mode
 				// Aims to match BBBAAA to (BBB)AAA as opposed to either (BBBAAA), B(BBAA),
 				// BB(BAAA), (BBB)AAA
