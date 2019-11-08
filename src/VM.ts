@@ -52,7 +52,7 @@ export default class VM<TInput, TRecord, TOptions = void> {
 			inputItem = inputIndex >= inputLength ? null : input[inputIndex];
 
 			while (pc !== null) {
-				const instruction = this._program[pc];
+				const instruction: Instruction<TInput, TRecord, TOptions> = this._program[pc];
 
 				switch (instruction.op) {
 					case Operation.ACCEPT:
