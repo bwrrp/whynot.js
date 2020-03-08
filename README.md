@@ -2,7 +2,7 @@
 
 [![NPM version](https://badge.fury.io/js/whynot.svg)](https://badge.fury.io/js/whynot)
 [![Build Status](https://travis-ci.org/bwrrp/whynot.js.svg?branch=master)](https://travis-ci.org/bwrrp/whynot.js)
-[![Greenkeeper badge](https://badges.greenkeeper.io/bwrrp/whynot.js.svg)](https://greenkeeper.io/)
+
 Generic VM-based formal language matching framework, inspired by [http://swtch.com/~rsc/regexp/](http://swtch.com/~rsc/regexp/)
 
 This library implements a VM able to execute programs aimed at matching
