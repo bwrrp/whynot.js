@@ -19,28 +19,8 @@ in the test suite.
 
 ## Benchmarking
 
-A simple benchmark is included in the `benchmark` directory. This script runs
-a simple program including repetition and records on an input of 1000000
-items. The directory also includes scripts for running the benchmark in
-node.js, the SpiderMonkey shell and ChakraCore. Make sure these are
-installed, open a shell in the benchmark directory and then run the
-`run-all.sh` script. Alternatively, use one of the following, depending on
-the engine to test on:
-
-### Node.js
-
-```sh
-node --experimental-modules ./start.mjs
-```
-
-### SpiderMonkey shell
-
-```sh
-js52 -m ./start.mjs
-```
-
-### ChakraCore
-
-```sh
-ch ./start-chakra.js
-```
+A simple benchmark is included in the `performance` directory. This script runs a simple program
+including repetition and records on an input of 1000000 items. This benchmark can be run in node.js
+by running `npm run performance` or in a browser by running `npm run performance-server`. The latter
+start a server, open [http://localhost:8080](http://localhost:8080) in any browser. You can see the
+benchmark results in the console output.

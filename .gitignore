@@ -2,6 +2,7 @@
 /dist/
 /docs/
 /lib/
+/performance/lib/
 /temp/
 node_modules/
 package-lock.json
