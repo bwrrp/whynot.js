@@ -20,7 +20,7 @@ in the test suite.
 ## Benchmarking
 
 A simple benchmark is included in the `performance` directory. This script runs a simple program
-including repetition and records on an input of 1000000 items. This benchmark can be run in node.js
-by running `npm run performance` or in a browser by running `npm run performance-server`. The latter
-start a server, open [http://localhost:8080](http://localhost:8080) in any browser. You can see the
-benchmark results in the console output.
+including repetition and records on an input of 1000000 items. These can be run using
+[fonto-benchmark-runner commands](https://www.npmjs.com/package/@fontoxml/fonto-benchmark-runner)
+which will run the benchmarks in the console. You can see the benchmark results in
+the console output.

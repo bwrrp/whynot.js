@@ -1,9 +1,9 @@
-import runner from './BenchmarkRunner';
+import benchmarkRunner from '@fontoxml/fonto-benchmark-runner';
 import * as whynot from '../src/index';
 
 let vm: whynot.VM<number, void, void>;
 let input: number[];
-runner.addBenchmark(
+benchmarkRunner.addBenchmark(
 	'simple',
 	() => {
 		vm.execute(input);

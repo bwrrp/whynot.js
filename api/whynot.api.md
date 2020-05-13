@@ -12,7 +12,7 @@ export class Assembler<TInput, TRecord, TOptions = void> {
     fail(predicate?: FailFunc<TOptions>): Instruction<TInput, TRecord, TOptions>;
     jump(targets: number[]): Instruction<TInput, TRecord, TOptions>;
     // Warning: (ae-forgotten-export) The symbol "Instruction" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
     readonly program: Instruction<TInput, TRecord, TOptions>[];
     // Warning: (ae-forgotten-export) The symbol "RecordFunc" needs to be exported by the entry point index.d.ts
