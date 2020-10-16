@@ -34,7 +34,7 @@
 		"url": "https://github.com/bwrrp/whynot.js"
 	},
 	"devDependencies": {
-		"@fontoxml/fonto-benchmark-runner": "0.0.4",
+		"@fontoxml/fonto-benchmark-runner": "0.1.0",
 		"@microsoft/api-documenter": "^7.8.56",
 		"@microsoft/api-extractor": "^7.9.22",
 		"@rollup/plugin-commonjs": "^15.1.0",
