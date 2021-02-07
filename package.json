@@ -13,8 +13,8 @@
 		"Regex",
 		"Structure"
 	],
-	"main": "dist/whynot.js",
-	"module": "dist/whynot.mjs",
+	"main": "dist/whynot.umd.js",
+	"module": "dist/whynot.esm.js",
 	"types": "dist/whynot.d.ts",
 	"scripts": {
 		"build:clean": "rimraf dist && rimraf lib && rimraf temp",
