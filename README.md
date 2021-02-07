@@ -1,7 +1,7 @@
 # whynot.js
 
 [![NPM version](https://badge.fury.io/js/whynot.svg)](https://badge.fury.io/js/whynot)
-[![Build Status](https://travis-ci.org/bwrrp/whynot.js.svg?branch=master)](https://travis-ci.org/bwrrp/whynot.js)
+[![CI](https://github.com/bwrrp/whynot.js/workflows/CI/badge.svg)](https://github.com/bwrrp/whynot.js/actions?query=workflow%3ACI)
 
 Generic VM-based formal language matching framework, inspired by [http://swtch.com/~rsc/regexp/](http://swtch.com/~rsc/regexp/)
 
@@ -14,7 +14,7 @@ language's grammar. This enables giving feedback on _why_ a given input does
 not match the grammar rules in some way.
 
 For an example showing how this library can be used, see
-[Examples.tests.ts](https://github.com/bwrrp/whynot.js/blob/master/test/Examples.tests.ts)
+[Examples.tests.ts](https://github.com/bwrrp/whynot.js/blob/main/test/Examples.tests.ts)
 in the test suite.
 
 ## Benchmarking
