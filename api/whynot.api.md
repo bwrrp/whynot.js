@@ -30,7 +30,6 @@ const _default: {
     VM: typeof VM;
     compileVM: typeof compileVM;
 };
-
 export default _default;
 
 // @public
@@ -38,8 +37,7 @@ export class VM<TInput, TRecord, TOptions = void> {
     constructor(program: Instruction<TInput, TRecord, TOptions>[]);
     // Warning: (ae-forgotten-export) The symbol "Result" needs to be exported by the entry point index.d.ts
     execute(input: TInput[], options?: TOptions): Result<TRecord>;
-    }
-
+}
 
 // (No @packageDocumentation comment for this package)
 
